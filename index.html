@@ -1,0 +1,2595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca Ministro Luís Roberto Barroso</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://jctlmsqmacgrygdjhefr.supabase.co">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#1a2744;--navy-light:#243460;--navy-deep:#111b33;
+    --gold:#c9a84c;--gold-light:#e8c87a;--gold-pale:#f7f0e0;--gold-dim:#a8883a;
+    --cream:#faf8f4;--white:#ffffff;
+    --gray-50:#f8f6f1;--gray-100:#f0ece3;--gray-200:#e4ddd0;--gray-300:#ccc5b5;
+    --gray-400:#9e9587;--gray-600:#6b6358;--gray-800:#3a3530;
+    --danger:#b84040;--success:#2d6e4e;
+    --font-d:'Cormorant Garamond','Playfair Display',Georgia,serif;--font-b:'Source Sans 3',sans-serif;
+    --r:8px;--rl:12px;--sh:0 2px 16px rgba(26,39,68,.10);
+  }
+  body{font-family:var(--font-b);background:var(--cream);color:var(--gray-800);font-size:14px;min-height:100vh}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+  /* TOPBAR */
+  .topbar{background:var(--navy-deep);padding:0 24px;display:flex;align-items:center;gap:0;border-bottom:1px solid rgba(201,168,76,.15);position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(26,39,68,.25)}
+  .top-brand{display:flex;align-items:center;gap:12px;padding:10px 20px 10px 0;margin-right:8px;border-right:1px solid rgba(255,255,255,.08);cursor:pointer;transition:opacity .18s;flex-shrink:0}
+  .top-brand:hover{opacity:.8}
+  .top-brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-weight:600;color:#fff;letter-spacing:.02em;white-space:nowrap}
+  .top-nav{display:flex;flex:1}
+  .tn{background:none;border:none;color:rgba(255,255,255,.55);font-family:var(--font-b);font-size:13px;font-weight:600;padding:0 16px;height:56px;cursor:pointer;letter-spacing:.03em;border-bottom:2px solid transparent;transition:all .18s;display:flex;align-items:center;gap:6px}
+  .tn i{font-size:15px}
+  .tn:hover{color:rgba(255,255,255,.9)}
+  .tn.active{color:var(--gold);border-bottom-color:var(--gold)}
+  .tn i{font-size:15px}
+  .tn:hover{color:rgba(255,255,255,.85)}
+  .tn.active{color:var(--gold);border-bottom-color:var(--gold)}
+  .top-stats{display:flex;gap:16px;padding-left:16px;border-left:1px solid rgba(255,255,255,.08)}
+  .ts-item{text-align:center}
+  .ts-item .n{font-family:var(--font-d);font-size:16px;font-weight:600;color:var(--gold);line-height:1}
+  .ts-item .l{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.04em}
+
+  .view{display:none}.view.active{display:block}
+
+  /* HERO */
+  .hero{background:var(--navy);padding:48px 24px 36px;text-align:center}
+  .hero-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:38px;font-weight:600;color:var(--white);line-height:1.15;margin-bottom:6px;letter-spacing:.01em}
+  .hero-title span{color:var(--gold);font-style:italic}
+  .hero-title span{color:var(--gold)}
+  .search-box-wrap{max-width:680px;margin:0 auto 16px}
+  .search-box{display:flex;align-items:center;background:var(--white);border-radius:40px;border:2px solid rgba(201,168,76,.3);padding:6px 6px 6px 22px;gap:8px;transition:border-color .2s,box-shadow .2s}
+  .search-box:focus-within{border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,168,76,.12)}
+  .search-box i{font-size:20px;color:var(--gray-300);flex-shrink:0}
+  .search-box input{flex:1;border:none;background:none;font-family:var(--font-b);font-size:16px;color:var(--gray-800);outline:none;padding:6px 0}
+  .search-box input::placeholder{color:var(--gray-300)}
+  .btn-search{background:var(--gold);border:none;border-radius:32px;padding:10px 24px;font-family:var(--font-b);font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0;transition:background .18s}
+  .btn-search:hover{background:var(--gold-light)}
+  .quick-filters{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+  .qf{background:rgba(255,255,255,.08);border:1px solid rgba(201,168,76,.25);color:rgba(255,255,255,.7);font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;cursor:pointer;transition:all .15s;font-family:var(--font-b)}
+  .qf:hover,.qf.on{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+  .qf-label{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:.05em;text-transform:uppercase;align-self:center}
+  .adv-toggle{background:none;border:none;color:rgba(255,255,255,.4);font-family:var(--font-b);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:4px 0;transition:color .18s}
+  .adv-toggle:hover{color:var(--gold-light)}
+  .adv-panel{max-width:860px;width:100%;margin:14px auto 0;display:none;background:rgba(255,255,255,.06);border:1px solid rgba(201,168,76,.2);border-radius:var(--rl);padding:18px 22px;box-sizing:border-box}
+  .adv-panel.open{display:block}
+  .adv-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 16px}
+  .af{display:flex;flex-direction:column;gap:4px}
+  .af label{font-size:11px;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.02em}
+  .af input,.af select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r);padding:8px 12px;font-family:var(--font-b);font-size:13px;color:#fff;outline:none;transition:border-color .18s}
+  .af input::placeholder{color:rgba(255,255,255,.3)}
+  .af input:focus,.af select:focus{border-color:var(--gold);background:rgba(255,255,255,.15)}
+  .af select option{background:var(--navy);color:#fff}
+  .adv-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+  .btn-adv-clear{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);border-radius:var(--r);padding:7px 14px;font-family:var(--font-b);font-size:12px;cursor:pointer;transition:all .15s}
+  .btn-adv-clear:hover{border-color:rgba(255,255,255,.4);color:#fff}
+  .btn-adv-search{background:var(--gold);border:none;border-radius:var(--r);padding:7px 18px;font-family:var(--font-b);font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .18s}
+  .btn-adv-search:hover{background:var(--gold-light)}
+
+  /* RESULTADOS */
+  .results-area{background:var(--cream);padding:24px}
+  .res-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .res-count{font-size:14px;color:var(--gray-600);font-weight:500}
+  .res-count strong{color:var(--navy)}
+  .res-chips{display:flex;gap:6px;flex-wrap:wrap}
+  .res-chip{background:var(--gold-pale);border:1px solid rgba(201,168,76,.4);color:var(--gold-dim);font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;display:flex;align-items:center;gap:5px}
+  .res-grid{display:flex;flex-direction:column;gap:10px}
+  .res-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--rl);padding:16px 20px;cursor:pointer;transition:all .18s;display:flex;gap:16px;align-items:flex-start}
+  .res-card:hover{border-color:var(--gold);box-shadow:0 2px 12px rgba(201,168,76,.15)}
+  .res-card-icon{width:40px;height:40px;border-radius:var(--r);background:var(--navy);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .res-card-icon i{font-size:20px;color:var(--gold)}
+  .res-card-body{flex:1;min-width:0}
+  .res-card-title{font-family:var(--font-d);font-size:15px;font-weight:600;color:var(--navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .res-card-meta{font-size:12px;color:var(--gray-600);margin-bottom:6px}
+  .res-card-meta span{margin-right:14px}
+  .res-card-meta i{margin-right:3px;font-size:12px;vertical-align:-1px}
+  .res-card-tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+  .tag-area{background:#e8eef8;color:#1a3a6a}
+  .tag-tipo-livro{background:#e3edf8;color:#1a4a7a}
+  .tag-tipo-periodico{background:#e3f0e6;color:#1a5c32}
+  .tag-tipo-tese{background:#f5eaf8;color:#5a2e7a}
+  .res-card-tombo{font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:var(--gray-400);margin-left:auto;white-space:nowrap;padding-top:2px}
+  .pag{display:flex;gap:6px;justify-content:center;padding:20px 0 8px;flex-wrap:wrap}
+  .pag button{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r);padding:6px 12px;font-size:13px;cursor:pointer;font-family:var(--font-b);transition:all .15s}
+  .pag button.active{background:var(--navy);color:var(--gold);border-color:var(--navy);font-weight:700}
+  .pag button:hover:not(.active){background:var(--gold-pale);border-color:var(--gold)}
+  .empty{text-align:center;padding:52px 20px;color:var(--gray-400)}
+  .empty i{font-size:52px;display:block;margin-bottom:14px;color:var(--gray-200)}
+  .empty p{font-size:14px;line-height:1.7}
+
+  /* FORMS */
+  .page-wrap{padding:24px;max-width:960px;margin:0 auto}
+  .fc{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--rl);padding:24px 28px;box-shadow:var(--sh);margin-bottom:20px}
+  .fct{font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;font-weight:600;color:var(--navy);margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--gold);display:flex;align-items:center;gap:10px}
+  .fct i{color:var(--gold);font-size:20px}
+  .fct .tb2{margin-left:auto;background:var(--navy);color:var(--gold);font-family:var(--font-b);font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px}
+  .fg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 18px}
+  .fg .full{grid-column:1/-1}.fg .half{grid-column:span 2}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  .fld label{font-size:11px;font-weight:700;color:var(--gray-600);letter-spacing:.02em}
+  .fld label .req{color:var(--gold);margin-left:2px}
+  .fld input,.fld select,.fld textarea{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r);padding:9px 12px;font-family:var(--font-b);font-size:14px;color:var(--gray-800);outline:none;transition:border-color .18s}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(201,168,76,.12)}
+  .fld textarea{resize:vertical;min-height:72px}
+  .fld select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239e9587' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+  .factions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:16px;border-top:1px solid var(--gray-100)}
+  .btn{border:none;border-radius:var(--r);padding:10px 22px;font-family:var(--font-b);font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .18s}
+  .btn-p{background:var(--navy);color:#fff}.btn-p:hover{background:var(--navy-light)}
+  .btn-g{background:var(--gold);color:var(--navy)}.btn-g:hover{background:var(--gold-light)}
+  .btn-o{background:var(--white);color:var(--navy);border:1.5px solid var(--gray-200)}.btn-o:hover{background:var(--gray-100)}
+  .btn-d{background:#fff0f0;color:var(--danger);border:1.5px solid #f5c6c6}.btn-d:hover{background:#fde0e0}
+  .btn-sm{padding:6px 13px;font-size:12px}
+
+  /* ACERVO */
+  .ac-ctrl{display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap}
+  .cbadge{background:var(--navy);color:var(--gold);font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px}
+  .tw{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--rl);box-shadow:var(--sh);overflow:hidden}
+  table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+  thead tr{background:var(--navy)}
+  thead th{padding:12px 14px;text-align:left;font-size:11px;font-weight:700;color:rgba(255,255,255,.75);letter-spacing:.04em;cursor:pointer;user-select:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  thead th:hover{color:var(--gold)}
+  tbody tr{border-bottom:1px solid var(--gray-100);transition:background .12s}
+  tbody tr:hover{background:var(--gold-pale)}
+  tbody td{padding:10px 14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tc{font-family:'Courier New',monospace;font-size:11px;font-weight:700;color:var(--navy)}
+  .pag2{display:flex;gap:6px;justify-content:center;padding:12px;border-top:1px solid var(--gray-100);flex-wrap:wrap}
+  .pag2 button{background:var(--gray-100);border:1px solid var(--gray-200);border-radius:var(--r);padding:5px 11px;font-size:12px;cursor:pointer;font-family:var(--font-b)}
+  .pag2 button.active{background:var(--navy);color:var(--gold);border-color:var(--navy)}
+  .pag2 button:hover:not(.active){background:var(--gold-pale)}
+
+  /* MODAL */
+  .mo{display:none;position:fixed;inset:0;background:rgba(26,39,68,.6);z-index:200;align-items:center;justify-content:center;padding:20px}
+  .mo.open{display:flex}
+  .md{background:var(--white);border-radius:var(--rl);width:100%;max-width:660px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(26,39,68,.2)}
+  .mh{background:var(--navy);padding:18px 24px;display:flex;align-items:flex-start;gap:12px;border-radius:var(--rl) var(--rl) 0 0}
+  .mh h2{font-family:var(--font-d);font-size:16px;font-weight:600;color:#fff;flex:1;line-height:1.35}
+  .mh .mtb{font-family:'Courier New',monospace;font-size:12px;color:var(--gold);font-weight:700;white-space:nowrap}
+  .mc-btn{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:22px;line-height:1;flex-shrink:0}
+  .mc-btn:hover{color:#fff}
+  .mb{padding:22px 24px}
+  .mg{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px}
+  .mf label{font-size:11px;font-weight:700;color:var(--gray-400);letter-spacing:.02em;display:block;margin-bottom:3px}
+  .mf p{font-size:14px;color:var(--gray-800);line-height:1.45}
+  .mf.full{grid-column:1/-1}
+  .ma{display:flex;gap:8px;justify-content:flex-end;padding:14px 24px 18px;border-top:1px solid var(--gray-100)}
+
+  /* IMPORT */
+  .iz{border:2px dashed var(--gray-200);border-radius:var(--rl);padding:40px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--gray-50)}
+  .iz:hover,.iz.drag{border-color:var(--gold);background:var(--gold-pale)}
+  .iz i{font-size:40px;color:var(--gold);margin-bottom:12px;display:block}
+  .iz p{color:var(--gray-600);font-size:14px;font-weight:500}
+  .iz small{color:var(--gray-400);font-size:12px}
+  .iz input[type=file]{display:none}
+  .map-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+  .map-table th{background:var(--navy);color:rgba(255,255,255,.7);padding:9px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.03em}
+  .map-table td{padding:9px 12px;border-bottom:1px solid var(--gray-100)}
+  .map-table tr:hover td{background:var(--gold-pale)}
+  .map-table select{width:100%;background:var(--gray-100);border:1px solid var(--gray-200);border-radius:var(--r);padding:5px 8px;font-size:13px;font-family:var(--font-b)}
+  .prog-bar{height:8px;background:var(--gray-200);border-radius:4px;overflow:hidden;margin:12px 0}
+  .prog-fill{height:100%;background:var(--gold);border-radius:4px;transition:width .3s}
+  .callout{background:var(--gold-pale);border-left:3px solid var(--gold);border-radius:0 6px 6px 0;padding:12px 16px;font-size:13px;color:#4a3a1a;margin-bottom:16px}
+
+  /* TOAST */
+  .tc2{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+  .toast{background:var(--navy);color:#fff;padding:13px 18px;border-radius:var(--r);font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(26,39,68,.2);animation:sIn .3s ease;border-left:3px solid var(--gold)}
+  .toast.success{border-left-color:#4caf81}.toast.error{border-left-color:#b84040}
+  .status-ok{background:#e3f0e6;color:#1a5c32;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+  .status-atraso{background:#fde8e8;color:#b84040;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+  .status-hoje{background:#fff3e0;color:#e67e22;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+  .status-devolvido{background:var(--gray-100);color:var(--gray-600);padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600}
+  .alerta-card{background:#fde8e8;border:1px solid #f5c6c6;border-left:4px solid var(--danger);border-radius:var(--r);padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;font-size:13px}
+  .alerta-card i{color:var(--danger);font-size:20px;flex-shrink:0}
+  .emp-sugestao-item{padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--gray-100)}
+  .emp-sugestao-item:hover{background:var(--gold-pale)}
+  .emp-sugestao-item strong{color:var(--navy);display:block}
+  .emp-sugestao-item span{color:var(--gray-400);font-size:11px}
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+  /* ── ADMIN ── */
+  .admin-tabs{display:none}
+  .admin-tabs.visible{display:contents}
+  .admin-footer{position:fixed;bottom:10px;right:16px;z-index:500}
+  .admin-btn{background:rgba(26,39,68,.6);border:1px solid rgba(201,168,76,.2);color:rgba(255,255,255,.25);font-size:10px;font-family:var(--font-b);cursor:pointer;padding:4px 10px;border-radius:4px;transition:all .2s;letter-spacing:.05em;backdrop-filter:blur(4px)}
+  .admin-btn:hover{color:rgba(255,255,255,.6);border-color:rgba(201,168,76,.4)}
+  .login-overlay{display:none!important;position:fixed;inset:0;background:rgba(26,39,68,.75);z-index:300;align-items:center;justify-content:center}
+  .login-overlay.open{display:flex!important}
+  .login-box{background:#fff;border-radius:var(--rl);width:100%;max-width:360px;overflow:hidden;box-shadow:0 8px 32px rgba(26,39,68,.25)}
+  .login-header{background:var(--navy);padding:24px;text-align:center}
+  .login-header h2{font-family:var(--font-d);font-size:18px;font-weight:600;color:#fff;margin-bottom:4px}
+  .login-header p{font-size:12px;color:rgba(255,255,255,.45)}
+  .login-body{padding:24px}
+  .login-error{background:#fde8e8;border:1px solid #f5c6c6;border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--danger);margin-bottom:12px;display:none}
+  .admin-bar{background:#b84040;color:#fff;text-align:center;font-size:12px;font-weight:600;padding:5px 16px;display:none;align-items:center;justify-content:center;gap:12px;letter-spacing:.04em;position:sticky;top:56px;z-index:99}
+  .admin-bar.visible{display:flex}
+  .admin-bar button{background:rgba(255,255,255,.2);border:none;border-radius:4px;color:#fff;font-size:11px;font-weight:600;padding:3px 10px;cursor:pointer;font-family:var(--font-b)}
+  .admin-bar button:hover{background:rgba(255,255,255,.35)}
+  #carousel::-webkit-scrollbar{display:none}
+  .car-item{flex-shrink:0;width:130px;cursor:pointer;transition:transform .2s}
+  .car-item:hover{transform:translateY(-4px)}
+  .car-cover{width:130px;height:185px;border-radius:6px;overflow:hidden;background:var(--navy);box-shadow:0 4px 14px rgba(26,39,68,.25);margin-bottom:8px;display:flex;align-items:center;justify-content:center;position:relative}
+  .car-cover img{width:100%;height:100%;object-fit:cover}
+  .car-cover-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;text-align:center;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%)}
+  .car-cover-placeholder i{font-size:28px;color:var(--gold);margin-bottom:8px}
+  .car-cover-placeholder span{font-size:10px;color:rgba(255,255,255,.6);line-height:1.4;font-family:var(--font-b)}
+  .car-title{font-size:11px;font-weight:600;color:var(--gray-800);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .car-autor{font-size:10px;color:var(--gray-400);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .book-cover-wrap{width:80px;height:112px;border-radius:4px;overflow:hidden;background:var(--navy);box-shadow:0 2px 8px rgba(26,39,68,.2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .book-cover-wrap img{width:100%;height:100%;object-fit:cover}
+  .book-cover-wrap i{font-size:24px;color:var(--gold)}
+  .col-tombo{width:110px}.col-titulo{width:26%}.col-autor{width:17%}.col-area{width:15%}.col-tipo{width:88px}.col-ano{width:58px}.col-loc{width:10%}.col-ac{width:74px}
+  @media(max-width:768px){
+    .topbar{padding:0 10px;flex-wrap:nowrap;height:auto;min-height:52px}
+    .top-brand{padding:6px 10px 6px 0;margin-right:6px}
+    .top-brand-name{font-size:12px;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .top-nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex:1}
+    .top-nav::-webkit-scrollbar{display:none}
+    .tn{padding:0 10px;height:46px;font-size:11px;white-space:nowrap;flex-shrink:0}
+    .top-stats{flex-shrink:0;gap:8px;padding-left:8px}
+    .ts-item .n{font-size:15px}
+    .ts-item .l{font-size:8px}
+    .hero{padding:20px 16px 18px}
+    .hero-title{font-size:22px;line-height:1.2}
+    .search-box-wrap{padding:0}
+    .search-box{border-radius:50px;padding:6px 6px 6px 14px}
+    .search-box input{font-size:14px}
+    .btn-search{padding:8px 14px;font-size:13px;border-radius:40px}
+    .adv-panel{margin:10px 0 0;padding:12px;border-radius:10px}
+    .adv-grid{grid-template-columns:1fr!important;gap:8px}
+    .adv-actions{flex-direction:column;gap:8px}
+    .adv-actions .btn{width:100%;justify-content:center}
+    .res-header{flex-wrap:wrap;gap:8px}
+    .res-card{padding:10px;gap:10px}
+    .res-card-title{font-size:13px}
+    .res-card-meta{font-size:11px;flex-wrap:wrap}
+    .book-cover-wrap{width:56px!important;height:80px!important;flex-shrink:0}
+    .car-item{min-width:100px}
+    .car-cover{width:100px;height:142px}
+    .car-title{font-size:11px;max-width:100px}
+    .car-autor{font-size:10px;max-width:100px}
+    .modal-box{width:96vw;max-height:88vh;overflow-y:auto;margin:6vh auto;border-radius:12px}
+    .modal-inner{padding:14px}
+    .m-grid{grid-template-columns:1fr}
+    .m-cover{display:none}
+    .ma{flex-wrap:wrap;gap:6px}
+    .ma .btn{flex:1;min-width:80px;justify-content:center;font-size:11px;padding:7px 8px}
+    .fg{grid-template-columns:1fr!important}
+    .fg .half,.fg .full{grid-column:1}
+    .factions{flex-direction:column;gap:8px}
+    .factions .btn{width:100%;justify-content:center}
+    .page-wrap{padding:10px}
+    .fc{padding:14px}
+    .fct{font-size:15px}
+    .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .tw table{min-width:560px}
+    .ac-ctrl{flex-wrap:wrap;gap:6px}
+    .ac-ctrl .btn{font-size:11px;padding:6px 10px}
+    #etq-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))!important}
+    .admin-bar{font-size:11px;padding:4px 8px;gap:6px;flex-wrap:wrap}
+    .admin-bar button{padding:2px 8px;font-size:10px}
+    #btn-home-float{width:40px;height:40px;bottom:52px;left:12px}
+    .admin-footer{bottom:10px;right:10px}
+    .admin-btn{font-size:10px;padding:4px 8px}
+    .login-box{width:92vw}
+    .callout{flex-direction:column;gap:8px}
+  }
+  @media(max-width:480px){
+    .hero-title{font-size:19px}
+    .top-brand-name{max-width:110px;font-size:11px}
+    .ts-item .n{font-size:13px}
+    .car-item{min-width:86px}
+    .car-cover{width:86px;height:122px}
+  }
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyBp7Jk1Lomp2fGUEwSGEHcFgziu-U7hUzY",
+  authDomain:"biblioteca-ministro-barroso.firebaseapp.com",
+  projectId:"biblioteca-ministro-barroso",
+  storageBucket:"biblioteca-ministro-barroso.firebasestorage.app",
+  messagingSenderId:"608560273578",
+  appId:"1:608560273578:web:d6b4a77d455dcd229518d3"
+});
+window._fbDb=firebase.firestore();
+window._fbReady=true;
+window.dispatchEvent(new Event('fb-ready'));
+</script>
+</head>
+<body>
+<h2 class="sr-only">Sistema de Gerenciamento de Biblioteca — Ministro Luís Roberto Barroso</h2>
+
+<div class="topbar">
+  <div class="top-brand" onclick="sw('inicio')" title="Página inicial">
+    <svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0">
+      <circle cx="50" cy="50" r="48" fill="#243460"/>
+      <circle cx="50" cy="50" r="46.5" fill="none" stroke="#c9a84c" stroke-width="2.5"/>
+      <circle cx="50" cy="50" r="42" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.35"/>
+      <path d="M20 64 C20 59 24 56 28 56 L48 56 L48 74 L28 74 C24 74 20 71 20 67Z" fill="#c9a84c" opacity="0.25"/>
+      <path d="M20 64 C20 59 24 56 28 56 L48 56 L48 74 L28 74 C24 74 20 71 20 67Z" fill="none" stroke="#c9a84c" stroke-width="1.3"/>
+      <path d="M52 56 L72 56 C76 56 80 59 80 64 L80 67 C80 71 76 74 72 74 L52 74Z" fill="#c9a84c" opacity="0.25"/>
+      <path d="M52 56 L72 56 C76 56 80 59 80 64 L80 67 C80 71 76 74 72 74 L52 74Z" fill="none" stroke="#c9a84c" stroke-width="1.3"/>
+      <line x1="50" y1="55" x2="50" y2="75" stroke="#c9a84c" stroke-width="2"/>
+      <line x1="27" y1="63" x2="46" y2="63" stroke="#c9a84c" stroke-width="0.9" opacity="0.9"/>
+      <line x1="27" y1="68" x2="46" y2="68" stroke="#c9a84c" stroke-width="0.9" opacity="0.9"/>
+      <line x1="27" y1="72" x2="40" y2="72" stroke="#c9a84c" stroke-width="0.9" opacity="0.9"/>
+      <line x1="54" y1="63" x2="73" y2="63" stroke="#c9a84c" stroke-width="0.9" opacity="0.9"/>
+      <line x1="54" y1="68" x2="73" y2="68" stroke="#c9a84c" stroke-width="0.9" opacity="0.9"/>
+      <line x1="54" y1="72" x2="67" y2="72" stroke="#c9a84c" stroke-width="0.9" opacity="0.9"/>
+      <line x1="50" y1="29" x2="50" y2="56" stroke="#c9a84c" stroke-width="2"/>
+      <circle cx="50" cy="27" r="4" fill="#c9a84c"/>
+      <line x1="24" y1="38" x2="76" y2="38" stroke="#c9a84c" stroke-width="2"/>
+      <line x1="28" y1="38" x2="21" y2="49" stroke="#c9a84c" stroke-width="1.3"/>
+      <line x1="21" y1="49" x2="14" y2="49" stroke="#c9a84c" stroke-width="1.3"/>
+      <path d="M10 49 Q15 57 21 49" fill="none" stroke="#c9a84c" stroke-width="1.8"/>
+      <line x1="72" y1="38" x2="79" y2="49" stroke="#c9a84c" stroke-width="1.3"/>
+      <line x1="79" y1="49" x2="86" y2="49" stroke="#c9a84c" stroke-width="1.3"/>
+      <path d="M79 51 Q86 59 92 51" fill="none" stroke="#c9a84c" stroke-width="1.8"/>
+      <circle cx="36" cy="21" r="2" fill="#c9a84c" opacity="0.6"/>
+      <circle cx="64" cy="23" r="2" fill="#c9a84c" opacity="0.6"/>
+      <circle cx="22" cy="29" r="1.3" fill="#c9a84c" opacity="0.4"/>
+      <circle cx="78" cy="27" r="1.3" fill="#c9a84c" opacity="0.4"/>
+    </svg>
+    <div class="top-brand-name">Biblioteca Ministro Luís Roberto Barroso</div>
+  </div>
+  <nav class="top-nav">
+    <span class="admin-tabs" id="admin-tabs">
+    <button class="tn" onclick="sw('cadastro')" id="tab-cadastro"><i class="ti ti-book-upload"></i>Catalogar</button>
+    <button class="tn" onclick="sw('acervo')" id="tab-acervo"><i class="ti ti-layout-list"></i>Acervo</button>
+    <button class="tn" onclick="sw('circulacao')" id="tab-circulacao"><i class="ti ti-arrows-exchange"></i>Circulação</button>
+    <button class="tn" onclick="sw('etiquetas')" id="tab-etiquetas"><i class="ti ti-tag"></i>Etiquetas</button>
+    <button class="tn" onclick="sw('importar')" id="tab-importar"><i class="ti ti-file-spreadsheet"></i>Importar Excel</button>
+    </span>
+  </nav>
+  <div style="font-size:10px;margin-right:12px;font-family:var(--font-b)" id="sb-status"></div><div class="top-stats">
+    <div class="ts-item"><div class="n" id="st-total">0</div><div class="l">obras</div></div>
+    <div class="ts-item"><div class="n" id="st-livros">0</div><div class="l">livros</div></div>
+    <div class="ts-item"><div class="n" id="st-emprestimos" style="color:#e8c87a">0</div><div class="l">empréstimos</div></div>
+  </div>
+</div>
+
+<!-- ADMIN BAR -->
+<div class="admin-bar" id="admin-bar">
+  <i class="ti ti-shield-lock"></i> Modo administrador ativo
+  <button onclick="sw('inicio')"><i class="ti ti-home"></i> Página inicial</button>
+  <button onclick="logoutAdmin()"><i class="ti ti-logout"></i> Sair</button>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div class="login-header">
+      <svg viewBox="0 0 100 100" width="52" height="52" xmlns="http://www.w3.org/2000/svg" style="margin:0 auto 12px;display:block">
+        <circle cx="50" cy="50" r="48" fill="#243460"/>
+        <circle cx="50" cy="50" r="46.5" fill="none" stroke="#c9a84c" stroke-width="2.5"/>
+        <path d="M20 64 C20 59 24 56 28 56 L48 56 L48 74 L28 74 C24 74 20 71 20 67Z" fill="#c9a84c" opacity="0.25"/>
+        <path d="M20 64 C20 59 24 56 28 56 L48 56 L48 74 L28 74 C24 74 20 71 20 67Z" fill="none" stroke="#c9a84c" stroke-width="1.3"/>
+        <path d="M52 56 L72 56 C76 56 80 59 80 64 L80 67 C80 71 76 74 72 74 L52 74Z" fill="#c9a84c" opacity="0.25"/>
+        <path d="M52 56 L72 56 C76 56 80 59 80 64 L80 67 C80 71 76 74 72 74 L52 74Z" fill="none" stroke="#c9a84c" stroke-width="1.3"/>
+        <line x1="50" y1="55" x2="50" y2="75" stroke="#c9a84c" stroke-width="2"/>
+        <line x1="50" y1="29" x2="50" y2="56" stroke="#c9a84c" stroke-width="2"/>
+        <circle cx="50" cy="27" r="4" fill="#c9a84c"/>
+        <line x1="24" y1="38" x2="76" y2="38" stroke="#c9a84c" stroke-width="2"/>
+        <line x1="28" y1="38" x2="21" y2="49" stroke="#c9a84c" stroke-width="1.3"/>
+        <path d="M10 49 Q15 57 21 49" fill="none" stroke="#c9a84c" stroke-width="1.8"/>
+        <line x1="72" y1="38" x2="79" y2="49" stroke="#c9a84c" stroke-width="1.3"/>
+        <path d="M79 51 Q86 59 92 51" fill="none" stroke="#c9a84c" stroke-width="1.8"/>
+      </svg>
+      <h2>Área administrativa</h2>
+      <p>Biblioteca Ministro Luís Roberto Barroso</p>
+    </div>
+    <div class="login-body">
+      <div class="login-error" id="login-error">Senha incorreta. Tente novamente.</div>
+      <div class="fld" style="margin-bottom:14px">
+        <label>Senha</label>
+        <input type="password" id="login-senha" placeholder="Digite a senha de administrador"
+          onkeydown="if(event.key==='Enter')fazerLogin()" style="font-size:14px">
+      </div>
+      <button class="btn btn-g" onclick="fazerLogin()" style="width:100%;justify-content:center">
+        <i class="ti ti-login"></i> Entrar
+      </button>
+      <button class="btn btn-o" onclick="fecharLogin()" style="width:100%;justify-content:center;margin-top:8px">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- INÍCIO / PESQUISA -->
+<section class="view active" id="view-inicio">
+  <div class="hero">
+    <h1 class="hero-title">Biblioteca <span>Ministro Luís Roberto Barroso</span></h1>
+    <p style="font-size:11px;color:rgba(201,168,76,.45);letter-spacing:.28em;text-transform:uppercase;margin-bottom:28px;margin-top:6px;font-family:var(--font-b)">acervo jurídico digital</p>
+    <div class="search-box-wrap">
+      <div class="search-box">
+        <i class="ti ti-search"></i>
+        <input type="text" id="s-main" placeholder="Busque por título, autor, assunto, área do direito..." onkeydown="if(event.key==='Enter')buscar()" oninput="if(!this.value)limparRes()">
+        <button class="btn-search" onclick="buscar()"><i class="ti ti-search"></i>Buscar</button>
+      </div>
+    </div>
+
+    <button class="adv-toggle" id="adv-btn" onclick="toggleAdv()">
+      <i class="ti ti-adjustments-horizontal"></i> Pesquisa avançada <i class="ti ti-chevron-down"></i>
+    </button>
+    <div class="adv-panel" id="adv-panel">
+      <div class="adv-grid" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="af"><label>Título</label><input type="text" id="a-titulo" placeholder="Palavra(s) no título"></div>
+        <div class="af"><label>Autor</label><input type="text" id="a-autor" placeholder="Nome do autor"></div>
+        <div class="af"><label>Ano</label><input type="text" id="a-ano" placeholder="Ex.: 2023 ou 2010-2020"></div>
+        <div class="af"><label>Editora</label><input type="text" id="a-editora" placeholder="Nome da editora"></div>
+        <div class="af"><label>Área do Direito</label>
+          <select id="a-area">
+            <option value="">Todas as áreas</option>
+            <optgroup label="Direito Público"><option>Direito Constitucional</option><option>Direito Administrativo</option><option>Direito Internacional Público</option><option>Direito Internacional Privado</option><option>Direito Tributário</option><option>Direito Financeiro</option><option>Direito Previdenciário</option><option>Direito Ambiental</option><option>Direito Eleitoral</option><option>Direito Urbanístico</option><option>Direito Militar</option></optgroup>
+            <optgroup label="Direito Privado"><option>Direito Civil</option><option>Direito Empresarial / Comercial</option><option>Direito do Consumidor</option><option>Direito Imobiliário</option><option>Direito de Família e Sucessões</option><option>Direito Contratual</option></optgroup>
+            <optgroup label="Direito Processual"><option>Direito Processual Civil</option><option>Direito Processual Penal</option><option>Direito Processual Constitucional</option><option>Direito Processual do Trabalho</option></optgroup>
+            <optgroup label="Direito Social"><option>Direito do Trabalho</option><option>Direitos Humanos</option><option>Direito da Criança e do Adolescente</option><option>Direito da Saúde</option></optgroup>
+            <optgroup label="Direito Penal"><option>Direito Penal</option><option>Criminologia</option><option>Execução Penal</option></optgroup>
+            <optgroup label="Outros"><option>Filosofia do Direito / Teoria Geral</option><option>Direito Digital / Tecnologia</option><option>Bioética e Biodireito</option><option>Direito Comparado</option><option>Interdisciplinar / Geral</option></optgroup>
+          </select>
+        </div>
+        <div class="af"><label>Tipo de Material</label>
+          <select id="a-tipo"><option value="">Todos os tipos</option><option>Livro</option><option>Periódico</option><option>Tese</option><option>Dissertação</option><option>Monografia</option><option>Relatório</option></select>
+        </div>
+        <!-- Assuntos — linha completa -->
+        <div class="af"><label>Assunto 1</label><input type="text" id="a-assunto" placeholder="Primeiro assunto ou palavra-chave"></div>
+        <div class="af">
+          <label>Assunto 2</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="a-op2" style="flex:0 0 58px;font-size:11px;padding:8px 4px;font-weight:700;color:var(--navy);background:var(--gold-pale);border:1px solid rgba(201,168,76,.4)">
+              <option value="e">E</option>
+              <option value="ou">OU</option>
+            </select>
+            <input type="text" id="a-assunto2" placeholder="Segundo assunto" style="flex:1">
+          </div>
+        </div>
+        <div class="af">
+          <label>Assunto 3</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="a-op3" style="flex:0 0 58px;font-size:11px;padding:8px 4px;font-weight:700;color:var(--navy);background:var(--gold-pale);border:1px solid rgba(201,168,76,.4)">
+              <option value="e">E</option>
+              <option value="ou">OU</option>
+            </select>
+            <input type="text" id="a-assunto3" placeholder="Terceiro assunto" style="flex:1">
+          </div>
+        </div>
+        <div class="af"><label>Nº Tombo</label><input type="text" id="a-tombo" placeholder="Ex.: BMLRB-00042"></div>
+        <div class="af"><label>Estante / Localização</label><input type="text" id="a-estante" placeholder="Ex.: Gabinete"></div>
+      </div>
+      <div class="adv-actions">
+        <button class="btn-adv-clear" onclick="limparAdv()"><i class="ti ti-x"></i> Limpar filtros</button>
+        <button class="btn-adv-search" onclick="buscarAdv()"><i class="ti ti-search"></i> Pesquisar</button>
+      </div>
+    </div>
+  </div>
+  <div class="results-area" id="results-area" style="display:none">
+    <div class="res-header">
+      <div class="res-count" id="res-count"></div>
+      <div class="res-chips" id="res-chips"></div>
+      <button class="btn btn-sm btn-o" style="margin-left:auto" onclick="limparRes()"><i class="ti ti-x"></i> Limpar busca</button>
+    </div>
+    <div class="res-grid" id="res-grid"></div>
+    <div class="pag" id="res-pag"></div>
+  </div>
+  <div id="inicio-default" style="padding:32px 24px 40px">
+
+    <!-- CARROSSEL ÚLTIMAS AQUISIÇÕES -->
+    <div id="carousel-section" style="display:none;margin-bottom:36px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;max-width:960px;margin-left:auto;margin-right:auto">
+        <div style="font-family:var(--font-d);font-size:18px;font-weight:600;color:var(--navy)">
+          <i class="ti ti-sparkles" style="color:var(--gold);font-size:17px;margin-right:6px"></i>Últimas Aquisições
+        </div>
+        <button onclick="sw('acervo')" style="background:none;border:none;color:var(--gold-dim);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-b);display:flex;align-items:center;gap:4px">Ver tudo <i class="ti ti-arrow-right"></i></button>
+      </div>
+      <div style="position:relative;max-width:960px;margin:0 auto">
+        <button id="car-prev" onclick="carScroll(-1)" style="position:absolute;left:-16px;top:50%;transform:translateY(-50%);z-index:10;background:var(--navy);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)"><i class="ti ti-chevron-left" style="color:var(--gold);font-size:18px"></i></button>
+        <div id="carousel" style="display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;padding:4px 2px 12px;scrollbar-width:none;-ms-overflow-style:none"></div>
+        <button id="car-next" onclick="carScroll(1)" style="position:absolute;right:-16px;top:50%;transform:translateY(-50%);z-index:10;background:var(--navy);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)"><i class="ti ti-chevron-right" style="color:var(--gold);font-size:18px"></i></button>
+      </div>
+    </div>
+
+    <!-- CARROSSEL PRODUÇÃO INTELECTUAL -->
+    <div id="pi-section" style="display:none;margin-bottom:36px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;max-width:960px;margin-left:auto;margin-right:auto">
+        <div style="font-family:var(--font-d);font-size:18px;font-weight:600;color:var(--navy)">
+          <i class="ti ti-feather" style="color:var(--gold);font-size:17px;margin-right:6px"></i>Produção intelectual
+        </div>
+        <button onclick="buscarPI()" style="background:none;border:none;color:var(--gold-dim);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-b);display:flex;align-items:center;gap:4px">Ver tudo <i class="ti ti-arrow-right"></i></button>
+      </div>
+      <div style="position:relative;max-width:960px;margin:0 auto">
+        <button onclick="piScroll(-1)" style="position:absolute;left:-16px;top:50%;transform:translateY(-50%);z-index:10;background:var(--navy);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)"><i class="ti ti-chevron-left" style="color:var(--gold);font-size:18px"></i></button>
+        <div id="pi-carousel" style="display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;padding:4px 2px 12px;scrollbar-width:none;-ms-overflow-style:none"></div>
+        <button onclick="piScroll(1)" style="position:absolute;right:-16px;top:50%;transform:translateY(-50%);z-index:10;background:var(--navy);border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)"><i class="ti ti-chevron-right" style="color:var(--gold);font-size:18px"></i></button>
+      </div>
+    </div>
+
+    <!-- ATALHOS -->
+  </div>
+</section>
+
+<!-- CATALOGAR -->
+<section class="view" id="view-cadastro">
+  <div class="page-wrap">
+    <div class="fc">
+      <div class="fct"><i class="ti ti-book-2"></i> Novo Registro Bibliográfico <span class="tb2" id="prev-tombo">Próximo: —</span></div>
+
+      <!-- PREENCHIMENTO AUTOMÁTICO -->
+      <div style="background:var(--gold-pale);border:1.5px solid rgba(201,168,76,.4);border-radius:var(--rl);padding:16px 20px;margin-bottom:22px">
+        <div style="font-size:12px;font-weight:700;color:var(--gold-dim);letter-spacing:.07em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-wand" style="font-size:15px"></i> Preenchimento automático
+        </div>
+
+        <!-- ABAS -->
+        <div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid rgba(201,168,76,.25)">
+          <button type="button" id="tab-isbn-btn" onclick="trocarAbaAuto('isbn')" style="background:var(--gold);border:none;border-radius:6px 6px 0 0;padding:7px 16px;font-family:var(--font-b);font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;margin-bottom:-2px;border-bottom:2px solid var(--gold)">
+            <i class="ti ti-barcode"></i> Por ISBN
+          </button>
+          <button type="button" id="tab-marc-btn" onclick="trocarAbaAuto('marc')" style="background:none;border:none;border-radius:6px 6px 0 0;padding:7px 16px;font-family:var(--font-b);font-size:12px;font-weight:600;color:var(--gold-dim);cursor:pointer;margin-bottom:-2px;border-bottom:2px solid transparent">
+            <i class="ti ti-code"></i> Colar ficha MARC (RVBI/STF)
+          </button>
+        </div>
+
+        <!-- PAINEL ISBN -->
+        <div id="painel-isbn">
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div class="fld" style="flex:1;min-width:200px">
+              <label>ISBN do livro</label>
+              <input type="text" id="isbn-lookup" placeholder="Ex.: 9788547015756 ou 978-85-470-1575-6" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarISBN()}" style="background:#fff">
+            </div>
+            <button type="button" class="btn btn-g" onclick="buscarISBN()" id="btn-isbn" style="flex-shrink:0;margin-bottom:1px">
+              <i class="ti ti-search"></i> Buscar dados
+            </button>
+          </div>
+        </div>
+
+        <!-- PAINEL MARC -->
+        <div id="painel-marc" style="display:none">
+          <div class="fld">
+            <label>Cole aqui o registro MARC do catálogo RVBI / STF</label>
+            <textarea id="marc-input" placeholder="Cole o conteúdo MARC aqui (linhas começando com =001, =100, =245, =260, =300...)" style="background:#fff;min-height:120px;font-family:'Courier New',monospace;font-size:12px;line-height:1.6"></textarea>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px">
+            <button type="button" class="btn btn-g" onclick="parsearMARC()">
+              <i class="ti ti-file-import"></i> Extrair dados do MARC
+            </button>
+          </div>
+        </div>
+
+        <div id="isbn-status" style="margin-top:10px;font-size:13px;display:none"></div>
+      </div>
+
+      <form id="form-cad" onsubmit="salvar(event)">
+        <div class="fg">
+          <div class="fld half"><label>Título <span class="req">*</span></label><input type="text" id="f-titulo" required placeholder="Título completo da obra"></div>
+          <div class="fld"><label>Subtítulo</label><input type="text" id="f-subtitulo" placeholder="Subtítulo (se houver)"></div>
+          <div class="fld half"><label>Autor(es) <span class="req">*</span></label><input type="text" id="f-autor" required placeholder="Sobrenome, Nome; Sobrenome, Nome" oninput="atualizarClassPreview()"></div>
+          <div class="fld"><label>Organizador / Editor</label><input type="text" id="f-org" placeholder="Org. ou Ed."></div>
+          <div class="fld"><label>Editora</label><input type="text" id="f-editora" placeholder="Nome da editora"></div>
+          <div class="fld"><label>Local de Publicação</label><input type="text" id="f-local" placeholder="Cidade, País"></div>
+          <div class="fld"><label>Ano <span class="req">*</span></label><input type="number" id="f-ano" required placeholder="AAAA" min="1500" max="2099"></div>
+          <div class="fld"><label>Volume / Tomo</label><input type="text" id="f-volume" placeholder="Ex.: v. 1"></div>
+          <div class="fld"><label>Edição</label><input type="text" id="f-edicao" placeholder="Ex.: 3. ed."></div>
+          <div class="fld"><label>Páginas</label><input type="text" id="f-pag" placeholder="Ex.: 512 p."></div>
+          <div class="fld"><label>ISBN / ISSN</label><input type="text" id="f-isbn" placeholder="ISBN ou ISSN"></div>
+          <div class="fld"><label>Tipo de Material <span class="req">*</span></label>
+            <select id="f-tipo" required><option value="">— Selecione —</option><option>Livro</option><option>Periódico</option><option>Tese</option><option>Dissertação</option><option>Monografia</option><option>Relatório</option><option>Atos Normativos</option><option>Jurisprudência</option><option>Material Audiovisual</option></select>
+          </div>
+          <div class="fld half"><label>Área do Direito</label>
+            <select id="f-area" onchange="atualizarClassPreview()"><option value="">— Selecione a Área —</option>
+              <optgroup label="Direito Público"><option>Direito Constitucional</option><option>Direito Administrativo</option><option>Direito Internacional Público</option><option>Direito Internacional Privado</option><option>Direito Tributário</option><option>Direito Financeiro</option><option>Direito Previdenciário</option><option>Direito Ambiental</option><option>Direito Eleitoral</option><option>Direito Urbanístico</option><option>Direito Militar</option></optgroup>
+              <optgroup label="Direito Privado"><option>Direito Civil</option><option>Direito Empresarial / Comercial</option><option>Direito do Consumidor</option><option>Direito Imobiliário</option><option>Direito de Família e Sucessões</option><option>Direito Contratual</option></optgroup>
+              <optgroup label="Direito Processual"><option>Direito Processual Civil</option><option>Direito Processual Penal</option><option>Direito Processual Constitucional</option><option>Direito Processual do Trabalho</option></optgroup>
+              <optgroup label="Direito Social"><option>Direito do Trabalho</option><option>Direitos Humanos</option><option>Direito da Criança e do Adolescente</option><option>Direito da Saúde</option></optgroup>
+              <optgroup label="Direito Penal"><option>Direito Penal</option><option>Criminologia</option><option>Execução Penal</option></optgroup>
+              <optgroup label="Outros"><option>Filosofia do Direito / Teoria Geral</option><option>Direito Digital / Tecnologia</option><option>Bioética e Biodireito</option><option>Direito Comparado</option><option>Interdisciplinar / Geral</option></optgroup>
+            </select>
+          </div>
+          <div class="fld full"><label>Assunto / Palavras-chave</label><input type="text" id="f-assunto" placeholder="Termos separados por ponto-e-vírgula"></div>
+          <div class="fld"><label>Localização / Cota</label><input type="text" id="f-loc" placeholder="Ex.: Est. A, Prat. 3"></div>
+          <div class="fld"><label>Estante</label><input type="text" id="f-estante" placeholder="Ex.: Prateleira 3"></div>
+          <div class="fld"><label>Coleção / Localização</label>
+            <select id="f-colecao">
+              <option value="gabinete">Gabinete</option>
+              <option value="escritorio">Escritório</option>
+              <option value="mezanino">Mezanino</option>
+            </select>
+          </div>
+          <div class="fld"><label>Classificação</label>
+            <!-- Prévia visual da etiqueta -->
+            <div id="f-class-preview" style="background:var(--navy);border-radius:var(--r);padding:10px 14px;text-align:center;min-height:64px;display:flex;flex-direction:column;justify-content:center;gap:3px;margin-bottom:8px;cursor:pointer" title="Clique para editar a grande área manualmente" onclick="toggleClassEdit()">
+              <div id="f-class-area" style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;line-height:1.3">—</div>
+              <div id="f-class-esp" style="font-size:10px;font-weight:500;color:rgba(255,255,255,.7);letter-spacing:.03em;display:none"></div>
+              <div id="f-class-autor" style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.06em">—</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:2px"><i class="ti ti-pencil" style="font-size:9px"></i> clique para editar a grande área</div>
+            </div>
+            <!-- Campo editável da grande área (visível ao clicar) -->
+            <div id="f-class-area-edit" style="display:none;margin-bottom:6px">
+              <input type="text" id="f-class-area-manual" placeholder="Grande área (ex: Direito Constitucional)" oninput="atualizarClassPreview()" style="font-size:13px;width:100%">
+              <div style="font-size:11px;color:var(--gray-400);margin-top:3px"><i class="ti ti-info-circle" style="vertical-align:-2px"></i> Deixe em branco para usar a Área do Direito selecionada acima.</div>
+            </div>
+            <!-- Assunto específico -->
+            <div style="margin-bottom:6px">
+              <input type="text" id="f-class-especifico" placeholder="Assunto específico (ex: Controle de constitucionalidade)" oninput="atualizarClassPreview()" style="font-size:13px;width:100%">
+            </div>
+            <!-- Sobrenome editável -->
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" id="f-class-sobrenome" placeholder="Sobrenome (preenchido automaticamente pelo autor)" oninput="atualizarClassPreview()" style="font-size:13px;flex:1">
+              <button type="button" class="btn btn-sm btn-o" onclick="resetSobrenome()" title="Restaurar sobrenome do autor"><i class="ti ti-refresh"></i></button>
+            </div>
+            <input type="hidden" id="f-class">
+          </div>
+          <div class="fld"><label>Exemplares</label><input type="number" id="f-ex" value="1" min="1"></div>
+          <div class="fld full"><label>Notas / Observações</label><textarea id="f-notas" placeholder="Observações adicionais..."></textarea></div>
+
+          <!-- CAPA -->
+          <div class="fld full">
+            <label>Capa do Livro</label>
+            <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+              <div style="width:90px;height:128px;border-radius:6px;background:var(--navy);border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 10px rgba(26,39,68,.2)">
+                <i class="ti ti-book" style="font-size:28px;color:var(--gold)" id="cover-preview-icon"></i>
+                <img id="cover-preview-img" style="width:100%;height:100%;object-fit:cover;display:none">
+              </div>
+              <div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:10px">
+                <div class="fld">
+                  <label>URL da capa (cole o link de uma imagem)</label>
+                  <div style="display:flex;gap:8px">
+                    <input type="text" id="f-capa-url" placeholder="https://..." oninput="previewCapa()" style="flex:1">
+                    <button type="button" class="btn btn-sm btn-o" onclick="buscarCapaGoogle()" title="Buscar capa automaticamente pelo ISBN"><i class="ti ti-search"></i> Buscar</button>
+                  </div>
+                </div>
+                <div class="fld">
+                  <label>Ou faça upload da imagem da capa</label>
+                  <input type="file" id="f-capa-file" accept="image/*" onchange="uploadCapa(event)" style="font-size:12px">
+                </div>
+                <div style="font-size:11px;color:var(--gray-400)"><i class="ti ti-info-circle" style="vertical-align:-2px"></i> Se tiver ISBN preenchido, clique em "Buscar" para obter a capa automaticamente. Ou cole uma URL ou faça upload de uma foto.</div>
+                <div id="isbn-status-capa" style="font-size:12px;display:none"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="factions">
+          <button type="button" class="btn btn-o" onclick="limpar()"><i class="ti ti-x"></i> <span id="btn-limpar-txt">Limpar</span></button>
+          <button type="submit" class="btn btn-g" id="btn-salvar"><i class="ti ti-device-floppy"></i> <span id="btn-salvar-txt">Registrar obra</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ACERVO -->
+<section class="view" id="view-acervo">
+  <div class="page-wrap">
+    <div class="ac-ctrl">
+      <span class="cbadge" id="ac-count">0 obras</span>
+      <button class="btn btn-sm btn-o" onclick="exportCSV()"><i class="ti ti-download"></i> Exportar CSV</button>
+      <button class="btn btn-sm btn-o" onclick="dedupAcervo()"><i class="ti ti-filter"></i> Remover duplicatas</button>
+      <button class="btn btn-sm btn-d" onclick="limparAc()"><i class="ti ti-trash"></i> Limpar tudo</button>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th class="col-tombo" onclick="ord('tombo')">Nº Tombo <i class="ti ti-arrows-sort"></i></th>
+          <th class="col-titulo" onclick="ord('titulo')">Título <i class="ti ti-arrows-sort"></i></th>
+          <th class="col-autor" onclick="ord('autor')">Autor <i class="ti ti-arrows-sort"></i></th>
+          <th class="col-area" onclick="ord('area')">Área <i class="ti ti-arrows-sort"></i></th>
+          <th class="col-tipo">Tipo</th>
+          <th class="col-ano" onclick="ord('ano')">Ano <i class="ti ti-arrows-sort"></i></th>
+          <th class="col-loc">Estante</th>
+          <th class="col-ac">Ver</th>
+        </tr></thead>
+        <tbody id="ac-tbody"></tbody>
+      </table>
+      <div id="ac-empty" class="empty" style="display:none"><i class="ti ti-books"></i><p>Nenhuma obra no acervo.</p></div>
+      <div class="pag2" id="paginacao"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CIRCULAÇÃO -->
+<section class="view" id="view-circulacao">
+  <div class="page-wrap">
+
+    <!-- ALERTAS DE ATRASO -->
+    <div id="alertas-atraso" style="display:none;margin-bottom:16px"></div>
+
+    <!-- NOVO EMPRÉSTIMO -->
+    <div class="fc" style="margin-bottom:20px">
+      <div class="fct"><i class="ti ti-book-upload"></i> Registrar empréstimo</div>
+      <div class="fg" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="fld half">
+          <label>Buscar obra por título, autor ou Nº tombo <span class="req">*</span></label>
+          <div style="position:relative">
+            <input type="text" id="emp-busca" placeholder="Ex.: BMLRB-00005 ou nome do autor..." oninput="buscarObraEmp()" autocomplete="off" style="width:100%">
+            <div id="emp-sugestoes" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);box-shadow:var(--sh);z-index:50;max-height:200px;overflow-y:auto"></div>
+          </div>
+        </div>
+        <div class="fld">
+          <label>Nº Tombo selecionado</label>
+          <input type="text" id="emp-tombo" readonly placeholder="Preenchido automaticamente" style="background:var(--gray-100);cursor:default">
+        </div>
+        <div class="fld">
+          <label>Nome do Usuário <span class="req">*</span></label>
+          <input type="text" id="emp-nome" placeholder="Nome completo">
+        </div>
+        <div class="fld">
+          <label>E-mail do Usuário <span class="req">*</span></label>
+          <input type="email" id="emp-email" placeholder="email@exemplo.com">
+        </div>
+        <div class="fld">
+          <label>Data de Empréstimo</label>
+          <input type="date" id="emp-data-saida">
+        </div>
+        <div class="fld">
+          <label>Prazo de Devolução <span class="req">*</span></label>
+          <input type="date" id="emp-data-prev">
+        </div>
+        <div class="fld full">
+          <label>Observações</label>
+          <input type="text" id="emp-obs" placeholder="Estado do livro, observações adicionais...">
+        </div>
+      </div>
+      <div class="factions">
+        <button type="button" class="btn btn-o" onclick="limparEmp()"><i class="ti ti-x"></i> Limpar</button>
+        <button type="button" class="btn btn-g" onclick="registrarEmp()"><i class="ti ti-circle-plus"></i> Registrar empréstimo</button>
+      </div>
+    </div>
+
+    <!-- EMPRÉSTIMOS ATIVOS -->
+    <div class="fc">
+      <div class="fct">
+        <i class="ti ti-book-2"></i> Empréstimos Ativos
+        <span id="badge-ativos" class="tb2" style="margin-left:8px">0</span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <input type="text" id="emp-filtro" placeholder="Filtrar por nome, obra ou tombo..." oninput="renderEmprestimos()" style="font-size:12px;padding:5px 10px;border:1px solid var(--gray-200);border-radius:var(--r);background:var(--gray-50);width:220px">
+          <button class="btn btn-sm btn-o" onclick="exportarEmpCSV()"><i class="ti ti-download"></i> Exportar</button>
+        </div>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr>
+            <th style="width:110px">Tombo</th>
+            <th style="width:28%">Obra</th>
+            <th style="width:18%">Usuário</th>
+            <th style="width:16%">E-mail</th>
+            <th style="width:100px">Saída</th>
+            <th style="width:100px">Devolução</th>
+            <th style="width:90px">Status</th>
+            <th style="width:80px">Ação</th>
+          </tr></thead>
+          <tbody id="emp-tbody"></tbody>
+        </table>
+        <div id="emp-empty" class="empty" style="display:none">
+          <i class="ti ti-books"></i>
+          <p>Nenhum empréstimo ativo.<br>Registre um empréstimo acima.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="fc">
+      <div class="fct"><i class="ti ti-history"></i> Histórico de Devoluções
+        <span id="badge-hist" class="tb2" style="margin-left:8px;background:var(--gray-400)">0</span>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr>
+            <th style="width:110px">Tombo</th>
+            <th style="width:28%">Obra</th>
+            <th style="width:18%">Usuário</th>
+            <th style="width:100px">Saída</th>
+            <th style="width:100px">Devolução Prev.</th>
+            <th style="width:100px">Devolvido em</th>
+            <th style="width:80px">Status</th>
+          </tr></thead>
+          <tbody id="hist-tbody"></tbody>
+        </table>
+        <div id="hist-empty" class="empty" style="display:none">
+          <i class="ti ti-clock-hour-3"></i>
+          <p>Nenhuma devolução registrada ainda.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ETIQUETAS -->
+<section class="view" id="view-etiquetas">
+  <div class="page-wrap">
+    <div class="fc">
+      <div class="fct"><i class="ti ti-tag"></i> Impressão de etiquetas <small style="font-size:13px;font-weight:400;color:var(--gray-400);margin-left:8px">70 × 31 mm — folha A4</small></div>
+
+      <!-- Filtros -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px 16px;margin-bottom:16px;align-items:flex-end">
+        <div class="fld">
+          <label>Filtrar por texto</label>
+          <input type="text" id="etq-filtro" placeholder="Título, autor, tombo ou área..." oninput="renderEtiquetas()">
+        </div>
+        <div class="fld">
+          <label>Área do direito</label>
+          <select id="etq-area" onchange="renderEtiquetas()">
+            <option value="">Todas as áreas</option>
+            <optgroup label="Direito Público">
+              <option>Direito Constitucional</option><option>Direito Administrativo</option>
+              <option>Direito Internacional Público</option><option>Direito Internacional Privado</option>
+              <option>Direito Tributário</option><option>Direito Financeiro</option>
+              <option>Direito Previdenciário</option><option>Direito Ambiental</option>
+              <option>Direito Eleitoral</option><option>Direito Urbanístico</option>
+            </optgroup>
+            <optgroup label="Direito Privado">
+              <option>Direito Civil</option><option>Direito Empresarial / Comercial</option>
+              <option>Direito do Consumidor</option><option>Direito de Família e Sucessões</option>
+            </optgroup>
+            <optgroup label="Direito Processual">
+              <option>Direito Processual Civil</option><option>Direito Processual Penal</option>
+              <option>Direito Processual Constitucional</option><option>Direito Processual do Trabalho</option>
+            </optgroup>
+            <optgroup label="Outros">
+              <option>Direito do Trabalho</option><option>Direitos Humanos</option>
+              <option>Direito Penal</option><option>Criminologia</option>
+              <option>Filosofia do Direito / Teoria Geral</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="fld">
+          <label>Intervalo de tombo</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="etq-tombo-ini" placeholder="De (ex: 1)" min="1" oninput="renderEtiquetas()" style="width:90px">
+            <span style="color:var(--gray-400);font-size:13px">até</span>
+            <input type="number" id="etq-tombo-fim" placeholder="Até (ex: 100)" min="1" oninput="renderEtiquetas()" style="width:90px">
+            <button class="btn btn-sm btn-o" onclick="limparFiltrosEtq()" title="Limpar filtros"><i class="ti ti-x"></i></button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn btn-sm btn-o" onclick="selecionarTodas()"><i class="ti ti-checkbox"></i> Selecionar todas</button>
+          <button class="btn btn-sm btn-o" onclick="deselecionarTodas()"><i class="ti ti-square"></i> Limpar seleção</button>
+        </div>
+      </div>
+
+      <!-- Ações de impressão -->
+      <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-g" onclick="imprimirEtiquetas('selecao')"><i class="ti ti-printer"></i> Imprimir selecionadas</button>
+        <button class="btn btn-p" onclick="imprimirEtiquetas('intervalo')"><i class="ti ti-printer"></i> Imprimir por intervalo de tombo</button>
+        <span id="etq-sel-count" style="font-size:12px;color:var(--gray-600)"></span>
+      </div>
+
+      <!-- Normalizar metadados -->
+      <div class="callout" style="margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <i class="ti ti-wand" style="font-size:20px;color:var(--gold-dim)"></i>
+        <div style="flex:1">
+          <strong>Normalização de metadados</strong><br>
+          <span style="font-size:12px">Converte títulos para caixa baixa e autores com iniciais maiúsculas em todos os registros.</span>
+        </div>
+        <button class="btn btn-sm btn-p" onclick="normalizarTodos()"><i class="ti ti-refresh"></i> Normalizar todos os registros</button>
+      </div>
+
+      <!-- Preview -->
+      <div id="etq-count" style="font-size:13px;color:var(--gray-600);margin-bottom:12px"></div>
+      <div id="etq-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPORTAR -->
+<section class="view" id="view-importar">
+  <div class="page-wrap">
+    <div class="fc">
+      <div class="fct"><i class="ti ti-file-spreadsheet"></i> Importação de Planilha Excel / CSV</div>
+      <div class="callout"><i class="ti ti-check" style="vertical-align:-2px;margin-right:6px"></i><strong>Formato detectado automaticamente.</strong> Reconhece: <code style="font-size:12px">Título, Autor, Ano, Edição, Volume, Localização, Estante, Classificação</code></div>
+      <div class="iz" id="iz" onclick="document.getElementById('fi').click()" ondragover="dov(event)" ondragleave="dlv()" ondrop="ddr(event)">
+        <input type="file" id="fi" accept=".xlsx,.xls,.csv" onchange="hf(event)">
+        <i class="ti ti-upload"></i>
+        <p>Clique para selecionar ou arraste seu arquivo aqui</p>
+        <small>Formatos: .xlsx, .xls, .csv — até 20 MB</small>
+      </div>
+      <div id="map-section" style="display:none;margin-top:22px">
+        <div class="fct" style="font-size:14px;margin-bottom:10px"><i class="ti ti-table"></i> Confirme o mapeamento das colunas</div>
+        <table class="map-table"><thead><tr><th>Coluna na Planilha</th><th>Amostra</th><th>Campo no Sistema</th></tr></thead><tbody id="map-tbody"></tbody></table>
+        <div class="prog-bar" id="prog-bar" style="display:none"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <div id="prog-label" style="font-size:12px;color:var(--gray-600);text-align:center;margin-top:4px;display:none"></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+          <button class="btn btn-o" onclick="cancelImp()"><i class="ti ti-x"></i> Cancelar</button>
+          <button class="btn btn-g" onclick="confirmarImport()"><i class="ti ti-database-import"></i> Importar para o acervo</button>
+        </div>
+      </div>
+      <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--gray-200)">
+        <button class="btn btn-o btn-sm" onclick="baixarModelo()"><i class="ti ti-download"></i> Baixar modelo .csv</button>
+      </div>
+      <div id="imp-result"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL -->
+<div class="mo" id="mo" onclick="fmo(event)">
+  <div class="md">
+    <div class="mh">
+      <div id="m-cover" style="margin-right:12px;flex-shrink:0"></div>
+      <div style="flex:1;min-width:0">
+        <h2 id="m-titulo" style="font-size:16px;line-height:1.3;margin-bottom:4px">—</h2>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="mtb" id="m-tombo">—</span>
+          <span id="m-nav-info" style="font-size:11px;color:rgba(255,255,255,.4)"></span>
+        </div>
+      </div>
+      <button class="mc-btn" onclick="fmob()" aria-label="Fechar"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb"><div class="mg" id="m-grid"></div></div>
+    <div class="ma">
+      <button class="btn btn-sm btn-o" onclick="navModal(-1)" id="btn-prev-modal" title="Anterior"><i class="ti ti-chevron-left"></i></button>
+      <button class="btn btn-sm btn-o" onclick="navModal(1)" id="btn-next-modal" title="Próximo"><i class="ti ti-chevron-right"></i></button>
+      <button class="btn btn-sm btn-o" onclick="editObra()"><i class="ti ti-edit"></i> Editar</button>
+      <button class="btn btn-sm btn-g" onclick="emprestarDoModal()"><i class="ti ti-arrows-exchange"></i> Emprestar</button>
+      <button class="btn btn-sm btn-d" onclick="delObra()"><i class="ti ti-trash"></i> Excluir</button>
+      <button class="btn btn-sm btn-p" onclick="fmob()">Fechar</button>
+    </div>
+  </div>
+</div>
+<div class="tc2" id="toasts"></div>
+
+<button id="btn-home-float" onclick="sw('inicio')" title="Página inicial"
+  style="display:none;position:fixed;bottom:24px;left:24px;z-index:998;background:var(--navy);border:2px solid var(--gold);border-radius:50%;width:48px;height:48px;cursor:pointer;box-shadow:0 4px 16px rgba(26,39,68,.3);align-items:center;justify-content:center;transition:all .2s">
+  <i class="ti ti-home" style="font-size:20px;color:var(--gold)" aria-hidden="true"></i>
+</button>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// ══ FIREBASE CONFIG ══
+const TIPO_ICON={'Livro':'ti-book','Periódico':'ti-news','Tese':'ti-school','Dissertação':'ti-school','Monografia':'ti-file-text','Relatório':'ti-report','E-book':'ti-device-tablet'};
+function fbDb(){return window._fbDb;}
+
+async function waitFb(){
+  if(window._fbReady) return;
+  await new Promise(r=>{window.addEventListener('fb-ready',r,{once:true});setTimeout(r,5000);});
+}
+
+async function sbCarregarAcervo(){
+  try{
+    await waitFb();
+    const db=fbDb();if(!db)return[];
+    const snap=await db.collection('acervo').orderBy('tombo').get();
+    return snap.docs.map(d=>{const r=d.data();return{
+      id:d.id,tombo:r.tombo,titulo:r.titulo,subtitulo:r.subtitulo,
+      autor:r.autor,organizador:r.organizador,editora:r.editora,
+      local_pub:r.local_pub,ano:r.ano,volume:r.volume,edicao:r.edicao,
+      paginas:r.paginas,isbn:r.isbn,tipo:r.tipo,area:r.area,
+      assunto:r.assunto,assuntoEspecifico:r.assunto_especifico,
+      sobrenomeClass:r.sobrenome_class,localizacao:r.localizacao,
+      estante:r.estante,colecao:r.colecao||'gabinete',
+      classificacao:r.classificacao,exemplares:r.exemplares,
+      notas:r.notas,capaUrl:r.capa_url,dataCad:r.data_cad
+    };});
+  }catch(e){console.error('Firebase carregar acervo:',e);return[];}
+}
+
+async function sbSalvarAcervo(){
+  try{
+    await waitFb();
+    const db=fbDb();if(!db||!acervo.length)return;
+    const lote=400;
+    for(let i=0;i<acervo.length;i+=lote){
+      const batch=db.batch();
+      acervo.slice(i,i+lote).forEach(o=>{
+        batch.set(db.collection('acervo').doc(String(o.id)),{
+          tombo:o.tombo||'',titulo:o.titulo||'',subtitulo:o.subtitulo||'',
+          autor:o.autor||'',organizador:o.organizador||'',editora:o.editora||'',
+          local_pub:o.local_pub||'',ano:o.ano||'',volume:o.volume||'',
+          edicao:o.edicao||'',paginas:o.paginas||'',isbn:o.isbn||'',
+          tipo:o.tipo||'Livro',area:o.area||'',assunto:o.assunto||'',
+          assunto_especifico:o.assuntoEspecifico||'',sobrenome_class:o.sobrenomeClass||'',
+          localizacao:o.localizacao||'',estante:o.estante||'',
+          colecao:o.colecao||'gabinete',classificacao:o.classificacao||'',
+          exemplares:o.exemplares||'1',notas:o.notas||'',
+          capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString()
+        });
+      });
+      await batch.commit();
+    }
+  }catch(e){console.error('Firebase salvar acervo:',e);}
+}
+
+async function sbSalvarObra(o){
+  try{
+    await waitFb();
+    const db=fbDb();if(!db)return false;
+    await db.collection('acervo').doc(String(o.id)).set({
+      tombo:o.tombo||'',titulo:o.titulo||'',subtitulo:o.subtitulo||'',
+      autor:o.autor||'',organizador:o.organizador||'',editora:o.editora||'',
+      local_pub:o.local_pub||'',ano:o.ano||'',volume:o.volume||'',
+      edicao:o.edicao||'',paginas:o.paginas||'',isbn:o.isbn||'',
+      tipo:o.tipo||'Livro',area:o.area||'',assunto:o.assunto||'',
+      assunto_especifico:o.assuntoEspecifico||'',sobrenome_class:o.sobrenomeClass||'',
+      localizacao:o.localizacao||'',estante:o.estante||'',
+      colecao:o.colecao||'gabinete',classificacao:o.classificacao||'',
+      exemplares:o.exemplares||'1',notas:o.notas||'',
+      capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString()
+    });
+    return true;
+  }catch(e){console.error('Firebase salvar obra:',e);return false;}
+}
+
+async function sbDeletarObra(id){
+  try{
+    await waitFb();
+    const db=fbDb();if(!db)return;
+    await db.collection('acervo').doc(String(id)).delete();
+  }catch(e){console.error('Firebase deletar:',e);}
+}
+
+async function sbSalvarEmprestimos(){
+  try{
+    await waitFb();
+    const db=fbDb();if(!db||!emprestimos.length)return;
+    const batch=db.batch();
+    emprestimos.forEach(e=>{
+      batch.set(db.collection('emprestimos').doc(String(e.id)),{
+        obra_id:String(e.obraId||''),tombo:e.tombo||'',titulo:e.titulo||'',
+        autor:e.autor||'',nome:e.nome||'',email:e.email||'',
+        data_saida:e.dataSaida||'',data_prev:e.dataPrev||'',
+        data_retorno:e.dataRetorno||'',obs:e.obs||'',status:e.status||'ativo',
+        criado_em:e.criadoEm||new Date().toISOString()
+      });
+    });
+    await batch.commit();
+  }catch(e){console.error('Firebase salvar emprestimos:',e);}
+}
+
+async function sbCarregarEmprestimos(){
+  try{
+    await waitFb();
+    const db=fbDb();if(!db)return[];
+    const snap=await db.collection('emprestimos').orderBy('criado_em','desc').get();
+    return snap.docs.map(d=>{const r=d.data();return{
+      id:d.id,obraId:r.obra_id,tombo:r.tombo,titulo:r.titulo,
+      autor:r.autor,nome:r.nome,email:r.email,dataSaida:r.data_saida,
+      dataPrev:r.data_prev,dataRetorno:r.data_retorno,obs:r.obs,
+      status:r.status,criadoEm:r.criado_em
+    };});
+  }catch(e){console.error('Firebase carregar emprestimos:',e);return[];}
+}
+async function load(){
+  const sbStatus=document.getElementById('sb-status');
+  function setStatus(msg,color){if(sbStatus){sbStatus.textContent=msg;sbStatus.style.color=color||'var(--gold)';}}
+  
+  try{ctr=parseInt(localStorage.getItem('bmlrb_ctr')||'1');}catch(e){ctr=1;}
+
+  // 1. CARREGA DO CACHE LOCAL PRIMEIRO — instantâneo!
+  const cache=localStorage.getItem('bmlrb_ac');
+  if(cache&&cache!=='[]'){
+    try{
+      acervo=JSON.parse(cache);
+      emprestimos=JSON.parse(localStorage.getItem('bmlrb_emp')||'[]');
+      acervo.forEach(o=>{if(!o.colecao)o.colecao='gabinete';});
+      updStats();updPrev();
+      setTimeout(()=>{renderCarousel();renderPI();},50);
+      setStatus('✅ '+acervo.length+' obras (cache)','#4caf81');
+      setTimeout(()=>setStatus(''),3000);
+      // 2. ATUALIZA DO FIREBASE EM SEGUNDO PLANO
+      setTimeout(()=>atualizarDoFirebase(),1000);
+      return;
+    }catch(e){}
+  }
+
+  // Sem cache — carrega do Firebase pela primeira vez
+  setStatus('⏳ Carregando acervo...','var(--gold)');
+  try{
+    const fbAcervo=await sbCarregarAcervo();
+    const fbEmp=await sbCarregarEmprestimos();
+    if(fbAcervo&&fbAcervo.length>0){
+      acervo=fbAcervo;
+      emprestimos=fbEmp||[];
+      acervo.forEach(o=>{if(!o.colecao)o.colecao='gabinete';});
+      // Salva no cache
+      try{
+        localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));
+        localStorage.setItem('bmlrb_emp',JSON.stringify(emprestimos));
+      }catch(e){}
+      setStatus('✅ '+acervo.length+' obras','#4caf81');
+      setTimeout(()=>setStatus(''),4000);
+    } else {
+      acervo=[];emprestimos=[];
+      setStatus('⚠️ Acervo vazio','#e67e22');
+    }
+  }catch(e){
+    acervo=[];emprestimos=[];
+    setStatus('⚠️ Erro ao conectar','var(--danger)');
+  }
+  updStats();updPrev();
+}
+
+// Atualiza cache com dados frescos do Firebase em segundo plano
+async function atualizarDoFirebase(){
+  const sbStatus=document.getElementById('sb-status');
+  try{
+    const fbAcervo=await sbCarregarAcervo();
+    if(fbAcervo&&fbAcervo.length>0){
+      acervo=fbAcervo;
+      acervo.forEach(o=>{if(!o.colecao)o.colecao='gabinete';});
+      try{localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));}catch(e){}
+      updStats();
+      renderCarousel();
+      renderPI();
+      if(sbStatus){sbStatus.textContent='✅ '+acervo.length+' obras';sbStatus.style.color='#4caf81';
+        setTimeout(()=>{sbStatus.textContent='';},2000);}
+    }
+  }catch(e){console.log('Atualização em segundo plano falhou:',e);}
+}
+
+function save(){
+  try{
+    localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));
+    localStorage.setItem('bmlrb_ctr',ctr);
+  }catch(e){}
+  // Sincroniza com Supabase (debounce 2s)
+  clearTimeout(window._sbTimer);
+  window._sbTimer=setTimeout(()=>{
+    sbSalvarAcervo().then(()=>{
+      const n=document.getElementById('sb-status');
+      if(n){n.textContent='✅ Sincronizado';n.style.color='#4caf81';
+        setTimeout(()=>{n.textContent='';},3000);}
+    });
+  },2000);
+}
+
+function salvarBackupHTML(){
+  try{
+    // Lê o arquivo HTML atual e injeta os dados dentro dele
+    const dados={
+      acervo:acervo,
+      ctr:ctr,
+      emprestimos:emprestimos,
+      backup_em:new Date().toISOString()
+    };
+    const script='<script id="bmlrb-backup-data" type="application/json">'+JSON.stringify(dados)+'<\/script>';
+    
+    // Cria blob do arquivo atual com os dados embutidos
+    fetch(location.href)
+      .then(r=>r.text())
+      .then(html=>{
+        // Remove backup anterior se existir
+        html=html.replace(/<script id="bmlrb-backup-data"[\s\S]*?<\/script>/,'');
+        // Injeta novo backup antes do </body>
+        html=html.replace('</body>',script+'\n</body>');
+        const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;
+        a.download='biblioteca_barroso.html';
+        a.click();
+        URL.revokeObjectURL(url);
+        // Mostra notificação discreta
+        mostrarNotifBackup();
+      })
+      .catch(()=>{
+        // Se fetch falhar (ex: arquivo local em alguns navegadores), 
+        // apenas mantém no localStorage sem download automático
+      });
+  }catch(e){}
+}
+
+function mostrarNotifBackup(){
+  const n=document.createElement('div');
+  n.style.cssText='position:fixed;bottom:60px;right:16px;background:#1a2744;color:#c9a84c;font-size:11px;font-weight:600;padding:6px 12px;border-radius:6px;z-index:999;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.2);animation:sIn .3s ease';
+  n.innerHTML='<i class="ti ti-device-floppy"></i> Backup salvo automaticamente';
+  document.body.appendChild(n);
+  setTimeout(()=>n.remove(),3000);
+}
+
+function saveEmp(){
+  try{localStorage.setItem('bmlrb_emp',JSON.stringify(emprestimos));}catch(e){}
+  clearTimeout(window._backupTimer);
+  window._backupTimer=setTimeout(()=>salvarBackupHTML(),3000);
+}
+function gtombo(){const t='BMLRB-'+String(ctr).padStart(5,'0');ctr++;save();return t;}
+function updPrev(){document.getElementById('prev-tombo').textContent='Próximo: BMLRB-'+String(ctr).padStart(5,'0');}
+let capaBase64Temp='';
+function updStats(){
+  document.getElementById('st-total').textContent=acervo.length;
+  document.getElementById('st-livros').textContent=acervo.filter(o=>o.tipo==='Livro').length;
+  updStatsEmp();
+}
+let tabAtual='inicio';
+function sw(tab,pushState){
+  if(pushState!==false&&tab!==tabAtual){history.pushState({tab:tab},'','');}
+  tabAtual=tab;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.tn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  const tabEl=document.getElementById('tab-'+tab);if(tabEl)tabEl.classList.add('active');
+  if(tab==='inicio'){
+    document.getElementById('results-area').style.display='none';
+    document.getElementById('inicio-default').style.display='block';
+    renderCarousel();
+    renderPI();
+  }
+  if(tab==='acervo'){listaAc=[...acervo];pgAc=1;renderAcervo();}
+  if(tab==='etiquetas'){renderEtiquetas();}
+  if(tab==='circulacao'){
+    const ds=document.getElementById('emp-data-saida');
+    if(ds&&!ds.value) ds.value=new Date().toISOString().split('T')[0];
+    renderEmprestimos();verificarAtrasos();
+  }
+  const btnHome=document.getElementById('btn-home-float');
+  if(btnHome) btnHome.style.display=tab==='inicio'?'none':'flex';
+  window.scrollTo(0,0);
+}
+window.addEventListener('popstate',function(e){var tab=(e.state&&e.state.tab)||'inicio';sw(tab,false);});
+function gv(id){return document.getElementById(id)?.value.trim()||'';}
+
+function buscar(){const t=gv('s-main').toLowerCase();if(!t){limparRes();return;}const res=acervo.filter(o=>Object.values(o).some(v=>String(v).toLowerCase().includes(t)));mostrarRes(res,[{label:'Busca: "'+gv('s-main')+'"'}]);}
+function buscarAdv(){
+  const ft=gv('a-titulo').toLowerCase(),fa=gv('a-autor').toLowerCase(),fano=gv('a-ano'),fed=gv('a-editora').toLowerCase();
+  const fass=gv('a-assunto').toLowerCase(),fass2=gv('a-assunto2').toLowerCase(),fass3=gv('a-assunto3').toLowerCase();
+  const op2=document.getElementById('a-op2')?.value||'e';
+  const op3=document.getElementById('a-op3')?.value||'e';
+  const ftmb=gv('a-tombo').toLowerCase(),farea=gv('a-area'),ftipo=gv('a-tipo'),fest=gv('a-estante').toLowerCase();
+  const chips=[];
+  if(ft)chips.push({label:'Título: '+gv('a-titulo')});
+  if(fa)chips.push({label:'Autor: '+gv('a-autor')});
+  if(fano)chips.push({label:'Ano: '+fano});
+  if(farea)chips.push({label:'Área: '+farea});
+  if(ftipo)chips.push({label:'Tipo: '+ftipo});
+  if(fass)chips.push({label:'Assunto: '+gv('a-assunto')});
+  if(fass2)chips.push({label:op2.toUpperCase()+': '+gv('a-assunto2')});
+  if(fass3)chips.push({label:op3.toUpperCase()+': '+gv('a-assunto3')});
+  if(!chips.length&&!ftmb&&!fed&&!fest){alert('Preencha ao menos um campo para pesquisar.');return;}
+  let res=[...acervo];
+  if(ft)res=res.filter(o=>(o.titulo+' '+(o.subtitulo||'')).toLowerCase().includes(ft));
+  if(fa)res=res.filter(o=>(o.autor||'').toLowerCase().includes(fa));
+  if(fano){const range=fano.match(/(\d{4})-(\d{4})/);if(range)res=res.filter(o=>{const y=parseInt(o.ano);return y>=parseInt(range[1])&&y<=parseInt(range[2]);});else res=res.filter(o=>(o.ano||'').toString().includes(fano));}
+  if(fed)res=res.filter(o=>(o.editora||'').toLowerCase().includes(fed));
+  if(fass||fass2||fass3){
+    res=res.filter(o=>{
+      const campo=(o.assunto||'').toLowerCase()+' '+(o.titulo||'').toLowerCase()+' '+(o.assuntoEspecifico||'').toLowerCase();
+      const m1=!fass||campo.includes(fass);
+      const m2=!fass2||campo.includes(fass2);
+      const m3=!fass3||campo.includes(fass3);
+      // Aplica operadores: E = AND, OU = OR
+      let resultado=m1;
+      if(fass2) resultado=op2==='ou'?(resultado||m2):(resultado&&m2);
+      if(fass3) resultado=op3==='ou'?(resultado||m3):(resultado&&m3);
+      return resultado;
+    });
+  }
+  if(ftmb)res=res.filter(o=>(o.tombo||'').toLowerCase().includes(ftmb));
+  if(farea)res=res.filter(o=>(o.area||'').includes(farea));
+  if(ftipo)res=res.filter(o=>o.tipo===ftipo);
+  if(fest)res=res.filter(o=>(o.estante||o.localizacao||'').toLowerCase().includes(fest));
+  mostrarRes(res,chips);
+}
+function getCoverUrl(o){
+  if(o.capaUrl&&o.capaUrl.trim()) return o.capaUrl;
+  if(o.capaBase64&&o.capaBase64.trim()) return o.capaBase64;
+  const isbn=(o.isbn||'').replace(/[^0-9X]/gi,'');
+  if(isbn.length>=10) return 'https://covers.openlibrary.org/b/isbn/'+isbn+'-M.jpg';
+  return '';
+}
+function coverHtml(o,w,h){
+  const url=getCoverUrl(o);
+  const icon=TIPO_ICON[o.tipo]||'ti-book';
+  if(url){
+    return '<div class="book-cover-wrap" style="width:'+w+'px;height:'+h+'px;background:var(--navy);flex-shrink:0">'
+      +'<img src="'+url+'" style="width:100%;height:100%;object-fit:cover" loading="lazy" '
+      +'onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\'">'
+      +'<i class="ti '+icon+'" style="display:none;font-size:'+(h>80?'32':'22')+'px;color:var(--gold);margin:auto"></i>'
+      +'</div>';
+  }
+  return '<div class="book-cover-wrap" style="width:'+w+'px;height:'+h+'px;background:var(--navy);flex-shrink:0;display:flex;align-items:center;justify-content:center">'
+    +'<i class="ti '+icon+'" style="font-size:'+(h>80?'32':'22')+'px;color:var(--gold)"></i></div>';
+}
+
+function colLabel(col){
+  if(col==='escritorio') return 'Escritório';
+  if(col==='mezanino') return 'Mezanino';
+  return 'Gabinete';
+}
+function colBadge(col){
+  const cls=col==='escritorio'?'col-escritorio':col==='mezanino'?'col-mezanino':'col-gabinete';
+  return '<span class="tag '+cls+'" style="font-size:11px;padding:2px 9px;border-radius:10px;font-weight:600">'+colLabel(col)+'</span>';
+}
+function colDot(col,size){
+  size=size||10;
+  if(col==='escritorio') return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:#e8c84c;border:1px solid #c9a84c;vertical-align:middle;flex-shrink:0"></span>';
+  if(col==='mezanino') return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:#1a2744;border:1.5px solid #7090c0;vertical-align:middle;flex-shrink:0"></span>';
+  return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:#ddd;border:1px solid #bbb;vertical-align:middle;flex-shrink:0"></span>';
+}
+function renderPI(){
+  const obras=acervo.filter(o=>{
+    const autor=(o.autor||'').toLowerCase();
+    return autor.includes('barroso') && (
+      autor.includes('luís') || autor.includes('luis') || 
+      autor.includes('roberto') || autor.includes('barroso, lu')
+    );
+  });
+  const pi=document.getElementById('pi-section');
+  const car=document.getElementById('pi-carousel');
+  if(!obras.length||!car){if(pi)pi.style.display='none';return;}
+  pi.style.display='block';
+  car.innerHTML=obras.map(o=>{
+    const url=getCoverUrl(o);
+    const icon=TIPO_ICON[o.tipo]||'ti-book';
+    const capa=url
+      ?'<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px 6px 0 0" loading="lazy" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+       +'<i class="ti '+icon+'" style="display:none;font-size:28px;color:var(--gold)"></i>'
+      :'<i class="ti '+icon+'" style="font-size:28px;color:var(--gold)"></i>';
+    return '<div class="car-item" onclick="ver(\''+o.id+'\')" style="cursor:pointer;flex-shrink:0">'
+      +'<div class="car-cover" style="background:var(--navy);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden">'+capa+'</div>'
+      +'<div class="car-title" style="margin-top:6px;font-size:12px;font-weight:600;color:var(--navy);line-height:1.3;max-width:120px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+( o.titulo||'')+'</div>'
+      +'<div class="car-autor" style="font-size:11px;color:var(--gray-400);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">'+(o.ano||'')+'</div>'
+      +'</div>';
+  }).join('');
+}
+function piScroll(dir){
+  const car=document.getElementById('pi-carousel');
+  if(car) car.scrollBy({left:dir*280,behavior:'smooth'});
+}
+function buscarPI(){
+  // Vai para pesquisa com filtro do Ministro
+  document.getElementById('s-main').value='Barroso';
+  buscar();
+}
+
+function renderCarousel(){
+  const sec=document.getElementById('carousel-section');
+  const car=document.getElementById('carousel');
+  if(!acervo.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  const ultimas=[...acervo].filter(o=>{
+    if(!o.titulo||o.titulo.trim().length<4) return false;
+    if(/relat[oó]rio|total de|registros|gabinete|data:|n[oú]mero/i.test(o.titulo)) return false;
+    if(!o.autor&&!o.area&&!o.ano) return false;
+    return true;
+  }).slice(-20).reverse();
+  car.innerHTML=ultimas.map(o=>{
+    const url=getCoverUrl(o);
+    const icon=TIPO_ICON[o.tipo]||'ti-book';
+    const coverInner=url
+      ?'<img src="'+url+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'" loading="lazy"><div class="car-cover-placeholder" style="display:none"><i class="ti '+icon+'"></i><span>'+o.titulo.substring(0,40)+'</span></div>'
+      :'<div class="car-cover-placeholder"><i class="ti '+icon+'"></i><span>'+o.titulo.substring(0,40)+'</span></div>';
+    return '<div class="car-item" onclick="ver(\''+o.id+'\')"><div class="car-cover">'+coverInner+'</div><div class="car-title">'+o.titulo+'</div><div class="car-autor">'+(o.autor||'').split(';')[0]+'</div></div>';
+  }).join('');
+}
+function carScroll(dir){document.getElementById('carousel').scrollBy({left:dir*420,behavior:'smooth'});}
+function mostrarRes(res,chips){document.getElementById('results-area').style.display='block';document.getElementById('inicio-default').style.display='none';resLista=res;resPg=1;document.getElementById('res-count').innerHTML='<strong>'+res.length+'</strong> obra'+(res.length!==1?'s':'')+' encontrada'+(res.length!==1?'s':'');document.getElementById('res-chips').innerHTML=chips.map(c=>'<span class="res-chip"><i class="ti ti-tag" style="font-size:11px"></i>'+c.label+'</span>').join('');renderResGrid();}
+function renderResGrid(){
+  const start=(resPg-1)*resPgTam,pg=resLista.slice(start,start+resPgTam),grid=document.getElementById('res-grid');
+  if(!pg.length){grid.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Nenhuma obra encontrada.</p></div>';document.getElementById('res-pag').innerHTML='';return;}
+  const resIds=pg.map(o=>o.id);grid.innerHTML=pg.map((o,i)=>'<div class="res-card" onclick="verLista(\''+o.id+'\',resLista)">'
+    +coverHtml(o,70,100)
+    +'<div class="res-card-body"><div class="res-card-title">'+(o.titulo||'Sem título')+(o.subtitulo?': <span style="font-weight:400">'+o.subtitulo+'</span>':'')+'</div>'
+    +'<div class="res-card-meta">'+(o.autor?'<span><i class="ti ti-user"></i>'+o.autor+'</span>':'')+' '+(o.editora?'<span><i class="ti ti-building"></i>'+o.editora+'</span>':'')+' '+(o.ano?'<span><i class="ti ti-calendar"></i>'+o.ano+'</span>':'')+' '+(o.estante?'<span><i class="ti ti-map-pin"></i>'+o.estante+'</span>':'')+'</div>'
+    +'<div class="res-card-tags">'+(o.area?'<span class="tag tag-area">'+o.area+'</span>':'')+' '+(o.tipo?'<span class="tag tag-tipo-'+tcls2(o.tipo)+'">'+o.tipo+'</span>':'')+' '+colBadge(o.colecao||'gabinete')+'</div>'
+    +'</div><div class="res-card-tombo">'+o.tombo+'</div></div>').join('');
+  const pages=Math.ceil(resLista.length/resPgTam);let html='';
+  if(pages>1){for(let i=1;i<=Math.min(pages,15);i++)html+='<button onclick="irResPg('+i+')" class="'+(i===resPg?'active':'')+'">'+i+'</button>';}
+  document.getElementById('res-pag').innerHTML=html;
+}
+function irResPg(p){resPg=p;renderResGrid();}
+function limparRes(){document.getElementById('results-area').style.display='none';document.getElementById('inicio-default').style.display='block';document.getElementById('s-main').value='';if(qfAtivo){qfAtivo.classList.remove('on');qfAtivo=null;}}
+function limparAdv(){['a-titulo','a-autor','a-ano','a-editora','a-assunto','a-assunto2','a-assunto3','a-tombo','a-area','a-tipo','a-estante'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+function toggleAdv(){const p=document.getElementById('adv-panel'),b=document.getElementById('adv-btn');p.classList.toggle('open');b.classList.toggle('open');}
+function qfClick(btn,area){if(qfAtivo&&qfAtivo!==btn)qfAtivo.classList.remove('on');if(btn.classList.contains('on')){btn.classList.remove('on');qfAtivo=null;limparRes();return;}btn.classList.add('on');qfAtivo=btn;document.getElementById('s-main').value=area;mostrarRes(acervo.filter(o=>(o.area||'').includes(area)),[{label:'Área: '+area}]);}
+function tcls2(t){if(!t)return 'livro';if(t==='Periódico')return 'periodico';if(['Tese','Dissertação','Monografia'].includes(t))return 'tese';return 'livro';}
+
+function previewCapa(url){
+  if(url===undefined) url=document.getElementById('f-capa-url').value.trim();
+  const img=document.getElementById('cover-preview-img');
+  const icon=document.getElementById('cover-preview-icon');
+  if(url){
+    img.src=url;img.style.display='block';icon.style.display='none';
+    img.onerror=function(){img.style.display='none';icon.style.display='block';};
+  } else {
+    img.style.display='none';icon.style.display='block';
+  }
+}
+function uploadCapa(e){
+  const file=e.target.files[0];if(!file)return;
+  if(file.size>3*1024*1024){toast('Imagem muito grande. Use uma menor que 3MB.','error');return;}
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    capaBase64Temp=ev.target.result;
+    previewCapa(capaBase64Temp);
+    document.getElementById('f-capa-url').value='';
+    toast('Imagem carregada com sucesso!','success');
+  };
+  reader.readAsDataURL(file);
+}
+async function buscarCapaGoogle(){
+  const isbn=(document.getElementById('f-isbn').value||'').replace(/[^0-9X]/gi,'');
+  const titulo=document.getElementById('f-titulo').value.trim();
+  const autor=(document.getElementById('f-autor').value||'').split(';')[0].trim();
+  const status=document.getElementById('isbn-status');
+  status.style.display='block';
+  status.innerHTML='<span style="color:var(--gray-600)"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite;vertical-align:-2px"></i> Buscando capa em múltiplas fontes...</span>';
+  
+  // Helper: test if image URL loads
+  function testImg(url){return new Promise(res=>{const i=new Image();i.onload=()=>res(url);i.onerror=()=>res(null);i.src=url;setTimeout(()=>res(null),5000);});}
+
+  try{
+    // 1. Google Books API
+    const q=isbn.length>=10?'isbn:'+isbn:(titulo+(autor?' '+autor:'')).trim();
+    const r=await fetch('https://www.googleapis.com/books/v1/volumes?q='+encodeURIComponent(q)+'&maxResults=3');
+    const j=await r.json();
+    if(j.totalItems>0&&j.items){
+      for(const item of j.items){
+        const links=item.volumeInfo?.imageLinks;
+        if(links){
+          const url=(links.large||links.medium||links.thumbnail||'').replace('http:','https:').replace('&edge=curl','');
+          if(url){const ok=await testImg(url);if(ok){document.getElementById('f-capa-url').value=ok;previewCapa(ok);status.innerHTML='<span style="color:var(--success);font-weight:600"><i class="ti ti-check" style="vertical-align:-2px"></i> Capa encontrada no Google Books!</span>';return;}}
+        }
+      }
+    }
+
+    // 2. Google Books direct thumbnail (sem API key)
+    if(isbn.length>=10){
+      const gbUrl='https://books.google.com/books/content?vid=ISBN'+isbn+'&printsec=frontcover&img=1&zoom=1&source=gbs_api';
+      const ok=await testImg(gbUrl);
+      if(ok){document.getElementById('f-capa-url').value=ok;previewCapa(ok);status.innerHTML='<span style="color:var(--success);font-weight:600"><i class="ti ti-check" style="vertical-align:-2px"></i> Capa encontrada via Google Books!</span>';return;}
+    }
+
+    // 3. Open Library
+    if(isbn.length>=10){
+      const olUrl='https://covers.openlibrary.org/b/isbn/'+isbn+'-L.jpg';
+      const ok=await testImg(olUrl);
+      if(ok){document.getElementById('f-capa-url').value=ok;previewCapa(ok);status.innerHTML='<span style="color:var(--success);font-weight:600"><i class="ti ti-check" style="vertical-align:-2px"></i> Capa encontrada na Open Library!</span>';return;}
+    }
+
+    status.innerHTML='<span style="color:var(--danger)"><i class="ti ti-alert-circle" style="vertical-align:-2px"></i> Capa não encontrada automaticamente.</span><br><span style="color:var(--gray-600);font-size:12px">Faça o upload de uma imagem do seu computador — é a forma mais confiável.</span>';
+  }catch(e){
+    status.innerHTML='<span style="color:var(--danger)"><i class="ti ti-alert-circle" style="vertical-align:-2px"></i> Erro de conexão ao buscar capa.</span>';
+  }
+}
+function salvar(e){e.preventDefault();
+  const capaUrl=document.getElementById('f-capa-url').value.trim();
+  const o={id:curId||(Date.now()+'_'+Math.random()),tombo:curId?acervo.find(x=>x.id===curId).tombo:gtombo(),
+    titulo:normTitulo(gv('f-titulo')),subtitulo:normTitulo(gv('f-subtitulo')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
+    editora:gv('f-editora'),local_pub:gv('f-local'),ano:gv('f-ano'),volume:gv('f-volume'),edicao:gv('f-edicao'),
+    paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
+    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
+    notas:gv('f-notas'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
+    dataCad:curId?acervo.find(x=>x.id===curId).dataCad:new Date().toISOString()};
+  if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
+  else{acervo.push(o);toast('Obra registrada! Tombo: '+o.tombo,'success');}
+  save();updStats();renderCarousel();renderPI();
+  // Sync só este registro para o Supabase
+  sbSalvarObra(o).then(()=>toast('Sincronizado com a nuvem ✅','success'));
+  limpar();
+}
+function limpar(){
+  document.getElementById('form-cad').reset();
+  document.getElementById('isbn-lookup').value='';
+  document.getElementById('marc-input').value='';
+  document.getElementById('isbn-status').style.display='none';
+  document.getElementById('f-capa-url').value='';
+  document.getElementById('f-capa-file').value='';
+  const el=document.getElementById('f-class-especifico');if(el)el.value='';
+  const elm=document.getElementById('f-class-area-manual');if(elm)elm.value='';
+  const els=document.getElementById('f-class-sobrenome');if(els)els.value='';
+  const edt=document.getElementById('f-class-area-edit');if(edt)edt.style.display='none';
+  const img=document.getElementById('cover-preview-img');
+  img.src='';img.style.display='none';
+  document.getElementById('cover-preview-icon').style.display='block';
+  capaBase64Temp='';
+  curId=null;
+  setModoEdicao(false);
+  atualizarClassPreview();
+  updPrev();
+}
+
+function renderAcervo(){const tbody=document.getElementById('ac-tbody'),empty=document.getElementById('ac-empty');document.getElementById('ac-count').textContent=listaAc.length+' obra'+(listaAc.length!==1?'s':'');if(!listaAc.length){tbody.innerHTML='';empty.style.display='block';document.getElementById('paginacao').innerHTML='';return;}empty.style.display='none';const start=(pgAc-1)*pgAcTam,pg=listaAc.slice(start,start+pgAcTam);tbody.innerHTML=pg.map(o=>'<tr><td class="tc">'+o.tombo+'</td><td title="'+(o.titulo||'')+'">'+(o.titulo||'—')+'</td><td title="'+(o.autor||'')+'">'+(o.autor||'—')+'</td><td style="font-size:12px" title="'+(o.area||'')+'">'+(o.area||'—')+'</td><td><span class="tag tag-tipo-'+tcls2(o.tipo)+'" style="padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600">'+(o.tipo||'—')+'</span></td><td>'+(o.ano||'—')+'</td><td style="font-size:12px">'+(o.estante||o.localizacao||'—')+'</td><td><button class="btn btn-sm btn-o" onclick="verLista(\''+o.id+'\',listaAc)" style="padding:4px 10px;font-size:11px"><i class="ti ti-eye"></i></button></td></tr>').join('');renderPagAc();}
+function renderPagAc(){const pages=Math.ceil(listaAc.length/pgAcTam);if(pages<=1){document.getElementById('paginacao').innerHTML='';return;}let html='',s=Math.max(1,pgAc-7),e=Math.min(pages,s+14);if(s>1)html+='<button onclick="irPgAc(1)">1</button><button disabled style="cursor:default;border:none">…</button>';for(let i=s;i<=e;i++)html+='<button onclick="irPgAc('+i+')" class="'+(i===pgAc?'active':'')+'">'+i+'</button>';if(e<pages)html+='<button disabled style="cursor:default;border:none">…</button><button onclick="irPgAc('+pages+')">'+pages+'</button>';document.getElementById('paginacao').innerHTML=html;}
+function irPgAc(p){pgAc=p;renderAcervo();}
+function ord(f){if(sortF===f)sortA=!sortA;else{sortF=f;sortA=true;}acervo.sort((a,b)=>{const va=(a[f]||'').toString().toLowerCase();const vb=(b[f]||'').toString().toLowerCase();return sortA?va.localeCompare(vb,'pt'):vb.localeCompare(va,'pt');});listaAc=[...acervo];pgAc=1;renderAcervo();}
+function dedupAcervo(){
+  const antes=acervo.length;
+  const vistos=new Map();
+  acervo=acervo.filter(o=>{
+    const chave=(o.titulo||'').trim().toLowerCase()+'|'+(o.autor||'').trim().toLowerCase();
+    if(vistos.has(chave)) return false;
+    vistos.set(chave,true);
+    return true;
+  });
+  const removidos=antes-acervo.length;
+  if(!removidos){toast('Nenhuma duplicata encontrada.','');return;}
+  save();updStats();listaAc=[...acervo];renderAcervo();renderCarousel();
+  toast(removidos+' duplicata(s) removida(s)!','success');
+}
+function limparAc(){if(!acervo.length)return;if(!confirm('Excluir TODAS as obras do acervo? Esta ação não pode ser desfeita.'))return;acervo=[];save();updStats();listaAc=[];renderAcervo();toast('Acervo limpo.','error');}
+function exportCSV(){if(!acervo.length){toast('Nenhuma obra para exportar.');return;}const hd=['tombo','titulo','subtitulo','autor','organizador','editora','local_pub','ano','volume','edicao','paginas','isbn','tipo','area','assunto','localizacao','estante','classificacao','exemplares','notas'];const rows=[hd.join(';'),...acervo.map(o=>hd.map(h=>'"'+(o[h]||'').replace(/"/g,'""')+'"').join(';'))];const b=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='acervo_bmlrb.csv';a.click();toast('CSV exportado!','success');}
+
+// Lista de contexto para navegação no modal
+let modalLista=[];
+let modalIdx=0;
+
+function ver(id,lista){
+  if(lista) modalLista=lista;
+  else if(!modalLista.length) modalLista=acervo;
+  modalIdx=modalLista.findIndex(x=>x.id===id);
+  if(modalIdx<0){modalIdx=0;}
+  const o=modalLista[modalIdx];
+  if(!o)return;
+  curId=o.id;
+  // Auto-preenche área se estiver vazia mas classificação preenchida
+  if(!o.area&&o.classificacao){
+    const a=cddParaArea(o.classificacao)||o.classificacao;
+    if(a) o.area=a;
+  }
+  document.getElementById('m-titulo').textContent=o.titulo+(o.subtitulo?': '+o.subtitulo:'');
+  document.getElementById('m-tombo').textContent=o.tombo;
+  // Navegação info
+  const nav=document.getElementById('m-nav-info');
+  if(nav) nav.textContent=(modalIdx+1)+' de '+modalLista.length;
+  // Botões prev/next
+  const bp=document.getElementById('btn-prev-modal');
+  const bn=document.getElementById('btn-next-modal');
+  if(bp) bp.disabled=modalIdx<=0;
+  if(bn) bn.disabled=modalIdx>=modalLista.length-1;
+  // Capa maior no modal
+  const coverUrl=getCoverUrl(o);
+  const icon=TIPO_ICON[o.tipo]||'ti-book';
+  const coverHtmlModal=coverUrl
+    ?'<img src="'+coverUrl+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'" style="width:80px;height:114px;object-fit:cover;border-radius:6px;box-shadow:0 3px 12px rgba(0,0,0,.4)" loading="lazy"><div style="display:none;width:80px;height:114px;background:rgba(255,255,255,.1);border-radius:6px;align-items:center;justify-content:center"><i class="ti '+icon+'" style="font-size:28px;color:var(--gold)"></i></div>'
+    :'<div style="width:80px;height:114px;background:rgba(255,255,255,.1);border-radius:6px;display:flex;align-items:center;justify-content:center"><i class="ti '+icon+'" style="font-size:28px;color:var(--gold)"></i></div>';
+  document.getElementById('m-cover').innerHTML=coverHtmlModal;
+  // Todos os metadados preenchidos
+  const etqArea=o.classificacao?AREA_LABEL[o.classificacao]||o.classificacao.toUpperCase():'';
+  const campos=[
+    ['Autor(es)',o.autor],
+    ['Organizador',o.organizador],
+    ['Editora',o.editora],
+    ['Local de publicação',o.local_pub],
+    ['Ano',o.ano],
+    ['Volume',o.volume],
+    ['Edição',o.edicao],
+    ['Páginas',o.paginas],
+    ['ISBN / ISSN',o.isbn],
+    ['Tipo de material',o.tipo],
+    ['Área do Direito',o.area||etqArea,true],
+    ['Classificação',o.classificacao],
+    ['Assunto específico',o.assuntoEspecifico],
+    ['Coleção',(o.colecao?colLabel(o.colecao):'')+((o.estante&&o.estante!=='-')?' — '+o.estante:'')],
+    ['Localização',o.localizacao],
+    ['Exemplares',o.exemplares],
+    ['Assunto / Palavras-chave',o.assunto,true],
+    ['Notas',o.notas,true],
+    ['Nº Tombo',o.tombo],
+    ['Data de cadastro',o.dataCad?new Date(o.dataCad).toLocaleDateString('pt-BR'):''],
+  ];
+  document.getElementById('m-grid').innerHTML=campos
+    .filter(([,v])=>v&&String(v).trim())
+    .map(([l,v,f])=>'<div class="mf'+(f?' full':'')+'"><label>'+l+'</label><p>'+v+'</p></div>')
+    .join('');
+  document.getElementById('mo').classList.add('open');
+}
+
+function navModal(dir){
+  const novoIdx=modalIdx+dir;
+  if(novoIdx<0||novoIdx>=modalLista.length) return;
+  ver(modalLista[novoIdx].id);
+}
+function emprestarDoModal(){
+  if(!curId)return;
+  const o=acervo.find(x=>x.id===curId);
+  if(!o)return;
+  fmob();sw('circulacao');
+  setTimeout(()=>{
+    selecionarObraEmp(o.id,o.tombo,o.titulo||'');
+    document.getElementById('emp-busca').value=o.titulo||'';
+    document.getElementById('emp-nome').focus();
+  },150);
+}
+function verLista(id,lista){modalLista=lista||acervo;ver(id);}
+
+function normalizarAreas(){
+  // Preenche área do direito automaticamente pela classificação CDD
+  let mod=0;
+  acervo.forEach(o=>{
+    if(!o.area&&o.classificacao){
+      const a=cddParaArea(o.classificacao);
+      if(a){o.area=a;mod++;}
+    }
+  });
+  if(mod>0){save();sbSalvarAcervo();}
+  return mod;
+}
+function fmob(){document.getElementById('mo').classList.remove('open');curId=null;}
+function setModoEdicao(editando){
+  const btnSalvar=document.getElementById('btn-salvar');
+  const btnSalvarTxt=document.getElementById('btn-salvar-txt');
+  const btnLimparTxt=document.getElementById('btn-limpar-txt');
+  const prevTombo=document.getElementById('prev-tombo');
+  if(!btnSalvar)return;
+  btnSalvarTxt.textContent=editando?'Salvar alterações':'Registrar obra';
+  btnLimparTxt.textContent=editando?'Cancelar edição':'Limpar';
+  btnSalvar.className=editando?'btn btn-p':'btn btn-g';
+  btnSalvar.style.fontSize=editando?'15px':'';
+  btnSalvar.style.padding=editando?'12px 28px':'';
+  prevTombo.textContent=editando?'✏️ Editando registro':'Próximo: BMLRB-'+String(ctr).padStart(5,'0');
+  prevTombo.style.background=editando?'#e67e22':'';
+  if(editando){
+    setTimeout(()=>{btnSalvar.scrollIntoView({behavior:'smooth',block:'center'});},300);
+  }
+}
+function editObra(){
+  if(!curId)return;
+  const o=acervo.find(x=>x.id===curId);
+  if(!o)return;
+  const editId=o.id; // preserva antes de qualquer reset
+  fmob();
+  sw('cadastro');
+  setTimeout(()=>{
+    curId=editId; // restaura APÓS sw e limpar zerarem
+    const m={'f-titulo':'titulo','f-subtitulo':'subtitulo','f-autor':'autor','f-org':'organizador','f-editora':'editora','f-local':'local_pub','f-ano':'ano','f-volume':'volume','f-edicao':'edicao','f-pag':'paginas','f-isbn':'isbn','f-tipo':'tipo','f-area':'area','f-assunto':'assunto','f-loc':'localizacao','f-estante':'estante','f-colecao':'colecao','f-ex':'exemplares','f-notas':'notas'};
+    Object.entries(m).forEach(([fid,k])=>{const el=document.getElementById(fid);if(el)el.value=o[k]||'';});
+    const espEl=document.getElementById('f-class-especifico');if(espEl)espEl.value=o.assuntoEspecifico||'';
+    const sobEl=document.getElementById('f-class-sobrenome');if(sobEl)sobEl.value=o.sobrenomeClass||sobrenome(o.autor||'');
+    const manEl=document.getElementById('f-class-area-manual');
+    if(manEl){const classVal=(o.classificacao||'').split('|')[0].trim();const areaVal=o.area||'';if(classVal&&classVal!==areaVal){manEl.value=classVal;const edt=document.getElementById('f-class-area-edit');if(edt)edt.style.display='block';}else{manEl.value='';}}
+    if(o.capaUrl){document.getElementById('f-capa-url').value=o.capaUrl;previewCapa(o.capaUrl);}
+    else if(o.capaBase64){capaBase64Temp=o.capaBase64;previewCapa(o.capaBase64);}
+    setModoEdicao(true);atualizarClassPreview();
+  },100);
+}
+function delObra(){if(!curId)return;if(!confirm('Excluir esta obra permanentemente?'))return;acervo=acervo.filter(o=>o.id!==curId);save();updStats();fmob();listaAc=listaAc.filter(o=>o.id!==curId);renderAcervo();toast('Obra excluída.','error');}
+
+function dov(e){e.preventDefault();document.getElementById('iz').classList.add('drag');}
+function dlv(){document.getElementById('iz').classList.remove('drag');}
+function ddr(e){e.preventDefault();dlv();const f=e.dataTransfer.files[0];if(f)procFile(f);}
+function hf(e){const f=e.target.files[0];if(f)procFile(f);}
+function procFile(file){const reader=new FileReader();reader.onload=function(e){try{let data;if(file.name.toLowerCase().endsWith('.csv')){const txt=new TextDecoder('utf-8').decode(e.target.result);data=parseCSV(txt);}else{const wb=XLSX.read(e.target.result,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});}let hi=0;for(let i=0;i<Math.min(5,data.length);i++){const r=data[i].map(c=>String(c||'').toLowerCase().trim());if(r.some(c=>c.includes('tít')||c==='titulo'||c==='título')){hi=i;break;}}pendHeaders=data[hi].map(c=>String(c||'').trim());pendRows=data.slice(hi+1).filter(r=>r.some(c=>String(c||'').trim()));mostrarMap();}catch(err){toast('Erro ao processar arquivo: '+err.message,'error');}};reader.readAsArrayBuffer(file);}
+function parseCSV(txt){return txt.split('\n').filter(l=>l.trim()).map(l=>{const r=[];let cur='',inQ=false;for(let c of l){if(c==='"'){inQ=!inQ;}else if((c===';'||c===',')&&!inQ){r.push(cur.trim());cur='';}else{cur+=c;}}r.push(cur.trim());return r.map(c=>c.replace(/^"|"$/g,'').replace(/""/g,'"'));});}
+function mostrarMap(){document.getElementById('map-section').style.display='block';const opts='<option value="">— (ignorar) —</option>'+CAMPOS.map(c=>'<option value="'+c+'">'+(CAMPOS_PT[c]||c)+'</option>').join('');const sample=pendRows[0]||[];document.getElementById('map-tbody').innerHTML=pendHeaders.map((h,i)=>{const key=h.toLowerCase().trim().replace(/[\n\r\s]+/g,' ');const auto=AUTO_MAP[key]||'';return '<tr><td><strong>'+(h||'(col '+(i+1)+')')+'</strong></td><td style="font-size:12px;color:var(--gray-600);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+String(sample[i]||'—').replace(/\n/g,' ').substring(0,40)+'</td><td><select id="map-'+i+'">'+opts.replace('value="'+auto+'"','value="'+auto+'" selected')+'</select></td></tr>';}).join('');}
+function cancelImp(){document.getElementById('map-section').style.display='none';document.getElementById('fi').value='';pendRows=[];pendHeaders=[];}
+async function confirmarImport(){const mapping=pendHeaders.map((_,i)=>document.getElementById('map-'+i)?.value||'');const pb=document.getElementById('prog-bar'),pf=document.getElementById('prog-fill'),pl=document.getElementById('prog-label');pb.style.display='block';pl.style.display='block';let imp=0,skip=0;const total=pendRows.length;for(let ri=0;ri<pendRows.length;ri++){const row=pendRows[ri];const o={id:(Date.now()+'_'+ri+'_'+Math.random()),tombo:gtombo(),dataCad:new Date().toISOString(),tipo:'Livro',colecao:'gabinete'};let temTit=false;mapping.forEach((campo,ci)=>{if(campo){const v=String(row[ci]||'').replace(/\n/g,' ').trim();if(v)o[campo]=v;if(campo==='titulo'&&v)temTit=true;}});if(!temTit){skip++;ctr--;continue;}
+    normalizarRegistro(o);
+    acervo.push(o);imp++;if(ri%300===0){pf.style.width=Math.round((ri/total)*100)+'%';pl.textContent='Importando… '+imp+' de ~'+total;await new Promise(r=>setTimeout(r,0));}}pf.style.width='100%';save();updStats();document.getElementById('map-section').style.display='none';document.getElementById('imp-result').innerHTML='<div style="margin-top:16px;padding:14px 18px;background:#e8f5ef;border:1px solid #a3d4be;border-radius:var(--r);font-size:13px;color:#1a5c32"><strong><i class="ti ti-check" style="vertical-align:-2px"></i> Importação concluída!</strong> '+imp+' obra(s) importada(s).'+( skip?' '+skip+' ignorada(s).':'')+' <button class="btn btn-sm btn-o" style="margin-left:12px" onclick="sw(\'acervo\')"><i class="ti ti-layout-list"></i> Ver acervo</button></div>';toast(imp+' obra(s) importada(s)! Normalizando...','success');acervo.forEach(o=>normalizarRegistro(o));save();sbSalvarAcervo().then(()=>toast('Sincronizado com a nuvem!','success'));renderCarousel();pb.style.display='none';pl.style.display='none';pendRows=[];pendHeaders=[];}
+function baixarModelo(){const h='titulo;subtitulo;autor;organizador;editora;local_pub;ano;volume;edicao;paginas;isbn;tipo;area;assunto;localizacao;estante;classificacao;exemplares;notas\n';const ex='"Título da Obra";"Subtítulo";"SOBRENOME, Nome";"";"Editora";"São Paulo";"2023";"v. 1";"3. ed.";"400 p.";"978-85-...";"Livro";"Direito Constitucional";"assunto";"Est. A";"Gabinete";"341.2";"2";""';const b=new Blob(['\uFEFF'+h+ex],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='modelo_bmlrb.csv';a.click();}
+function toast(msg,type){const c=document.getElementById('toasts'),t=document.createElement('div');t.className='toast'+(type?' '+type:'');const ic={success:'ti-check',error:'ti-alert-circle','':'ti-info-circle'};t.innerHTML='<i class="ti '+(ic[type||''])+'"></i>'+msg;c.appendChild(t);setTimeout(()=>t.remove(),4000);}
+function trocarAbaAuto(aba){
+  const isISBN=aba==='isbn';
+  document.getElementById('painel-isbn').style.display=isISBN?'block':'none';
+  document.getElementById('painel-marc').style.display=isISBN?'none':'block';
+  document.getElementById('tab-isbn-btn').style.background=isISBN?'var(--gold)':'none';
+  document.getElementById('tab-isbn-btn').style.color=isISBN?'var(--navy)':'var(--gold-dim)';
+  document.getElementById('tab-isbn-btn').style.fontWeight=isISBN?'700':'600';
+  document.getElementById('tab-isbn-btn').style.borderBottom=isISBN?'2px solid var(--gold)':'2px solid transparent';
+  document.getElementById('tab-marc-btn').style.background=isISBN?'none':'var(--gold)';
+  document.getElementById('tab-marc-btn').style.color=isISBN?'var(--gold-dim)':'var(--navy)';
+  document.getElementById('tab-marc-btn').style.fontWeight=isISBN?'600':'700';
+  document.getElementById('tab-marc-btn').style.borderBottom=isISBN?'2px solid transparent':'2px solid var(--gold)';
+  document.getElementById('isbn-status').style.display='none';
+}
+
+function parsearMARC(){
+  const txt=document.getElementById('marc-input').value.trim();
+  if(!txt){alert('Cole o registro MARC antes de extrair.');return;}
+  const status=document.getElementById('isbn-status');
+  status.style.display='block';
+
+  // Helper: extract subfield value from a MARC line
+  function sub(line, code){
+    const re=new RegExp('\\$'+code+'([^$\\n]+)');
+    const m=line.match(re);
+    return m?m[1].trim():'';
+  }
+  function getLines(tag){return txt.split('\n').filter(l=>l.startsWith('='+tag));}
+  function getFirst(tag){const ll=getLines(tag);return ll.length?ll[0]:'';}
+
+  // =245 — Título e subtítulo
+  const l245=getFirst('245');
+  let titulo='', subtitulo='', responsab='';
+  if(l245){
+    titulo=sub(l245,'a').replace(/\s*[:\/]\s*$/,'').trim();
+    subtitulo=sub(l245,'b').replace(/\s*[\/]\s*$/,'').trim();
+    responsab=sub(l245,'c');
+  }
+
+  // =100 ou =110 — Autor principal
+  let autor='';
+  const l100=getFirst('100');
+  const l110=getFirst('110');
+  if(l100){
+    autor=sub(l100,'a').replace(/,\s*$/,'').trim();
+    const datas=sub(l100,'d');
+    if(datas) autor=autor; // keep name only
+  } else if(l110){
+    autor=sub(l110,'a').replace(/,\s*$/,'').trim();
+  }
+
+  // =700 — Autores adicionais
+  const l700s=getLines('700');
+  const coautores=l700s.map(l=>sub(l,'a').replace(/,\s*$/,'').trim()).filter(Boolean);
+  if(coautores.length&&autor) autor=autor+'; '+coautores.join('; ');
+  else if(coautores.length) autor=coautores.join('; ');
+
+  // Organizador — extrair de $c em 245 ou de 700 com $e org
+  let org='';
+  const orgLines=l700s.filter(l=>sub(l,'e').toLowerCase().includes('org'));
+  if(orgLines.length) org=orgLines.map(l=>sub(l,'a').replace(/,\s*$/,'')).join('; ');
+  else if(responsab&&responsab.toLowerCase().includes('organiz')) org=responsab;
+
+  // Tradução — detectar tradutor em 245 $c ou 700
+  const tradLines=l700s.filter(l=>sub(l,'e').toLowerCase().includes('trad'));
+  if(tradLines.length&&!org) org=tradLines.map(l=>'Trad.: '+sub(l,'a').replace(/,\s*$/,'')).join('; ');
+
+  // =260 ou =264 — Editora, local, ano
+  let editora='', localPub='', ano='';
+  const l260=getFirst('260')||getFirst('264');
+  if(l260){
+    localPub=sub(l260,'a').replace(/\s*[:;,]\s*$/,'').trim();
+    editora=sub(l260,'b').replace(/\s*[,;]\s*$/,'').trim();
+    ano=sub(l260,'c').replace(/\D/g,'').substring(0,4);
+  }
+
+  // =008 — Ano fallback (posições 7-10)
+  if(!ano){
+    const l008=getFirst('008');
+    if(l008&&l008.length>14){
+      const rawAno=l008.substring(11,15).trim();
+      if(/^\d{4}$/.test(rawAno)) ano=rawAno;
+    }
+  }
+
+  // =300 — Páginas, volume, ilustrações
+  let paginas='', volume='';
+  const l300=getFirst('300');
+  if(l300){
+    const pa=sub(l300,'a');
+    const pb=sub(l300,'b');
+    paginas=pa?(pa+(pb?' : '+pb:'')):pb;
+  }
+
+  // =250 — Edição
+  let edicao='';
+  const l250=getFirst('250');
+  if(l250) edicao=sub(l250,'a').trim();
+
+  // =020 — ISBN
+  let isbn='';
+  const l020=getFirst('020');
+  if(l020){isbn=sub(l020,'a').replace(/[^0-9X]/gi,'');}
+
+  // =022 — ISSN
+  let issn='';
+  const l022=getFirst('022');
+  if(l022) issn=sub(l022,'a').trim();
+
+  // =084 / =082 — Classificação
+  let classif='';
+  const l084=getFirst('084')||getFirst('082');
+  if(l084) classif=sub(l084,'a').trim();
+
+  // =094 — Área do direito (campo local RVBI)
+  let area='';
+  const l094=getFirst('094');
+  if(l094){
+    const areaRaw=sub(l094,'c').trim();
+    // Mapear para as áreas do sistema
+    const mapeamento={
+      'Direito Constitucional':'Direito Constitucional',
+      'Direito Administrativo':'Direito Administrativo',
+      'Direito Internacional':'Direito Internacional Público',
+      'Direito Penal':'Direito Penal',
+      'Direito Civil':'Direito Civil',
+      'Direito do Trabalho':'Direito do Trabalho',
+      'Direito Processual Civil':'Direito Processual Civil',
+      'Direito Processual Penal':'Direito Processual Penal',
+      'Direito Tributário':'Direito Tributário',
+      'Direito Financeiro':'Direito Financeiro',
+      'Direito Eleitoral':'Direito Eleitoral',
+      'Direito Ambiental':'Direito Ambiental',
+      'Direito Empresarial':'Direito Empresarial / Comercial',
+      'Direito Comercial':'Direito Empresarial / Comercial',
+      'Direito do Consumidor':'Direito do Consumidor',
+      'Direitos Humanos':'Direitos Humanos',
+      'Direito Previdenciário':'Direito Previdenciário',
+      'Filosofia do Direito':'Filosofia do Direito / Teoria Geral',
+      'Teoria do Direito':'Filosofia do Direito / Teoria Geral',
+      'Criminologia':'Criminologia',
+    };
+    for(const [k,v] of Object.entries(mapeamento)){
+      if(areaRaw.includes(k)){area=v;break;}
+    }
+    if(!area) area=areaRaw;
+  }
+
+  // =650 — Assuntos
+  const l650s=getLines('650');
+  const assuntos=l650s.map(l=>{
+    const a=sub(l,'a'),x=sub(l,'x'),z=sub(l,'z'),y=sub(l,'y');
+    let s=a;
+    if(x)s+=' -- '+x;if(z)s+=' -- '+z;if(y)s+=' -- '+y;
+    return s.replace(/\.\s*$/,'').trim();
+  }).filter(Boolean);
+  const assunto=[...new Set(assuntos)].join('; ');
+
+  // =500/504/505 — Notas
+  const notaLines=[...getLines('500'),...getLines('504'),...getLines('505')];
+  const notas=notaLines.map(l=>sub(l,'a')||l.replace(/^=\d+\s+\\\\\s+\$a/,'')).filter(Boolean).join(' ');
+
+  // =900 — Tipo de material
+  let tipo='Livro';
+  const l900s=getLines('900');
+  const tipoRaw=l900s.map(l=>sub(l,'a').toLowerCase()).join(' ');
+  if(tipoRaw.includes('artigo de revista')||tipoRaw.includes('periódico')) tipo='Periódico';
+  else if(tipoRaw.includes('capítulo')) tipo='Livro';
+  else if(tipoRaw.includes('tese')) tipo='Tese';
+  else if(tipoRaw.includes('dissertação')) tipo='Dissertação';
+  else if(tipoRaw.includes('monografia')) tipo='Monografia';
+
+  // Preencher campos do formulário
+  let preenchidos=0;
+  function set(id,val){if(val){const el=document.getElementById(id);if(el){el.value=val;preenchidos++;}}}
+  set('f-titulo',titulo);
+  set('f-subtitulo',subtitulo);
+  set('f-autor',autor);
+  set('f-org',org);
+  set('f-editora',editora);
+  set('f-local',localPub);
+  set('f-ano',ano);
+  set('f-edicao',edicao);
+  set('f-pag',paginas);
+  set('f-isbn',isbn||issn);
+  set('f-assunto',assunto);
+  set('f-class',classif);
+  set('f-notas',notas);
+  if(tipo){document.getElementById('f-tipo').value=tipo;preenchidos++;}
+  if(area){
+    const sel=document.getElementById('f-area');
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].value===area||sel.options[i].text===area){sel.selectedIndex=i;preenchidos++;break;}
+    }
+  }
+
+  status.innerHTML='<span style="color:var(--success);font-weight:600"><i class="ti ti-check" style="vertical-align:-2px"></i> '+preenchidos+' campo(s) extraído(s) do registro MARC com sucesso!</span><br><span style="color:var(--gray-600);font-size:12px">Revise os dados, complete Estante e Localização, e clique em Registrar Obra.</span>';
+  document.getElementById('marc-input').value='';
+}
+
+async function buscarISBN(){
+  const raw=document.getElementById('isbn-lookup').value.trim().replace(/[-\s]/g,'');
+  if(!raw){alert('Digite um ISBN para buscar.');return;}
+  const btn=document.getElementById('btn-isbn');
+  const status=document.getElementById('isbn-status');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Buscando...';
+  status.style.display='block';status.innerHTML='<span style="color:var(--gray-600)"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite;vertical-align:-2px"></i> Consultando Open Library...</span>';
+  try{
+    // Try Open Library first
+    const url='https://openlibrary.org/api/books?bibkeys=ISBN:'+raw+'&format=json&jscmd=data';
+    const r=await fetch(url);
+    const json=await r.json();
+    const key='ISBN:'+raw;
+    if(json[key]){
+      const b=json[key];
+      const titulo=b.title||'';
+      const subtitulo=b.subtitle||'';
+      const autores=(b.authors||[]).map(a=>a.name).join('; ');
+      const editora=(b.publishers||[]).map(p=>p.name).join('; ');
+      const localPub=(b.publish_places||[]).map(p=>p.name).join(', ');
+      const ano=b.publish_date?b.publish_date.replace(/.*(\d{4}).*/,'$1'):'';
+      const paginas=b.number_of_pages?b.number_of_pages+' p.':'';
+      const edicao=b.edition_name||'';
+      if(titulo)document.getElementById('f-titulo').value=titulo;
+      if(subtitulo)document.getElementById('f-subtitulo').value=subtitulo;
+      if(autores)document.getElementById('f-autor').value=autores;
+      if(editora)document.getElementById('f-editora').value=editora;
+      if(localPub)document.getElementById('f-local').value=localPub;
+      if(ano)document.getElementById('f-ano').value=ano;
+      if(paginas)document.getElementById('f-pag').value=paginas;
+      if(edicao)document.getElementById('f-edicao').value=edicao;
+      document.getElementById('f-isbn').value=raw;
+      document.getElementById('f-tipo').value='Livro';
+      const preenchidos=[titulo,autores,editora,ano].filter(Boolean).length;
+      status.innerHTML='<span style="color:var(--success);font-weight:600"><i class="ti ti-check" style="vertical-align:-2px"></i> Livro encontrado! '+preenchidos+' campo(s) preenchido(s) automaticamente.</span><br><span style="color:var(--gray-600);font-size:12px">Revise os dados, selecione a Área do Direito e complemente o que faltar.</span>';
+    } else {
+      // Try Google Books as fallback
+      const gr=await fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:'+raw);
+      const gj=await gr.json();
+      if(gj.totalItems>0&&gj.items&&gj.items[0]){
+        const vi=gj.items[0].volumeInfo;
+        if(vi.title)document.getElementById('f-titulo').value=vi.title;
+        if(vi.subtitle)document.getElementById('f-subtitulo').value=vi.subtitle;
+        if(vi.authors)document.getElementById('f-autor').value=vi.authors.join('; ');
+        if(vi.publisher)document.getElementById('f-editora').value=vi.publisher;
+        if(vi.publishedDate)document.getElementById('f-ano').value=vi.publishedDate.substring(0,4);
+        if(vi.pageCount)document.getElementById('f-pag').value=vi.pageCount+' p.';
+        document.getElementById('f-isbn').value=raw;
+        document.getElementById('f-tipo').value='Livro';
+        // Buscar capa
+        const imgLinks=vi.imageLinks;
+        if(imgLinks){const capUrl=(imgLinks.large||imgLinks.medium||imgLinks.thumbnail||'').replace('http:','https:').replace('zoom=1','zoom=2');if(capUrl){document.getElementById('f-capa-url').value=capUrl;previewCapa(capUrl);}}
+        const preenchidos=[vi.title,vi.authors,vi.publisher,vi.publishedDate].filter(Boolean).length;
+        status.innerHTML='<span style="color:var(--success);font-weight:600"><i class="ti ti-check" style="vertical-align:-2px"></i> Livro encontrado via Google Books! '+preenchidos+' campo(s) preenchido(s).</span><br><span style="color:var(--gray-600);font-size:12px">Revise os dados, selecione a Área do Direito e complemente o que faltar.</span>';
+      } else {
+        status.innerHTML='<span style="color:var(--danger)"><i class="ti ti-alert-circle" style="vertical-align:-2px"></i> ISBN não encontrado nas bases Open Library e Google Books.</span><br><span style="color:var(--gray-600);font-size:12px">Preencha os dados manualmente. O ISBN foi copiado para o campo correspondente.</span>';
+        document.getElementById('f-isbn').value=raw;
+      }
+    }
+  } catch(e){
+    status.innerHTML='<span style="color:var(--danger)"><i class="ti ti-alert-circle" style="vertical-align:-2px"></i> Erro de conexão. Verifique a internet e tente novamente.</span>';
+  }
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-search"></i> Buscar dados';
+}
+// ══ CIRCULAÇÃO ══
+let emprestimos=[];
+let empObraId=null;
+
+function loadEmp(){/* handled in load() */}
+function saveEmpLegacy(){try{localStorage.setItem('bmlrb_emp',JSON.stringify(emprestimos));}catch(e){}}
+
+function updStatsEmp(){
+  const ativos=emprestimos.filter(e=>e.status==='ativo');
+  document.getElementById('st-emprestimos').textContent=ativos.length;
+}
+
+function buscarObraEmp(){
+  const t=document.getElementById('emp-busca').value.trim();
+  const tLow=t.toLowerCase();
+  const box=document.getElementById('emp-sugestoes');
+  if(!t||t.length<2){box.style.display='none';return;}
+  // Auto-select on exact tombo match (ex: BMLRB-00005)
+  const exato=acervo.find(o=>(o.tombo||'').toLowerCase()===tLow);
+  if(exato){selecionarObraEmp(exato.id,exato.tombo,exato.titulo||'');box.style.display='none';return;}
+  const res=acervo.filter(o=>
+    (o.titulo||'').toLowerCase().includes(tLow)||
+    (o.autor||'').toLowerCase().includes(tLow)||
+    (o.tombo||'').toLowerCase().includes(tLow)
+  ).slice(0,8);
+  if(!res.length){box.style.display='none';return;}
+  box.innerHTML=res.map(o=>`
+    <div class="emp-sugestao-item" onclick="selecionarObraEmp('${o.id}','${o.tombo}','${(o.titulo||'').replace(/'/g,"\\'")}')">
+      <strong>${o.titulo||'—'}</strong>
+      <span>${o.tombo} · ${o.autor||'—'} · ${o.ano||'—'}</span>
+    </div>`).join('');
+  box.style.display='block';
+}
+
+function selecionarObraEmp(id,tombo,titulo){
+  empObraId=id;
+  document.getElementById('emp-busca').value=titulo;
+  document.getElementById('emp-tombo').value=tombo;
+  document.getElementById('emp-sugestoes').style.display='none';
+}
+
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#emp-busca')&&!e.target.closest('#emp-sugestoes'))
+    document.getElementById('emp-sugestoes').style.display='none';
+});
+
+function registrarEmp(){
+  if(!empObraId){toast('Selecione uma obra da lista de sugestões.','error');return;}
+  const nome=document.getElementById('emp-nome').value.trim();
+  const email=document.getElementById('emp-email').value.trim();
+  const dataSaida=document.getElementById('emp-data-saida').value;
+  const dataPrev=document.getElementById('emp-data-prev').value;
+  if(!nome){toast('Informe o nome do usuário.','error');return;}
+  if(!email){toast('Informe o e-mail do usuário.','error');return;}
+  if(!dataPrev){toast('Informe o prazo de devolução.','error');return;}
+  const obra=acervo.find(o=>o.id==empObraId);
+  // Check if already borrowed
+  const jaEmprestado=emprestimos.find(e=>e.obraId==empObraId&&e.status==='ativo');
+  if(jaEmprestado){toast('Esta obra já está emprestada para '+jaEmprestado.nome+'.','error');return;}
+  const emp={
+    id:Date.now()+'_'+Math.random(),
+    obraId:empObraId,
+    tombo:obra.tombo,
+    titulo:obra.titulo,
+    autor:obra.autor||'',
+    nome:nome,
+    email:email,
+    dataSaida:dataSaida||new Date().toISOString().split('T')[0],
+    dataPrev:dataPrev,
+    dataRetorno:'',
+    obs:document.getElementById('emp-obs').value.trim(),
+    status:'ativo',
+    criadoEm:new Date().toISOString()
+  };
+  emprestimos.push(emp);
+  saveEmp();updStatsEmp();renderEmprestimos();verificarAtrasos();limparEmp();
+  toast('Empréstimo registrado com sucesso!','success');
+}
+
+function devolverEmp(id){
+  const emp=emprestimos.find(e=>e.id===id);
+  if(!emp)return;
+  if(!confirm('Confirmar devolução de "'+emp.titulo+'" por '+emp.nome+'?'))return;
+  emp.status='devolvido';
+  emp.dataRetorno=new Date().toISOString().split('T')[0];
+  saveEmp();updStatsEmp();renderEmprestimos();verificarAtrasos();
+  toast('Devolução registrada!','success');
+}
+
+function limparEmp(){
+  document.getElementById('emp-busca').value='';
+  document.getElementById('emp-tombo').value='';
+  document.getElementById('emp-nome').value='';
+  document.getElementById('emp-email').value='';
+  document.getElementById('emp-data-saida').value=new Date().toISOString().split('T')[0];
+  document.getElementById('emp-data-prev').value='';
+  document.getElementById('emp-obs').value='';
+  document.getElementById('emp-sugestoes').style.display='none';
+  empObraId=null;
+}
+
+function statusEmp(emp){
+  if(emp.status==='devolvido') return '';
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const prev=new Date(emp.dataPrev+'T00:00:00');
+  const diff=Math.ceil((prev-hoje)/(1000*60*60*24));
+  if(diff<0) return 'atraso';
+  if(diff===0) return 'hoje';
+  return 'ok';
+}
+
+function statusLabel(emp){
+  const s=statusEmp(emp);
+  if(emp.status==='devolvido') return '<span class="status-devolvido">Devolvido</span>';
+  if(s==='atraso'){
+    const prev=new Date(emp.dataPrev+'T00:00:00');
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    const dias=Math.ceil((hoje-prev)/(1000*60*60*24));
+    return '<span class="status-atraso"><i class="ti ti-alert-circle" style="vertical-align:-2px"></i> '+dias+'d atraso</span>';
+  }
+  if(s==='hoje') return '<span class="status-hoje"><i class="ti ti-clock" style="vertical-align:-2px"></i> Vence hoje</span>';
+  return '<span class="status-ok"><i class="ti ti-check" style="vertical-align:-2px"></i> Em dia</span>';
+}
+
+function renderEmprestimos(){
+  const filtro=(document.getElementById('emp-filtro')?.value||'').toLowerCase();
+  const ativos=emprestimos.filter(e=>e.status==='ativo').filter(e=>
+    !filtro||[e.titulo,e.nome,e.tombo,e.email].some(v=>(v||'').toLowerCase().includes(filtro))
+  );
+  const hist=emprestimos.filter(e=>e.status==='devolvido');
+  document.getElementById('badge-ativos').textContent=emprestimos.filter(e=>e.status==='ativo').length;
+  document.getElementById('badge-hist').textContent=hist.length;
+
+  // Ativos
+  const tbody=document.getElementById('emp-tbody');
+  const empty=document.getElementById('emp-empty');
+  if(!ativos.length){tbody.innerHTML='';empty.style.display='block';}
+  else{
+    empty.style.display='none';
+    tbody.innerHTML=ativos.map(e=>`<tr>
+      <td class="tc">${e.tombo}</td>
+      <td title="${e.titulo}">${e.titulo}</td>
+      <td title="${e.nome}">${e.nome}</td>
+      <td style="font-size:11px" title="${e.email}">${e.email}</td>
+      <td style="font-size:12px">${fmtData(e.dataSaida)}</td>
+      <td style="font-size:12px">${fmtData(e.dataPrev)}</td>
+      <td>${statusLabel(e)}</td>
+      <td><button class="btn btn-sm btn-g" onclick="devolverEmp('${e.id}')" style="font-size:11px;padding:4px 10px"><i class="ti ti-check"></i> Devolver</button></td>
+    </tr>`).join('');
+  }
+
+  // Histórico
+  const htbody=document.getElementById('hist-tbody');
+  const hempty=document.getElementById('hist-empty');
+  if(!hist.length){htbody.innerHTML='';hempty.style.display='block';}
+  else{
+    hempty.style.display='none';
+    htbody.innerHTML=[...hist].reverse().map(e=>`<tr>
+      <td class="tc">${e.tombo}</td>
+      <td title="${e.titulo}">${e.titulo}</td>
+      <td>${e.nome}</td>
+      <td style="font-size:12px">${fmtData(e.dataSaida)}</td>
+      <td style="font-size:12px">${fmtData(e.dataPrev)}</td>
+      <td style="font-size:12px">${fmtData(e.dataRetorno)}</td>
+      <td>${new Date(e.dataRetorno+'T00:00:00')>new Date(e.dataPrev+'T00:00:00')?'<span class="status-atraso">Devolvido com atraso</span>':'<span class="status-ok">No prazo</span>'}</td>
+    </tr>`).join('');
+  }
+}
+
+function verificarAtrasos(){
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const atrasados=emprestimos.filter(e=>{
+    if(e.status!=='ativo')return false;
+    const prev=new Date(e.dataPrev+'T00:00:00');
+    return prev<hoje;
+  });
+  const venceHoje=emprestimos.filter(e=>{
+    if(e.status!=='ativo')return false;
+    const prev=new Date(e.dataPrev+'T00:00:00');
+    return prev.getTime()===hoje.getTime();
+  });
+  const div=document.getElementById('alertas-atraso');
+  if(!atrasados.length&&!venceHoje.length){div.style.display='none';return;}
+  div.style.display='block';
+  div.innerHTML=[
+    ...atrasados.map(e=>{
+      const dias=Math.ceil((hoje-new Date(e.dataPrev+'T00:00:00'))/(1000*60*60*24));
+      return `<div class="alerta-card"><i class="ti ti-alert-circle"></i><div><strong>${e.titulo}</strong> — emprestado para <strong>${e.nome}</strong> (${e.email}) está <strong>${dias} dia(s) em atraso</strong> desde ${fmtData(e.dataPrev)}.</div></div>`;
+    }),
+    ...venceHoje.map(e=>`<div class="alerta-card" style="background:#fff3e0;border-color:#ffe0b2;border-left-color:#e67e22"><i class="ti ti-clock" style="color:#e67e22"></i><div><strong>${e.titulo}</strong> — emprestado para <strong>${e.nome}</strong> vence <strong>hoje</strong>.</div></div>`)
+  ].join('');
+}
+
+function fmtData(d){if(!d)return '—';const[y,m,dia]=d.split('-');return dia+'/'+m+'/'+y;}
+
+function exportarEmpCSV(){
+  if(!emprestimos.length){toast('Nenhum empréstimo para exportar.');return;}
+  const hd=['tombo','titulo','autor','nome','email','dataSaida','dataPrev','dataRetorno','status','obs'];
+  const rows=[hd.join(';'),...emprestimos.map(e=>hd.map(h=>'"'+(e[h]||'').replace(/"/g,'""')+'"').join(';'))];
+  const b=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='circulacao_bmlrb.csv';a.click();
+  toast('CSV de circulação exportado!','success');
+}
+
+// ══ METADADOS E ETIQUETAS ══
+
+// Mapeamento CDD → Grande Área
+const CDD_MAP = [
+  {re:/^340($|[^0-9])/,area:'Direito'},
+  {re:/^341\.[01]/,area:'Direito Internacional Público'},
+  {re:/^341\.2/,area:'Direito Constitucional'},
+  {re:/^341\.3/,area:'Direito Internacional Público'},
+  {re:/^341\.[4-9]/,area:'Direito Internacional Público'},
+  {re:/^341($|[^0-9.])/,area:'Direito Internacional Público'},
+  {re:/^342/,area:'Direito Constitucional'},
+  {re:/^343/,area:'Direito Administrativo'},
+  {re:/^344/,area:'Direito Social'},
+  {re:/^345/,area:'Direito Penal'},
+  {re:/^346/,area:'Direito Civil'},
+  {re:/^347/,area:'Direito Processual Civil'},
+  {re:/^348/,area:'Direito'},
+  {re:/^349/,area:'Direito'},
+  {re:/^330/,area:'Economia'},
+  {re:/^336/,area:'Direito Tributário'},
+  {re:/^320/,area:'Ciência Política'},
+  {re:/^360/,area:'Direito Previdenciário'},
+  {re:/^362/,area:'Direito da Saúde'},
+  {re:/^364/,area:'Criminologia'},
+  {re:/^370/,area:'Educação'},
+];
+
+const AREA_LABEL = {
+  'Direito Constitucional':'DIREITO CONSTITUCIONAL',
+  'Direito Administrativo':'DIREITO ADMINISTRATIVO',
+  'Direito Internacional Público':'DIREITO INTERNACIONAL',
+  'Direito Internacional Privado':'DIREITO INTERNACIONAL',
+  'Direito Tributário':'DIREITO TRIBUTÁRIO',
+  'Direito Financeiro':'DIREITO FINANCEIRO',
+  'Direito Previdenciário':'DIREITO PREVIDENCIÁRIO',
+  'Direito Ambiental':'DIREITO AMBIENTAL',
+  'Direito Eleitoral':'DIREITO ELEITORAL',
+  'Direito Urbanístico':'DIREITO URBANÍSTICO',
+  'Direito Militar':'DIREITO MILITAR',
+  'Direito Civil':'DIREITO CIVIL',
+  'Direito Empresarial / Comercial':'DIREITO EMPRESARIAL',
+  'Direito do Consumidor':'DIREITO DO CONSUMIDOR',
+  'Direito Imobiliário':'DIREITO IMOBILIÁRIO',
+  'Direito de Família e Sucessões':'DIREITO DE FAMÍLIA',
+  'Direito Contratual':'DIREITO CONTRATUAL',
+  'Direito Processual Civil':'DIREITO PROCESSUAL CIVIL',
+  'Direito Processual Penal':'DIREITO PROCESSUAL PENAL',
+  'Direito Processual Constitucional':'DIREITO PROCESSUAL',
+  'Direito Processual do Trabalho':'DIREITO PROCESSUAL DO TRABALHO',
+  'Direito do Trabalho':'DIREITO DO TRABALHO',
+  'Direitos Humanos':'DIREITOS HUMANOS',
+  'Direito da Criança e do Adolescente':'DIREITO DA CRIANÇA',
+  'Direito da Saúde':'DIREITO DA SAÚDE',
+  'Direito Penal':'DIREITO PENAL',
+  'Criminologia':'CRIMINOLOGIA',
+  'Execução Penal':'DIREITO PENAL',
+  'Filosofia do Direito / Teoria Geral':'FILOSOFIA DO DIREITO',
+  'Direito Digital / Tecnologia':'DIREITO DIGITAL',
+  'Bioética e Biodireito':'BIODIREITO',
+  'Direito Comparado':'DIREITO COMPARADO',
+  'Interdisciplinar / Geral':'DIREITO',
+};
+
+function cddParaArea(cdd){
+  if(!cdd) return '';
+  const c=cdd.trim();
+  for(const m of CDD_MAP){ if(m.re.test(c)) return m.area; }
+  return '';
+}
+
+function areaParaLabel(o){
+  // classificacao já foi normalizada para nome da área
+  const area=(o.classificacao||o.area||'').trim();
+  if(!area) return 'DIREITO';
+  return AREA_LABEL[area]||area.toUpperCase();
+}
+
+function sobrenome(autor){
+  if(!autor) return '';
+  // Handle "Sobrenome, Nome" format
+  const partes=autor.split(';')[0].trim();
+  if(partes.includes(',')) return partes.split(',')[0].trim().toUpperCase();
+  // Handle "Nome Sobrenome" format
+  const words=partes.trim().split(/\s+/);
+  return (words[words.length-1]||words[0]).toUpperCase();
+}
+
+// Normalização de títulos — caixa baixa exceto primeira letra
+function normTitulo(t){
+  if(!t) return t;
+  const excecoes=['do','da','de','dos','das','e','o','a','os','as','em','com','por','para','pelo','pela','um','uma','no','na','nos','nas'];
+  return t.toLowerCase().replace(/[^\s:–—-]+/g,(w,i)=>{
+    if(i===0) return w.charAt(0).toUpperCase()+w.slice(1);
+    if(excecoes.includes(w)) return w;
+    // After colon or dash, capitalize
+    const before=t.toLowerCase().slice(0,i).trimEnd();
+    if(before.endsWith(':')||before.endsWith('–')||before.endsWith('—')) return w.charAt(0).toUpperCase()+w.slice(1);
+    return w;
+  });
+}
+
+// Normalização de autores — "Sobrenome, Nome Outro" → "Sobrenome, Nome Outro"
+function normAutor(a){
+  if(!a) return a;
+  return a.split(';').map(parte=>{
+    const p=parte.trim();
+    return p.split(/\s+/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+  }).join('; ');
+}
+
+function toggleClassEdit(){
+  const edit=document.getElementById('f-class-area-edit');
+  if(edit){edit.style.display=edit.style.display==='none'?'block':'none';}
+}
+function resetSobrenome(){
+  const autor=document.getElementById('f-autor')?.value||'';
+  const sob=sobrenome(autor);
+  const el=document.getElementById('f-class-sobrenome');
+  if(el){el.value=sob;atualizarClassPreview();}
+}
+function atualizarClassPreview(){
+  const area=document.getElementById('f-area')?.value||'';
+  const autor=document.getElementById('f-autor')?.value||'';
+  const esp=document.getElementById('f-class-especifico')?.value.trim()||'';
+  const manual=(document.getElementById('f-class-area-manual')?.value||'').trim();
+  // Sobrenome: usa campo editável se preenchido, senão extrai do autor
+  const sobEl=document.getElementById('f-class-sobrenome');
+  let sob=(sobEl?.value||'').trim();
+  if(!sob) sob=autor?sobrenome(autor):'—';
+  // Auto-preenche o campo de sobrenome se ainda estiver vazio
+  if(sobEl&&!sobEl.value&&autor) sobEl.value=sobrenome(autor);
+  // Área: manual override > área dropdown
+  const areaLabel=manual?manual.toUpperCase():(area?(AREA_LABEL[area]||area.toUpperCase()):'—');
+  const el1=document.getElementById('f-class-area');
+  const el2=document.getElementById('f-class-autor');
+  const el3=document.getElementById('f-class-esp');
+  if(el1) el1.textContent=areaLabel;
+  if(el2) el2.textContent=sob.toUpperCase();
+  if(el3){if(esp){el3.textContent=esp;el3.style.display='block';}else{el3.textContent='';el3.style.display='none';}}
+  const hid=document.getElementById('f-class');
+  if(hid) hid.value=(manual||area)+(esp?'|'+esp:'');
+}
+
+// Normaliza o campo classificação: CDD code → Grande Área por extenso
+function normClassificacao(o){
+  // Prioridade 1: área do direito preenchida e mapeável
+  const area=(o.area||'').trim();
+  if(area) return area;
+  // Prioridade 2: classificação com código CDD numérico
+  const c=(o.classificacao||'').trim();
+  if(!c) return '';
+  if(!/^\d/.test(c)) return c; // já é texto
+  const codigo=c.match(/^[\d.]+/)?.[0]||'';
+  return cddParaArea(codigo)||c;
+}
+
+function normalizarRegistro(o){
+  o.colecao=o.colecao||'gabinete';
+  o.titulo=normTitulo(o.titulo||'');
+  o.subtitulo=normTitulo(o.subtitulo||'');
+  o.autor=normAutor(o.autor||'');
+  o.classificacao=normClassificacao(o);
+  // Garante sobrenome para etiqueta
+  if(!o.sobrenomeClass&&o.autor) o.sobrenomeClass=sobrenome(o.autor);
+  return o;
+}
+
+function normalizarTodos(){
+  if(!acervo.length){toast('Nenhum registro para normalizar.','');return;}
+  if(!confirm('Normalizar títulos, autores e classificações de todos os '+acervo.length+' registros?')) return;
+  let mod=0;
+  acervo.forEach(o=>{
+    const t0=o.titulo,a0=o.autor,c0=o.classificacao;
+    normalizarRegistro(o);
+    if(o.titulo!==t0||o.autor!==a0||o.classificacao!==c0) mod++;
+  });
+  save();renderAcervo();renderEtiquetas();
+  toast(mod+' registro(s) normalizados com sucesso!','success');
+}
+
+// ── ETIQUETAS ──
+let etqSelecionadas=new Set();
+
+function tomboNum(t){return parseInt((t||'').replace(/[^0-9]/g,''))||0;}
+
+function filtrarListaEtq(){
+  const filtro=(document.getElementById('etq-filtro')?.value||'').toLowerCase();
+  const area=document.getElementById('etq-area')?.value||'';
+  const colecao=document.getElementById('etq-colecao')?.value||'';
+  const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
+  const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
+  return acervo.filter(o=>{
+    if(area&&!(o.area||'').includes(area))return false;
+    if(colecao&&(o.colecao||'gabinete')!==colecao)return false;
+    if(filtro&&![o.titulo,o.autor,o.tombo,o.area,o.classificacao].some(v=>(v||'').toLowerCase().includes(filtro)))return false;
+    const n=tomboNum(o.tombo);
+    if((ini||fim<999999)&&(n<ini||n>fim))return false;
+    return true;
+  });
+}
+
+function limparFiltrosEtq(){
+  ['etq-filtro','etq-tombo-ini','etq-tombo-fim'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('etq-area').value='';
+  document.getElementById('etq-colecao').value='';
+  renderEtiquetas();
+}
+
+function etqLinhas(o){
+  const linhas=[];
+  // Assunto específico — aparece entre área e autor
+  if(o.assuntoEspecifico&&o.assuntoEspecifico.trim()) linhas.push({txt:o.assuntoEspecifico.trim(),tipo:'esp'});
+  // Volume
+  if(o.volume&&o.volume.trim()){
+    let v=o.volume.trim();
+    if(!/^v\./i.test(v)) v='v. '+v.replace(/^v\.?\s*/i,'');
+    linhas.push({txt:v,tipo:'extra'});
+  }
+  // Edição
+  if(o.edicao&&o.edicao.trim()){
+    let e=o.edicao.trim();
+    e=e.replace(/[ªa°º]/g,'').replace(/\.\s*ed\.?/i,'. ed.').replace(/\s+ed\.?$/i,' ed.');
+    if(/^\d+$/.test(e)) e=e+'. ed.';
+    if(!/ed\./i.test(e)) e=e+'. ed.';
+    e=e.charAt(0).toUpperCase()+e.slice(1);
+    linhas.push({txt:e,tipo:'extra'});
+  }
+  return linhas;
+}
+
+function renderEtiquetas(){
+  const lista=filtrarListaEtq();
+  document.getElementById('etq-count').textContent=`${lista.length} obra(s) — clique para selecionar`;
+  const sel=etqSelecionadas.size;
+  const sc=document.getElementById('etq-sel-count');
+  if(sc) sc.textContent=sel?`${sel} etiqueta(s) selecionada(s)`:'';
+
+  const grid=document.getElementById('etq-grid');
+  if(!lista.length){grid.innerHTML='<div class="empty"><i class="ti ti-tag-off"></i><p>Nenhuma obra encontrada.</p></div>';return;}
+
+  grid.innerHTML=lista.map(o=>{
+    const areaLabel=areaParaLabel(o);
+    const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
+    const extras=etqLinhas(o);
+    const selecionado=etqSelecionadas.has(o.tombo);
+    return `<div onclick="toggleEtq('${o.tombo}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
+      <div style="background:#fff;border:1.5px solid #1a2744;border-radius:5px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:64px">
+        <div style="font-size:9px;font-weight:700;color:#1a2744;letter-spacing:.07em;line-height:1.3">${areaLabel}</div>
+        ${extras.map(l=>l.tipo==='esp'
+          ?`<div style="font-size:8px;color:#333;font-style:italic;letter-spacing:.02em">${l.txt}</div>`
+          :`<div style="font-size:8px;color:#555;letter-spacing:.04em">${l.txt}</div>`).join('')}
+        <div style="font-size:11px;font-weight:700;color:#1a2744;letter-spacing:.06em">${sob}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;margin-top:5px">`+colDot(o.colecao||'gabinete',9)+`<span style="font-size:10px;color:var(--gray-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.titulo}">${o.tombo}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function toggleEtq(tombo){
+  if(etqSelecionadas.has(tombo))etqSelecionadas.delete(tombo);
+  else etqSelecionadas.add(tombo);
+  renderEtiquetas();
+}
+
+function selecionarTodas(){filtrarListaEtq().forEach(o=>etqSelecionadas.add(o.tombo));renderEtiquetas();}
+function deselecionarTodas(){etqSelecionadas.clear();renderEtiquetas();}
+
+function imprimirEtiquetas(modo){
+  let obras=[];
+  if(modo==='intervalo'){
+    const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
+    const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
+    if(!ini&&fim===999999){toast('Defina ao menos o tombo inicial para imprimir por intervalo.','error');return;}
+    obras=acervo.filter(o=>{const n=tomboNum(o.tombo);return n>=ini&&n<=fim;}).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
+    if(!obras.length){toast('Nenhuma obra encontrada no intervalo de tombo informado.','error');return;}
+  } else {
+    if(!etqSelecionadas.size){toast('Selecione ao menos uma etiqueta para imprimir.','error');return;}
+    obras=acervo.filter(o=>etqSelecionadas.has(o.tombo)).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
+  }
+
+  const etqHTML=obras.map(o=>{
+    const areaLabel=areaParaLabel(o);
+    const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
+    const extras=etqLinhas(o);
+    const dotStyle=o.colecao==='escritorio'?'background:#e8c84c;border:1px solid #c9a84c':o.colecao==='mezanino'?'background:#1a2744;border:1.5px solid #7090c0':'background:#ddd;border:1px solid #bbb';
+    return `<div class="etq" style="position:relative">
+      <div style="position:absolute;top:3mm;right:3mm;width:5mm;height:5mm;border-radius:50%;${dotStyle}"></div>
+      <div class="etq-area">${areaLabel}</div>
+      ${extras.map(l=>l.tipo==='esp'
+        ?`<div class="etq-esp">${l.txt}</div>`
+        :`<div class="etq-extra">${l.txt}</div>`).join('')}
+      <div class="etq-autor">${sob}</div>
+    </div>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Etiquetas — Biblioteca M. L. R. Barroso</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Source Sans 3',Arial,sans-serif;background:#fff}
+  .page{
+    width:210mm;
+    padding:10mm 5mm;
+    display:grid;
+    grid-template-columns:repeat(3,70mm);
+    grid-auto-rows:31mm;
+    column-gap:0;
+    row-gap:0;
+  }
+  .etq{
+    width:70mm;height:31mm;
+    border:0.3mm solid #bbb;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:2.5mm 3mm;
+    background:#ffffff;
+    page-break-inside:avoid;
+    gap:1.2mm;
+  }
+  .etq-area{
+    font-size:7pt;font-weight:700;
+    color:#1a2744;
+    text-align:center;
+    letter-spacing:.07em;
+    line-height:1.3;
+  }
+  .etq-autor{
+    font-size:10pt;font-weight:700;
+    color:#1a2744;
+    text-align:center;
+    letter-spacing:.08em;
+  }
+  .etq-extra{
+    font-size:7pt;font-weight:600;
+    color:#444444;
+    text-align:center;
+    letter-spacing:.05em;
+  }
+  .etq-esp{
+    font-size:7pt;font-weight:500;
+    color:#222222;
+    text-align:center;
+    font-style:italic;
+    letter-spacing:.02em;
+  }
+  @media print{
+    body{margin:0}
+    .page{padding:10mm 5mm}
+    @page{size:A4;margin:0}
+  }
+</style>
+</head>
+<body>
+<div class="page">${etqHTML}</div>
+<script>window.onload=function(){window.print();}<\/script>
+<!-- ADMIN FOOTER -->
+<div class="admin-footer">
+  <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
+</div>
+</body>
+</html>`;
+
+  const w=window.open('','_blank','width=900,height=700');
+  if(!w){toast('Permita pop-ups para imprimir as etiquetas.','error');return;}
+  w.document.write(html);
+  w.document.close();
+  toast(`${obras.length} etiqueta(s) enviadas para impressão!`,'success');
+}
+
+// ══ ADMINISTRADOR ══
+const ADMIN_HASH='6b359e7a5e5c5e5a5f5d5b5c5e5a5b5c'; // placeholder — computed below
+const ADMIN_SENHA='barroso';
+
+function hashSenha(s){
+  // Simple but effective: sum of char codes salted
+  let h=0;
+  for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))&0xffffffff;
+  return h.toString(16);
+}
+
+function isAdmin(){
+  return sessionStorage.getItem('bmlrb_admin')==='1';
+}
+
+function abrirLogin(){
+  if(isAdmin()){logoutAdmin();return;}
+  document.getElementById('login-overlay').classList.add('open');
+  document.getElementById('login-erro') && (document.getElementById('login-erro').style.display='none');
+  setTimeout(()=>document.getElementById('login-senha').focus(),100);
+}
+
+function fecharLogin(){
+  document.getElementById('login-overlay').classList.remove('open');
+  document.getElementById('login-senha').value='';
+}
+
+function fazerLogin(){
+  const senha=document.getElementById('login-senha').value;
+  const err=document.getElementById('login-error');
+  if(senha===ADMIN_SENHA){
+    sessionStorage.setItem('bmlrb_admin','1');
+    fecharLogin();
+    ativarAdmin();
+    toast('Bem-vindo, administrador!','success');
+  } else {
+    err.style.display='block';
+    document.getElementById('login-senha').value='';
+    document.getElementById('login-senha').focus();
+    setTimeout(()=>err.style.display='none',3000);
+  }
+}
+
+function ativarAdmin(){
+  document.getElementById('admin-tabs').classList.add('visible');
+  document.getElementById('admin-bar').classList.add('visible');
+  document.getElementById('admin-footer-btn').textContent='sair do admin';
+  document.getElementById('admin-footer-btn').style.color='rgba(255,100,100,.5)';
+}
+
+function logoutAdmin(){
+  sessionStorage.removeItem('bmlrb_admin');
+  document.getElementById('admin-tabs').classList.remove('visible');
+  document.getElementById('admin-bar').classList.remove('visible');
+  document.getElementById('admin-footer-btn').textContent='admin';
+  document.getElementById('admin-footer-btn').style.color='';
+  // Se estiver em aba admin, voltar para pesquisa
+  const abasAdmin=['cadastro','acervo','circulacao','etiquetas','importar'];
+  if(abasAdmin.includes(tabAtual)) sw('inicio');
+  toast('Sessão encerrada.','');
+}
+
+// Inicialização
+load().then(()=>{
+  updPrev();
+  const dsInit=document.getElementById('emp-data-saida');
+  if(dsInit) dsInit.value=new Date().toISOString().split('T')[0];
+  const ABAS_ADMIN=['cadastro','acervo','circulacao','etiquetas','importar'];
+  const _swOrig=sw;
+  sw=function(tab,pushState){
+    if(ABAS_ADMIN.includes(tab)&&!isAdmin()){abrirLogin();return;}
+    _swOrig(tab,pushState);
+  };
+  if(isAdmin()) ativarAdmin();
+  setTimeout(()=>{
+    renderCarousel();
+    renderPI();
+    const mod=normalizarAreas();
+    if(mod>0) console.log(mod+' áreas preenchidas automaticamente');
+  },200);
+  // Navegação pelo teclado no modal
+  document.addEventListener('keydown',function(e){
+    if(!document.getElementById('mo').classList.contains('open')) return;
+    if(e.key==='ArrowLeft') navModal(-1);
+    if(e.key==='ArrowRight') navModal(1);
+    if(e.key==='Escape') fmob();
+  });
+  history.replaceState({tab:'inicio'},'','');
+});
+</script>
+<!-- ADMIN FOOTER -->
+<div class="admin-footer">
+  <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
+</div>
+</body>
+</html>
