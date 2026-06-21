@@ -1230,7 +1230,17 @@ function sw(tab,pushState){
 window.addEventListener('popstate',function(e){var tab=(e.state&&e.state.tab)||'inicio';sw(tab,false);});
 function gv(id){return document.getElementById(id)?.value.trim()||'';}
 
-function buscar(){const t=gv('s-main').toLowerCase();if(!t){limparRes();return;}const res=acervo.filter(o=>Object.values(o).some(v=>String(v).toLowerCase().includes(t)));mostrarRes(res,[{label:'Busca: "'+gv('s-main')+'"'}]);}
+function buscar(){
+  const q=normBusca(gv('s-main'));
+  if(!q){limparRes();return;}
+  // Cada palavra deve aparecer em pelo menos um campo
+  const palavras=q.split(/\s+/).filter(p=>p.length>1);
+  const res=acervo.filter(o=>{
+    const txt=normBusca([o.titulo,o.subtitulo,o.autor,o.area,o.assunto,o.editora,o.tombo,o.classificacao].join(' '));
+    return palavras.every(p=>txt.includes(p));
+  });
+  mostrarRes(res,[{label:'Busca: "'+gv('s-main')+'"'}]);
+}
 function buscarAdv(){
   const ft=gv('a-titulo').toLowerCase(),fa=gv('a-autor').toLowerCase(),fano=gv('a-ano'),fed=gv('a-editora').toLowerCase();
   const fass=gv('a-assunto').toLowerCase(),fass2=gv('a-assunto2').toLowerCase(),fass3=gv('a-assunto3').toLowerCase();
@@ -1248,8 +1258,8 @@ function buscarAdv(){
   if(fass3)chips.push({label:op3.toUpperCase()+': '+gv('a-assunto3')});
   if(!chips.length&&!ftmb&&!fed&&!fest){alert('Preencha ao menos um campo para pesquisar.');return;}
   let res=[...acervo];
-  if(ft)res=res.filter(o=>(o.titulo+' '+(o.subtitulo||'')).toLowerCase().includes(ft));
-  if(fa)res=res.filter(o=>(o.autor||'').toLowerCase().includes(fa));
+  if(ft)res=res.filter(o=>normBusca(o.titulo+' '+(o.subtitulo||'')).includes(normBusca(ft)));
+  if(fa)res=res.filter(o=>normBusca(o.autor||'').includes(normBusca(fa)));
   if(fano){const range=fano.match(/(\d{4})-(\d{4})/);if(range)res=res.filter(o=>{const y=parseInt(o.ano);return y>=parseInt(range[1])&&y<=parseInt(range[2]);});else res=res.filter(o=>(o.ano||'').toString().includes(fano));}
   if(fed)res=res.filter(o=>(o.editora||'').toLowerCase().includes(fed));
   if(fass||fass2||fass3){
@@ -1379,6 +1389,14 @@ function renderResGrid(){
   document.getElementById('res-pag').innerHTML=html;
 }
 function irResPg(p){resPg=p;renderResGrid();}
+let qfAtivo=null;
+
+function fmo(e){if(e.target===document.getElementById('mo'))fmob();}
+function fmob(){document.getElementById('mo').classList.remove('open');curId=null;}
+
+// Normaliza texto removendo acentos para busca
+function normBusca(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+
 function limparRes(){document.getElementById('results-area').style.display='none';document.getElementById('inicio-default').style.display='block';document.getElementById('s-main').value='';if(qfAtivo){qfAtivo.classList.remove('on');qfAtivo=null;}}
 function limparAdv(){['a-titulo','a-autor','a-ano','a-editora','a-assunto','a-assunto2','a-assunto3','a-tombo','a-area','a-tipo','a-estante'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
 function toggleAdv(){const p=document.getElementById('adv-panel'),b=document.getElementById('adv-btn');p.classList.toggle('open');b.classList.toggle('open');}
@@ -1604,7 +1622,6 @@ function normalizarAreas(){
   if(mod>0){save();sbSalvarAcervo();}
   return mod;
 }
-function fmob(){document.getElementById('mo').classList.remove('open');curId=null;}
 function setModoEdicao(editando){
   const btnSalvar=document.getElementById('btn-salvar');
   const btnSalvarTxt=document.getElementById('btn-salvar-txt');
