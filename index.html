@@ -1198,13 +1198,12 @@ function saveEmp(){
 }
 function gtombo(){const t='BMLRB-'+String(ctr).padStart(5,'0');ctr++;save();return t;}
 function updPrev(){document.getElementById('prev-tombo').textContent='Próximo: BMLRB-'+String(ctr).padStart(5,'0');}
-let capaBase64Temp='';
-function updStats(){
+// Capa e tab são gerenciadas nas variáveis globais acimafunction updStats(){
   document.getElementById('st-total').textContent=acervo.length;
   document.getElementById('st-livros').textContent=acervo.filter(o=>o.tipo==='Livro').length;
   updStatsEmp();
 }
-let tabAtual='inicio';
+// tabAtual gerenciado globalmente
 function sw(tab,pushState){
   if(pushState!==false&&tab!==tabAtual){history.pushState({tab:tab},'','');}
   tabAtual=tab;
@@ -1514,8 +1513,6 @@ function limparAc(){if(!acervo.length)return;if(!confirm('Excluir TODAS as obras
 function exportCSV(){if(!acervo.length){toast('Nenhuma obra para exportar.');return;}const hd=['tombo','titulo','subtitulo','autor','organizador','editora','local_pub','ano','volume','edicao','paginas','isbn','tipo','area','assunto','localizacao','estante','classificacao','exemplares','notas'];const rows=[hd.join(';'),...acervo.map(o=>hd.map(h=>'"'+(o[h]||'').replace(/"/g,'""')+'"').join(';'))];const b=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='acervo_bmlrb.csv';a.click();toast('CSV exportado!','success');}
 
 // Lista de contexto para navegação no modal
-let modalLista=[];
-let modalIdx=0;
 
 function ver(id,lista){
   if(lista) modalLista=lista;
@@ -1926,7 +1923,6 @@ async function buscarISBN(){
   btn.disabled=false;btn.innerHTML='<i class="ti ti-search"></i> Buscar dados';
 }
 // ══ CIRCULAÇÃO ══
-let emprestimos=[];
 let empObraId=null;
 
 function loadEmp(){/* handled in load() */}
