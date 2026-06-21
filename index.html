@@ -947,6 +947,11 @@ window.dispatchEvent(new Event('fb-ready'));
 <script>
 // ══ FIREBASE CONFIG ══
 const TIPO_ICON={'Livro':'ti-book','Periódico':'ti-news','Tese':'ti-school','Dissertação':'ti-school','Monografia':'ti-file-text','Relatório':'ti-report','E-book':'ti-device-tablet'};
+let resLista=[],resPg=1,resPgTam=20;
+let listaAc=[],pgAc=1,pgAcTam=50;
+let modalLista=[],modalIdx=0;
+let curId=null,capaBase64Temp='',ctr=1;
+let acervo=[],emprestimos=[],tabAtual='inicio';
 function fbDb(){return window._fbDb;}
 
 async function waitFb(){
@@ -1522,7 +1527,7 @@ function ver(id,lista){
   curId=o.id;
   // Auto-preenche área se estiver vazia mas classificação preenchida
   if(!o.area&&o.classificacao){
-    const a=cddParaArea(o.classificacao)||o.classificacao;
+    const a=cdd_para_area(o.classificacao)||o.classificacao;
     if(a) o.area=a;
   }
   document.getElementById('m-titulo').textContent=o.titulo+(o.subtitulo?': '+o.subtitulo:'');
@@ -1596,7 +1601,7 @@ function normalizarAreas(){
   let mod=0;
   acervo.forEach(o=>{
     if(!o.area&&o.classificacao){
-      const a=cddParaArea(o.classificacao);
+      const a=cdd_para_area(o.classificacao);
       if(a){o.area=a;mod++;}
     }
   });
@@ -2187,11 +2192,37 @@ const AREA_LABEL = {
   'Interdisciplinar / Geral':'DIREITO',
 };
 
-function cddParaArea(cdd){
-  if(!cdd) return '';
-  const c=cdd.trim();
-  for(const m of CDD_MAP){ if(m.re.test(c)) return m.area; }
-  return '';
+function cdd_para_area(cdd){
+    cdd=(cdd||'').trim().split('\n')[0].trim();
+    if(!cdd||!cdd[0].match(/\d/)) return '';
+    const n=cdd.match(/^[\d.]+/);
+    if(!n) return '';
+    const c=n[0];
+    if(c.startsWith('341.28')) return 'Direito Eleitoral';
+    if(c.startsWith('341.2')||c.startsWith('342')) return 'Direito Constitucional';
+    if(c.startsWith('341.3')||c.startsWith('343')) return 'Direito Administrativo';
+    if(c.startsWith('341.4')||c.startsWith('341.5')||c.startsWith('341.6')||c.startsWith('341.7')||c.startsWith('341.8')||c.startsWith('341.9')||c.startsWith('341.1')) return 'Direito Internacional Público';
+    if(c==='341'||c.startsWith('340')) return 'Direito';
+    if(c.startsWith('336')) return 'Direito Tributário';
+    if(c.startsWith('337')||c.startsWith('338')) return 'Direito Financeiro';
+    if(c.startsWith('344')) return 'Direito Previdenciário';
+    if(c.startsWith('345')) return 'Direito Penal';
+    if(c.startsWith('346.01')||c.startsWith('346.02')||c.startsWith('346.03')) return 'Direito Civil';
+    if(c.startsWith('346.07')) return 'Direito Empresarial / Comercial';
+    if(c.startsWith('346')) return 'Direito Civil';
+    if(c.startsWith('347')) return 'Direito Processual Civil';
+    if(c.startsWith('348')) return 'Direito';
+    if(c.startsWith('349.6')) return 'Direito Ambiental';
+    if(c.startsWith('349')) return 'Direito do Trabalho';
+    if(c.startsWith('331')) return 'Direito do Trabalho';
+    if(c.startsWith('332')||c.startsWith('333')||c.startsWith('334')||c.startsWith('335')||c.startsWith('336')) return 'Direito Financeiro';
+    if(c.startsWith('320')) return 'Ciência Política';
+    if(c.startsWith('330')) return 'Economia';
+    if(c.startsWith('360')||c.startsWith('362')) return 'Direito Previdenciário';
+    if(c.startsWith('364')) return 'Criminologia';
+    if(c.startsWith('370')) return 'Educação';
+    if(c.startsWith('300')||c.startsWith('301')) return 'Ciências Sociais';
+    return '';
 }
 
 function areaParaLabel(o){
@@ -2277,7 +2308,7 @@ function normClassificacao(o){
   if(!c) return '';
   if(!/^\d/.test(c)) return c; // já é texto
   const codigo=c.match(/^[\d.]+/)?.[0]||'';
-  return cddParaArea(codigo)||c;
+  return cdd_para_area(codigo)||c;
 }
 
 function normalizarRegistro(o){
