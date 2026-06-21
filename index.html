@@ -1198,12 +1198,11 @@ function saveEmp(){
 }
 function gtombo(){const t='BMLRB-'+String(ctr).padStart(5,'0');ctr++;save();return t;}
 function updPrev(){document.getElementById('prev-tombo').textContent='Próximo: BMLRB-'+String(ctr).padStart(5,'0');}
-// Capa e tab são gerenciadas nas variáveis globais acimafunction updStats(){
+function updStats(){
   document.getElementById('st-total').textContent=acervo.length;
   document.getElementById('st-livros').textContent=acervo.filter(o=>o.tipo==='Livro').length;
   updStatsEmp();
 }
-// tabAtual gerenciado globalmente
 function sw(tab,pushState){
   if(pushState!==false&&tab!==tabAtual){history.pushState({tab:tab},'','');}
   tabAtual=tab;
