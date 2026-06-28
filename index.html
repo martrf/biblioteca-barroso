@@ -423,7 +423,7 @@ window.dispatchEvent(new Event('fb-ready'));
       <i class="ti ti-adjustments-horizontal"></i> Pesquisa avançada <i class="ti ti-chevron-down"></i>
     </button>
     <div class="adv-panel" id="adv-panel">
-      <div class="adv-grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="adv-grid">
         <div class="af"><label>Título</label><input type="text" id="a-titulo" placeholder="Palavra(s) no título"></div>
         <div class="af"><label>Autor</label><input type="text" id="a-autor" placeholder="Nome do autor"></div>
         <div class="af"><label>Ano</label><input type="text" id="a-ano" placeholder="Ex.: 2023 ou 2010-2020"></div>
@@ -431,12 +431,39 @@ window.dispatchEvent(new Event('fb-ready'));
         <div class="af"><label>Área do Direito</label>
           <select id="a-area">
             <option value="">Todas as áreas</option>
-            <optgroup label="Direito Público"><option>Direito Constitucional</option><option>Direito Administrativo</option><option>Direito Internacional Público</option><option>Direito Internacional Privado</option><option>Direito Tributário</option><option>Direito Financeiro</option><option>Direito Previdenciário</option><option>Direito Ambiental</option><option>Direito Eleitoral</option><option>Direito Urbanístico</option><option>Direito Militar</option></optgroup>
-            <optgroup label="Direito Privado"><option>Direito Civil</option><option>Direito Empresarial / Comercial</option><option>Direito do Consumidor</option><option>Direito Imobiliário</option><option>Direito de Família e Sucessões</option><option>Direito Contratual</option></optgroup>
-            <optgroup label="Direito Processual"><option>Direito Processual Civil</option><option>Direito Processual Penal</option><option>Direito Processual Constitucional</option><option>Direito Processual do Trabalho</option></optgroup>
-            <optgroup label="Direito Social"><option>Direito do Trabalho</option><option>Direitos Humanos</option><option>Direito da Criança e do Adolescente</option><option>Direito da Saúde</option></optgroup>
-            <optgroup label="Direito Penal"><option>Direito Penal</option><option>Criminologia</option><option>Execução Penal</option></optgroup>
-            <optgroup label="Outros"><option>Filosofia do Direito / Teoria Geral</option><option>Direito Digital / Tecnologia</option><option>Bioética e Biodireito</option><option>Direito Comparado</option><option>Interdisciplinar / Geral</option></optgroup>
+            <optgroup label="Direito Público">
+              <option>Direito Constitucional</option>
+              <option>Direito Administrativo</option>
+              <option>Direito Internacional Público</option>
+              <option>Direito Tributário</option>
+              <option>Direito Financeiro</option>
+              <option>Direito Previdenciário</option>
+              <option>Direito Ambiental</option>
+              <option>Direito Eleitoral</option>
+              <option>Direito Municipal</option>
+              <option>Direito Militar</option>
+            </optgroup>
+            <optgroup label="Direito Privado">
+              <option>Direito Civil</option>
+              <option>Direito Empresarial / Comercial</option>
+              <option>Direito do Trabalho</option>
+              <option>Direito Processual Civil</option>
+            </optgroup>
+            <optgroup label="Direitos Humanos e Fundamentais">
+              <option>Direitos Humanos</option>
+              <option>Direitos Fundamentais</option>
+              <option>Direito Penal</option>
+              <option>Criminologia</option>
+            </optgroup>
+            <optgroup label="Outras Áreas">
+              <option>Ciência Política</option>
+              <option>Economia</option>
+              <option>Ciências Sociais</option>
+              <option>Educação</option>
+              <option>Direito Digital / Tecnologia</option>
+              <option>Direito da Saúde</option>
+              <option>Direito</option>
+            </optgroup>
           </select>
         </div>
         <div class="af"><label>Tipo de Material</label>
@@ -587,12 +614,27 @@ window.dispatchEvent(new Event('fb-ready'));
           </div>
           <div class="fld half"><label>Área do Direito</label>
             <select id="f-area" onchange="atualizarClassPreview()"><option value="">— Selecione a Área —</option>
-              <optgroup label="Direito Público"><option>Direito Constitucional</option><option>Direito Administrativo</option><option>Direito Internacional Público</option><option>Direito Internacional Privado</option><option>Direito Tributário</option><option>Direito Financeiro</option><option>Direito Previdenciário</option><option>Direito Ambiental</option><option>Direito Eleitoral</option><option>Direito Urbanístico</option><option>Direito Militar</option></optgroup>
-              <optgroup label="Direito Privado"><option>Direito Civil</option><option>Direito Empresarial / Comercial</option><option>Direito do Consumidor</option><option>Direito Imobiliário</option><option>Direito de Família e Sucessões</option><option>Direito Contratual</option></optgroup>
-              <optgroup label="Direito Processual"><option>Direito Processual Civil</option><option>Direito Processual Penal</option><option>Direito Processual Constitucional</option><option>Direito Processual do Trabalho</option></optgroup>
-              <optgroup label="Direito Social"><option>Direito do Trabalho</option><option>Direitos Humanos</option><option>Direito da Criança e do Adolescente</option><option>Direito da Saúde</option></optgroup>
-              <optgroup label="Direito Penal"><option>Direito Penal</option><option>Criminologia</option><option>Execução Penal</option></optgroup>
-              <optgroup label="Outros"><option>Filosofia do Direito / Teoria Geral</option><option>Direito Digital / Tecnologia</option><option>Bioética e Biodireito</option><option>Direito Comparado</option><option>Interdisciplinar / Geral</option></optgroup>
+              <optgroup label="Direito Público">
+                <option>Direito Constitucional</option><option>Direito Administrativo</option>
+                <option>Direito Internacional Público</option><option>Direito Tributário</option>
+                <option>Direito Financeiro</option><option>Direito Previdenciário</option>
+                <option>Direito Ambiental</option><option>Direito Eleitoral</option>
+                <option>Direito Municipal</option><option>Direito Militar</option>
+              </optgroup>
+              <optgroup label="Direito Privado">
+                <option>Direito Civil</option><option>Direito Empresarial / Comercial</option>
+                <option>Direito do Trabalho</option><option>Direito Processual Civil</option>
+              </optgroup>
+              <optgroup label="Direitos Humanos e Fundamentais">
+                <option>Direitos Humanos</option><option>Direitos Fundamentais</option>
+                <option>Direito Penal</option><option>Criminologia</option>
+              </optgroup>
+              <optgroup label="Outras Áreas">
+                <option>Ciência Política</option><option>Economia</option>
+                <option>Ciências Sociais</option><option>Educação</option>
+                <option>Direito Digital / Tecnologia</option><option>Direito da Saúde</option>
+                <option>Direito</option>
+              </optgroup>
             </select>
           </div>
           <div class="fld full"><label>Assunto / Palavras-chave</label><input type="text" id="f-assunto" placeholder="Termos separados por ponto-e-vírgula"></div>
@@ -822,10 +864,10 @@ window.dispatchEvent(new Event('fb-ready'));
             <option value="">Todas as áreas</option>
             <optgroup label="Direito Público">
               <option>Direito Constitucional</option><option>Direito Administrativo</option>
-              <option>Direito Internacional Público</option><option>Direito Internacional Privado</option>
-              <option>Direito Tributário</option><option>Direito Financeiro</option>
-              <option>Direito Previdenciário</option><option>Direito Ambiental</option>
-              <option>Direito Eleitoral</option><option>Direito Urbanístico</option>
+              <option>Direito Internacional Público</option><option>Direito Tributário</option>
+              <option>Direito Financeiro</option><option>Direito Previdenciário</option>
+              <option>Direito Ambiental</option><option>Direito Eleitoral</option>
+              <option>Direito Municipal</option><option>Direito Militar</option>
             </optgroup>
             <optgroup label="Direito Privado">
               <option>Direito Civil</option><option>Direito Empresarial / Comercial</option>
@@ -1276,7 +1318,7 @@ function buscarAdv(){
     });
   }
   if(ftmb)res=res.filter(o=>(o.tombo||'').toLowerCase().includes(ftmb));
-  if(farea)res=res.filter(o=>(o.area||'').includes(farea));
+  if(farea)res=res.filter(o=>(o.area||'').toLowerCase()===farea.toLowerCase());
   if(ftipo)res=res.filter(o=>o.tipo===ftipo);
   if(fest)res=res.filter(o=>(o.estante||o.localizacao||'').toLowerCase().includes(fest));
   mostrarRes(res,chips);
