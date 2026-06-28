@@ -455,6 +455,39 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direito Penal</option>
               <option>Criminologia</option>
             </optgroup>
+            <optgroup label="Outras Ciências">
+              <option>Ciência Política</option>
+              <option>Economia</option>
+              <option>Ciências Sociais</option>
+              <option>Educação</option>
+              <option>Filosofia</option>
+              <option>Administração</option>
+              <option>Direito Digital / Tecnologia</option>
+              <option>Direito da Saúde</option>
+              <option>Direito</option>
+            </optgroup>
+            <optgroup label="Humanidades">
+              <option>Literatura</option>
+              <option>História</option>
+              <option>Biografia</option>
+              <option>Religião / Espiritismo</option>
+              <option>Arte e Cultura</option>
+              <option>Filosofia do Direito / Teoria Geral</option>
+              <option>Linguística</option>
+              <option>Geografia / Viagens</option>
+            </optgroup>
+            <optgroup label="Direito Privado">
+              <option>Direito Civil</option>
+              <option>Direito Empresarial / Comercial</option>
+              <option>Direito do Trabalho</option>
+              <option>Direito Processual Civil</option>
+            </optgroup>
+            <optgroup label="Direitos Humanos e Fundamentais">
+              <option>Direitos Humanos</option>
+              <option>Direitos Fundamentais</option>
+              <option>Direito Penal</option>
+              <option>Criminologia</option>
+            </optgroup>
             <optgroup label="Outras Áreas">
               <option>Ciência Política</option>
               <option>Economia</option>
@@ -863,11 +896,49 @@ window.dispatchEvent(new Event('fb-ready'));
           <select id="etq-area" onchange="renderEtiquetas()">
             <option value="">Todas as áreas</option>
             <optgroup label="Direito Público">
-              <option>Direito Constitucional</option><option>Direito Administrativo</option>
-              <option>Direito Internacional Público</option><option>Direito Tributário</option>
-              <option>Direito Financeiro</option><option>Direito Previdenciário</option>
-              <option>Direito Ambiental</option><option>Direito Eleitoral</option>
-              <option>Direito Municipal</option><option>Direito Militar</option>
+              <option>Direito Constitucional</option>
+              <option>Direito Administrativo</option>
+              <option>Direito Internacional Público</option>
+              <option>Direito Tributário</option>
+              <option>Direito Financeiro</option>
+              <option>Direito Previdenciário</option>
+              <option>Direito Ambiental</option>
+              <option>Direito Eleitoral</option>
+              <option>Direito Municipal</option>
+              <option>Direito Militar</option>
+            </optgroup>
+            <optgroup label="Direito Privado">
+              <option>Direito Civil</option>
+              <option>Direito Empresarial / Comercial</option>
+              <option>Direito do Trabalho</option>
+              <option>Direito Processual Civil</option>
+            </optgroup>
+            <optgroup label="Direitos Humanos e Fundamentais">
+              <option>Direitos Humanos</option>
+              <option>Direitos Fundamentais</option>
+              <option>Direito Penal</option>
+              <option>Criminologia</option>
+            </optgroup>
+            <optgroup label="Outras Ciências">
+              <option>Ciência Política</option>
+              <option>Economia</option>
+              <option>Ciências Sociais</option>
+              <option>Educação</option>
+              <option>Filosofia</option>
+              <option>Administração</option>
+              <option>Direito Digital / Tecnologia</option>
+              <option>Direito da Saúde</option>
+              <option>Direito</option>
+            </optgroup>
+            <optgroup label="Humanidades">
+              <option>Literatura</option>
+              <option>História</option>
+              <option>Biografia</option>
+              <option>Religião / Espiritismo</option>
+              <option>Arte e Cultura</option>
+              <option>Filosofia do Direito / Teoria Geral</option>
+              <option>Linguística</option>
+              <option>Geografia / Viagens</option>
             </optgroup>
             <optgroup label="Direito Privado">
               <option>Direito Civil</option><option>Direito Empresarial / Comercial</option>
@@ -1420,7 +1491,7 @@ function renderCarousel(){
     if(/relat[oó]rio|total de|registros|gabinete|data:|n[oú]mero/i.test(o.titulo)) return false;
     if(!o.autor&&!o.area&&!o.ano) return false;
     return true;
-  }).slice(-20).reverse();
+  }).sort((a,b)=>new Date(b.dataCad||0)-new Date(a.dataCad||0)).slice(0,20);
   car.innerHTML=ultimas.map(o=>{
     const url=getCoverUrl(o);
     const icon=TIPO_ICON[o.tipo]||'ti-book';
