@@ -1005,18 +1005,31 @@ async function sbCarregarAcervo(){
   try{
     await waitFb();
     const db=fbDb();if(!db)return[];
-    const snap=await db.collection('acervo').orderBy('tombo').get();
-    return snap.docs.map(d=>{const r=d.data();return{
-      id:d.id,tombo:r.tombo,titulo:r.titulo,subtitulo:r.subtitulo,
-      autor:r.autor,organizador:r.organizador,editora:r.editora,
-      local_pub:r.local_pub,ano:r.ano,volume:r.volume,edicao:r.edicao,
-      paginas:r.paginas,isbn:r.isbn,tipo:r.tipo,area:r.area,
-      assunto:r.assunto,assuntoEspecifico:r.assunto_especifico,
-      sobrenomeClass:r.sobrenome_class,localizacao:r.localizacao,
-      estante:r.estante,colecao:r.colecao||'gabinete',
-      classificacao:r.classificacao,exemplares:r.exemplares,
-      notas:r.notas,capaUrl:r.capa_url,dataCad:r.data_cad
-    };});
+    let todos=[];
+    let ultimo=null;
+    while(true){
+      let query=db.collection('acervo').orderBy('tombo').limit(1000);
+      if(ultimo) query=query.startAfter(ultimo);
+      const snap=await query.get();
+      if(snap.empty) break;
+      snap.docs.forEach(d=>{
+        const r=d.data();
+        todos.push({
+          id:d.id,tombo:r.tombo,titulo:r.titulo,subtitulo:r.subtitulo,
+          autor:r.autor,organizador:r.organizador,editora:r.editora,
+          local_pub:r.local_pub,ano:r.ano,volume:r.volume,edicao:r.edicao,
+          paginas:r.paginas,isbn:r.isbn,tipo:r.tipo,area:r.area,
+          assunto:r.assunto,assuntoEspecifico:r.assunto_especifico,
+          sobrenomeClass:r.sobrenome_class,localizacao:r.localizacao,
+          estante:r.estante,colecao:r.colecao||'gabinete',
+          classificacao:r.classificacao,exemplares:r.exemplares,
+          notas:r.notas,capaUrl:r.capa_url,dataCad:r.data_cad
+        });
+      });
+      ultimo=snap.docs[snap.docs.length-1];
+      if(snap.docs.length<1000) break;
+    }
+    return todos;
   }catch(e){console.error('Firebase carregar acervo:',e);return[];}
 }
 
