@@ -1008,14 +1008,14 @@ async function sbCarregarAcervo(){
     let todos=[];
     let ultimo=null;
     while(true){
-      let query=db.collection('acervo').orderBy('tombo').limit(1000);
+      let query=db.collection('acervo').limit(1000);
       if(ultimo) query=query.startAfter(ultimo);
       const snap=await query.get();
       if(snap.empty) break;
       snap.docs.forEach(d=>{
         const r=d.data();
         todos.push({
-          id:d.id,tombo:r.tombo,titulo:r.titulo,subtitulo:r.subtitulo,
+          id:d.id,tombo:r.tombo||d.id,titulo:r.titulo,subtitulo:r.subtitulo,
           autor:r.autor,organizador:r.organizador,editora:r.editora,
           local_pub:r.local_pub,ano:r.ano,volume:r.volume,edicao:r.edicao,
           paginas:r.paginas,isbn:r.isbn,tipo:r.tipo,area:r.area,
@@ -1029,6 +1029,8 @@ async function sbCarregarAcervo(){
       ultimo=snap.docs[snap.docs.length-1];
       if(snap.docs.length<1000) break;
     }
+    // Ordena por tombo localmente
+    todos.sort((a,b)=>(a.tombo||'').localeCompare(b.tombo||''));
     return todos;
   }catch(e){console.error('Firebase carregar acervo:',e);return[];}
 }
