@@ -347,6 +347,7 @@ window.dispatchEvent(new Event('fb-ready'));
     <span class="admin-tabs" id="admin-tabs">
     <button class="tn" onclick="sw('cadastro')" id="tab-cadastro"><i class="ti ti-book-upload"></i>Catalogar</button>
     <button class="tn" onclick="sw('acervo')" id="tab-acervo"><i class="ti ti-layout-list"></i>Acervo</button>
+    <button class="tn" onclick="sw('relatorio')" id="tab-relatorio"><i class="ti ti-chart-bar"></i>Relatório</button>
     <button class="tn" onclick="sw('circulacao')" id="tab-circulacao"><i class="ti ti-arrows-exchange"></i>Circulação</button>
     <button class="tn" onclick="sw('etiquetas')" id="tab-etiquetas"><i class="ti ti-tag"></i>Etiquetas</button>
     <button class="tn" onclick="sw('importar')" id="tab-importar"><i class="ti ti-file-spreadsheet"></i>Importar Excel</button>
@@ -1037,6 +1038,21 @@ window.dispatchEvent(new Event('fb-ready'));
 </section>
 
 <!-- IMPORTAR -->
+<section class="view" id="view-relatorio">
+  <div class="page-wrap">
+    <div class="fc">
+      <div class="fct"><i class="ti ti-chart-bar" style="color:var(--gold)"></i> Relatório de Catalogação</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="btn btn-o" onclick="gerarRelatorio('hoje')"><i class="ti ti-calendar-day"></i> Hoje</button>
+        <button class="btn btn-o" onclick="gerarRelatorio('semana')"><i class="ti ti-calendar-week"></i> Esta semana</button>
+        <button class="btn btn-o" onclick="gerarRelatorio('mes')"><i class="ti ti-calendar-month"></i> Este mês</button>
+        <button class="btn btn-o" onclick="gerarRelatorio('total')"><i class="ti ti-database"></i> Total do acervo</button>
+      </div>
+      <div id="relatorio-resultado"></div>
+    </div>
+  </div>
+</section>
+
 <section class="view" id="view-importar">
   <div class="page-wrap">
     <div class="fc">
@@ -1391,6 +1407,7 @@ function sw(tab,pushState){
   document.querySelectorAll('.tn').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+tab).classList.add('active');
   const tabEl=document.getElementById('tab-'+tab);if(tabEl)tabEl.classList.add('active');
+  if(tab==='relatorio'){gerarRelatorio('hoje');}
   if(tab==='inicio'){
     document.getElementById('results-area').style.display='none';
     document.getElementById('inicio-default').style.display='block';
@@ -2545,6 +2562,42 @@ function normalizarRegistro(o){
   return o;
 }
 
+function gerarRelatorio(periodo){
+  const agora=new Date();
+  const hoje=new Date(agora.getFullYear(),agora.getMonth(),agora.getDate());
+  const semana=new Date(hoje); semana.setDate(hoje.getDate()-hoje.getDay());
+  const mes=new Date(agora.getFullYear(),agora.getMonth(),1);
+  let filtro,titulo;
+  if(periodo==='hoje'){filtro=d=>new Date(d)>=hoje;titulo='Catalogados hoje ('+hoje.toLocaleDateString('pt-BR')+')';}
+  else if(periodo==='semana'){filtro=d=>new Date(d)>=semana;titulo='Catalogados esta semana';}
+  else if(periodo==='mes'){filtro=d=>new Date(d)>=mes;titulo='Catalogados em '+agora.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});}
+  else{filtro=()=>true;titulo='Total do acervo';}
+  const obras=acervo.filter(o=>filtro(o.dataCad||'2024-01-01'));
+  const porArea={};obras.forEach(o=>{const a=o.area||'Sem área';porArea[a]=(porArea[a]||0)+1;});
+  const areasOrdenadas=Object.entries(porArea).sort((a,b)=>b[1]-a[1]);
+  const porTipo={};obras.forEach(o=>{const t=o.tipo||'Livro';porTipo[t]=(porTipo[t]||0)+1;});
+  const ultimas=[...obras].sort((a,b)=>new Date(b.dataCad||0)-new Date(a.dataCad||0)).slice(0,10);
+  document.getElementById('relatorio-resultado').innerHTML=`
+    <div style="background:var(--navy);color:#fff;border-radius:10px;padding:18px;margin-bottom:16px;text-align:center">
+      <div style="font-size:13px;opacity:.6;margin-bottom:4px">${titulo}</div>
+      <div style="font-size:48px;font-weight:700;font-family:var(--font-d);color:var(--gold)">${obras.length}</div>
+      <div style="font-size:13px;opacity:.6">obras</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="fc"><div class="fct" style="font-size:14px">Por tipo</div>
+        ${Object.entries(porTipo).map(([t,n])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${t}</span><strong>${n}</strong></div>`).join('')}
+      </div>
+      <div class="fc"><div class="fct" style="font-size:14px">Por área (top 10)</div>
+        ${areasOrdenadas.slice(0,10).map(([a,n])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span>${a}</span><strong>${n}</strong></div>`).join('')}
+      </div>
+    </div>
+    ${ultimas.length?`<div class="fc"><div class="fct" style="font-size:14px">Últimas obras catalogadas</div>
+      ${ultimas.map(o=>`<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
+        <div style="font-weight:600">${o.titulo||'Sem título'}</div>
+        <div style="color:var(--gray-400)">${o.autor||''} ${o.dataCad?'• '+new Date(o.dataCad).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}</div>
+      </div>`).join('')}</div>`:''}`;
+}
+
 function normalizarTodos(){
   if(!acervo.length){toast('Nenhum registro para normalizar.','');return;}
   if(!confirm('Normalizar títulos, autores e classificações de todos os '+acervo.length+' registros?')) return;
@@ -2808,7 +2861,7 @@ function logoutAdmin(){
   document.getElementById('admin-footer-btn').textContent='admin';
   document.getElementById('admin-footer-btn').style.color='';
   // Se estiver em aba admin, voltar para pesquisa
-  const abasAdmin=['cadastro','acervo','circulacao','etiquetas','importar'];
+  const abasAdmin=['cadastro','acervo','circulacao','etiquetas','importar','relatorio'];
   if(abasAdmin.includes(tabAtual)) sw('inicio');
   toast('Sessão encerrada.','');
 }
