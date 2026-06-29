@@ -454,6 +454,7 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direitos Fundamentais</option>
               <option>Direito Penal</option>
               <option>Criminologia</option>
+              <option>Direito Processual Penal</option>
               <option>Filosofia do Direito / Teoria Geral</option>
               <option>Direito</option>
             </optgroup>
@@ -490,6 +491,7 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direitos Fundamentais</option>
               <option>Direito Penal</option>
               <option>Criminologia</option>
+              <option>Direito Processual Penal</option>
             </optgroup>
             <optgroup label="Outras Ciências">
               <option>Ciência Política</option>
@@ -523,6 +525,7 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direitos Fundamentais</option>
               <option>Direito Penal</option>
               <option>Criminologia</option>
+              <option>Direito Processual Penal</option>
             </optgroup>
             <optgroup label="Outras Áreas">
               <option>Ciência Política</option>
@@ -697,6 +700,7 @@ window.dispatchEvent(new Event('fb-ready'));
               <optgroup label="Direitos Humanos e Fundamentais">
                 <option>Direitos Humanos</option><option>Direitos Fundamentais</option>
                 <option>Direito Penal</option><option>Criminologia</option>
+              <option>Direito Processual Penal</option>
               </optgroup>
               <optgroup label="Outras Áreas">
                 <option>Ciência Política</option><option>Economia</option>
@@ -954,6 +958,7 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direitos Fundamentais</option>
               <option>Direito Penal</option>
               <option>Criminologia</option>
+              <option>Direito Processual Penal</option>
               <option>Filosofia do Direito / Teoria Geral</option>
               <option>Direito</option>
             </optgroup>
@@ -990,6 +995,7 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direitos Fundamentais</option>
               <option>Direito Penal</option>
               <option>Criminologia</option>
+              <option>Direito Processual Penal</option>
             </optgroup>
             <optgroup label="Outras Ciências">
               <option>Ciência Política</option>
@@ -1023,6 +1029,7 @@ window.dispatchEvent(new Event('fb-ready'));
             <optgroup label="Outros">
               <option>Direito do Trabalho</option><option>Direitos Humanos</option>
               <option>Direito Penal</option><option>Criminologia</option>
+              <option>Direito Processual Penal</option>
               <option>Filosofia do Direito / Teoria Geral</option>
             </optgroup>
           </select>
@@ -1396,7 +1403,18 @@ function saveEmp(){
   clearTimeout(window._backupTimer);
   window._backupTimer=setTimeout(()=>salvarBackupHTML(),3000);
 }
-function gtombo(){const t='BMLRB-'+String(ctr).padStart(5,'0');ctr++;save();return t;}
+function gtombo(){
+  // Garante que o ctr seja sempre maior que o último tombo existente
+  if(acervo.length>0){
+    const tombos=acervo.map(o=>parseInt((o.tombo||'').replace('BMLRB-',''))||0);
+    const maxTombo=Math.max(...tombos);
+    if(ctr<=maxTombo) ctr=maxTombo+1;
+  }
+  const t='BMLRB-'+String(ctr).padStart(5,'0');
+  ctr++;
+  localStorage.setItem('bmlrb_ctr',ctr);
+  return t;
+}
 function updPrev(){document.getElementById('prev-tombo').textContent='Próximo: BMLRB-'+String(ctr).padStart(5,'0');}
 function updStats(){
   document.getElementById('st-total').textContent=acervo.length;
@@ -1859,7 +1877,25 @@ function editObra(){
     setModoEdicao(true);atualizarClassPreview();
   },100);
 }
-function delObra(){if(!curId)return;if(!confirm('Excluir esta obra permanentemente?'))return;acervo=acervo.filter(o=>o.id!==curId);save();updStats();fmob();listaAc=listaAc.filter(o=>o.id!==curId);renderAcervo();toast('Obra excluída.','error');}
+function delObra(){
+  if(!curId)return;
+  if(!confirm('Excluir esta obra permanentemente?'))return;
+  const id=curId;
+  const obra=acervo.find(o=>o.id===id);
+  acervo=acervo.filter(o=>o.id!==id);
+  save();updStats();fmob();
+  listaAc=listaAc.filter(o=>o.id!==id);
+  renderAcervo();
+  // Delete from Firebase
+  if(obra&&obra.tombo){
+    fbDb().collection('acervo').doc(obra.tombo).delete()
+      .then(()=>toast('Obra excluída!','error'))
+      .catch(e=>{console.error(e);toast('Obra excluída localmente','error');});
+  } else {
+    toast('Obra excluída!','error');
+  }
+  localStorage.removeItem('bmlrb_ac');
+}
 
 function dov(e){e.preventDefault();document.getElementById('iz').classList.add('drag');}
 function dlv(){document.getElementById('iz').classList.remove('drag');}
