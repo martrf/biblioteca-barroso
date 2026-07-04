@@ -343,6 +343,17 @@ window.dispatchEvent(new Event('fb-ready'));
     </svg>
     <div class="top-brand-name">Biblioteca Ministro Luís Roberto Barroso</div>
   </div>
+
+  <!-- SELETOR DE PERFIL -->
+  <div style="display:flex;align-items:center;gap:6px;padding:0 12px;border-right:1px solid rgba(255,255,255,.08);flex-shrink:0">
+    <i class="ti ti-books" style="color:var(--gold);font-size:14px"></i>
+    <select id="perfil-select" onchange="trocarPerfil(this.value)" style="background:transparent;border:none;color:#fff;font-family:var(--font-b);font-size:13px;font-weight:600;cursor:pointer;outline:none;padding:4px 2px">
+      <option value="gabinete" style="background:#1a2744">Gabinete</option>
+      <option value="escritorio" style="background:#1a2744">Escritório</option>
+      <option value="biblioteca" style="background:#1a2744">Biblioteca</option>
+    </select>
+  </div>
+
   <nav class="top-nav">
     <span class="admin-tabs" id="admin-tabs">
     <button class="tn" onclick="sw('cadastro')" id="tab-cadastro"><i class="ti ti-book-upload"></i>Catalogar</button>
@@ -674,7 +685,7 @@ window.dispatchEvent(new Event('fb-ready'));
             <select id="f-colecao">
               <option value="gabinete">Gabinete</option>
               <option value="escritorio">Escritório</option>
-              <option value="mezanino">Mezanino</option>
+              <option value="biblioteca">Biblioteca</option>
             </select>
           </div>
           <div class="fld"><label>Classificação</label>
@@ -1263,7 +1274,12 @@ async function load(){
       emprestimos=JSON.parse(localStorage.getItem('bmlrb_emp')||'[]');
       acervo.forEach(o=>{if(!o.colecao)o.colecao='gabinete';});
       updStats();updPrev();
-      setTimeout(()=>{renderCarousel();renderPI();},50);
+      setTimeout(()=>{
+        // Inicializa o seletor de perfil
+        const sel=document.getElementById('perfil-select');
+        if(sel) sel.value=perfilAtual;
+        renderCarousel();renderPI();
+      },50);
       setStatus('✅ '+acervo.length+' obras (cache)','#4caf81');
       setTimeout(()=>setStatus(''),3000);
       // 2. ATUALIZA DO FIREBASE EM SEGUNDO PLANO
@@ -1395,9 +1411,23 @@ function gtombo(){
   return t;
 }
 function updPrev(){document.getElementById('prev-tombo').textContent='Próximo: BMLRB-'+String(ctr).padStart(5,'0');}
+let perfilAtual=localStorage.getItem('bmlrb_perfil')||'gabinete';
+function trocarPerfil(perfil){
+  perfilAtual=perfil;
+  localStorage.setItem('bmlrb_perfil',perfil);
+  document.getElementById('perfil-select').value=perfil;
+  // Filtra o acervo pelo perfil
+  acervoPerfil=acervo.filter(o=>(o.colecao||'gabinete')===perfil);
+  listaAc=[...acervoPerfil];
+  updStats();
+  renderCarousel();
+  if(tabAtual==='acervo') renderAcervo();
+}
+function acervoPerfil(){return acervo.filter(o=>(o.colecao||'gabinete')===perfilAtual);}
 function updStats(){
-  document.getElementById('st-total').textContent=acervo.length;
-  document.getElementById('st-livros').textContent=acervo.filter(o=>o.tipo==='Livro').length;
+  const filtrado=acervo.filter(o=>(o.colecao||'gabinete')===perfilAtual);
+  document.getElementById('st-total').textContent=filtrado.length;
+  document.getElementById('st-livros').textContent=filtrado.filter(o=>o.tipo==='Livro').length;
   updStatsEmp();
 }
 function sw(tab,pushState){
@@ -1414,7 +1444,7 @@ function sw(tab,pushState){
     renderCarousel();
     renderPI();
   }
-  if(tab==='acervo'){listaAc=[...acervo];pgAc=1;renderAcervo();}
+  if(tab==='acervo'){listaAc=acervo.filter(o=>(o.colecao||'gabinete')===perfilAtual);pgAc=1;renderAcervo();}
   if(tab==='etiquetas'){renderEtiquetas();}
   if(tab==='circulacao'){
     const ds=document.getElementById('emp-data-saida');
@@ -1431,9 +1461,9 @@ function gv(id){return document.getElementById(id)?.value.trim()||'';}
 function buscar(){
   const q=normBusca(gv('s-main'));
   if(!q){limparRes();return;}
-  // Cada palavra deve aparecer em pelo menos um campo
   const palavras=q.split(/\s+/).filter(p=>p.length>1);
-  const res=acervo.filter(o=>{
+  const base=acervo.filter(o=>(o.colecao||'gabinete')===perfilAtual);
+  const res=base.filter(o=>{
     const txt=normBusca([o.titulo,o.subtitulo,o.autor,o.area,o.assunto,o.editora,o.tombo,o.classificacao].join(' '));
     return palavras.every(p=>txt.includes(p));
   });
@@ -1455,7 +1485,7 @@ function buscarAdv(){
   if(fass2)chips.push({label:op2.toUpperCase()+': '+gv('a-assunto2')});
   if(fass3)chips.push({label:op3.toUpperCase()+': '+gv('a-assunto3')});
   if(!chips.length&&!ftmb&&!fed&&!fest){alert('Preencha ao menos um campo para pesquisar.');return;}
-  let res=[...acervo];
+  let res=acervo.filter(o=>(o.colecao||'gabinete')===perfilAtual);
   if(ft)res=res.filter(o=>normBusca(o.titulo+' '+(o.subtitulo||'')).includes(normBusca(ft)));
   if(fa)res=res.filter(o=>normBusca(o.autor||'').includes(normBusca(fa)));
   if(fano){const range=fano.match(/(\d{4})-(\d{4})/);if(range)res=res.filter(o=>{const y=parseInt(o.ano);return y>=parseInt(range[1])&&y<=parseInt(range[2]);});else res=res.filter(o=>(o.ano||'').toString().includes(fano));}
@@ -1502,17 +1532,17 @@ function coverHtml(o,w,h){
 
 function colLabel(col){
   if(col==='escritorio') return 'Escritório';
-  if(col==='mezanino') return 'Mezanino';
+  if(col==='biblioteca') return 'Biblioteca';
   return 'Gabinete';
 }
 function colBadge(col){
-  const cls=col==='escritorio'?'col-escritorio':col==='mezanino'?'col-mezanino':'col-gabinete';
+  const cls=col==='escritorio'?'col-escritorio':col==='biblioteca'?'col-biblioteca':'col-gabinete';
   return '<span class="tag '+cls+'" style="font-size:11px;padding:2px 9px;border-radius:10px;font-weight:600">'+colLabel(col)+'</span>';
 }
 function colDot(col,size){
   size=size||10;
   if(col==='escritorio') return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:#e8c84c;border:1px solid #c9a84c;vertical-align:middle;flex-shrink:0"></span>';
-  if(col==='mezanino') return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:#1a2744;border:1.5px solid #7090c0;vertical-align:middle;flex-shrink:0"></span>';
+  if(col==='biblioteca') return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:#1a2744;border:1.5px solid #7090c0;vertical-align:middle;flex-shrink:0"></span>';
   return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:#ddd;border:1px solid #bbb;vertical-align:middle;flex-shrink:0"></span>';
 }
 function renderPI(){
@@ -1557,6 +1587,7 @@ function renderCarousel(){
   if(!acervo.length){sec.style.display='none';return;}
   sec.style.display='block';
   const ultimas=[...acervo].filter(o=>{
+    if((o.colecao||'gabinete')!==perfilAtual) return false;
     if(!o.titulo||o.titulo.trim().length<4) return false;
     if(/relat[oó]rio|total de|registros|gabinete|data:|n[oú]mero/i.test(o.titulo)) return false;
     if(!o.autor&&!o.area&&!o.ano) return false;
@@ -2715,7 +2746,7 @@ function imprimirEtiquetas(modo){
     const areaLabel=areaParaLabel(o);
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     const extras=etqLinhas(o);
-    const dotStyle=o.colecao==='escritorio'?'background:#e8c84c;border:1px solid #c9a84c':o.colecao==='mezanino'?'background:#1a2744;border:1.5px solid #7090c0':'background:#ddd;border:1px solid #bbb';
+    const dotStyle=o.colecao==='escritorio'?'background:#e8c84c;border:1px solid #c9a84c':o.colecao==='biblioteca'?'background:#1a2744;border:1.5px solid #7090c0':'background:#ddd;border:1px solid #bbb';
     return `<div class="etq" style="position:relative">
       <div style="position:absolute;top:3mm;right:3mm;width:5mm;height:5mm;border-radius:50%;${dotStyle}"></div>
       <div class="etq-area">${areaLabel}</div>
