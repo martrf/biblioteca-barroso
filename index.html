@@ -618,19 +618,19 @@ window.dispatchEvent(new Event('fb-ready'));
 
       <form id="form-cad" onsubmit="salvar(event)">
         <div class="fg">
-          <div class="fld half"><label>Título <span class="req">*</span></label><input type="text" id="f-titulo" required placeholder="Título completo da obra"></div>
+          <div class="fld half"><label>Título </label><input type="text" id="f-titulo" placeholder="Título completo da obra"></div>
           <div class="fld"><label>Subtítulo</label><input type="text" id="f-subtitulo" placeholder="Subtítulo (se houver)"></div>
-          <div class="fld half"><label>Autor(es) <span class="req">*</span></label><input type="text" id="f-autor" required placeholder="Sobrenome, Nome; Sobrenome, Nome" oninput="atualizarClassPreview()"></div>
+          <div class="fld half"><label>Autor(es) </label><input type="text" id="f-autor" placeholder="Sobrenome, Nome; Sobrenome, Nome" oninput="atualizarClassPreview()"></div>
           <div class="fld"><label>Organizador / Editor</label><input type="text" id="f-org" placeholder="Org. ou Ed."></div>
           <div class="fld"><label>Editora</label><input type="text" id="f-editora" placeholder="Nome da editora"></div>
           <div class="fld"><label>Local de Publicação</label><input type="text" id="f-local" placeholder="Cidade, País"></div>
-          <div class="fld"><label>Ano <span class="req">*</span></label><input type="number" id="f-ano" required placeholder="AAAA" min="1500" max="2099"></div>
+          <div class="fld"><label>Ano </label><input type="number" id="f-ano" placeholder="AAAA" min="1500" max="2099"></div>
           <div class="fld"><label>Volume / Tomo</label><input type="text" id="f-volume" placeholder="Ex.: v. 1"></div>
           <div class="fld"><label>Edição</label><input type="text" id="f-edicao" placeholder="Ex.: 3. ed."></div>
           <div class="fld"><label>Páginas</label><input type="text" id="f-pag" placeholder="Ex.: 512 p."></div>
           <div class="fld"><label>ISBN / ISSN</label><input type="text" id="f-isbn" placeholder="ISBN ou ISSN"></div>
-          <div class="fld"><label>Tipo de Material <span class="req">*</span></label>
-            <select id="f-tipo" required><option value="">— Selecione —</option><option>Livro</option><option>Periódico</option><option>Tese</option><option>Dissertação</option><option>Monografia</option><option>Relatório</option><option>Atos Normativos</option><option>Jurisprudência</option><option>Material Audiovisual</option></select>
+          <div class="fld"><label>Tipo de Material </label>
+            <select id="f-tipo"><option value="">— Selecione —</option><option>Livro</option><option>Periódico</option><option>Tese</option><option>Dissertação</option><option>Monografia</option><option>Relatório</option><option>Atos Normativos</option><option>Jurisprudência</option><option>Material Audiovisual</option></select>
           </div>
           <div class="fld half"><label>Área do Direito</label>
             <select class="form-control" id="f-area">
@@ -791,7 +791,7 @@ window.dispatchEvent(new Event('fb-ready'));
       <div class="fct"><i class="ti ti-book-upload"></i> Registrar empréstimo</div>
       <div class="fg" style="grid-template-columns:1fr 1fr 1fr">
         <div class="fld half">
-          <label>Buscar obra por título, autor ou Nº tombo <span class="req">*</span></label>
+          <label>Buscar obra por título, autor ou Nº tombo </label>
           <div style="position:relative">
             <input type="text" id="emp-busca" placeholder="Ex.: BMLRB-00005 ou nome do autor..." oninput="buscarObraEmp()" autocomplete="off" style="width:100%">
             <div id="emp-sugestoes" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--gray-200);border-radius:var(--r);box-shadow:var(--sh);z-index:50;max-height:200px;overflow-y:auto"></div>
@@ -802,11 +802,11 @@ window.dispatchEvent(new Event('fb-ready'));
           <input type="text" id="emp-tombo" readonly placeholder="Preenchido automaticamente" style="background:var(--gray-100);cursor:default">
         </div>
         <div class="fld">
-          <label>Nome do Usuário <span class="req">*</span></label>
+          <label>Nome do Usuário </label>
           <input type="text" id="emp-nome" placeholder="Nome completo">
         </div>
         <div class="fld">
-          <label>E-mail do Usuário <span class="req">*</span></label>
+          <label>E-mail do Usuário </label>
           <input type="email" id="emp-email" placeholder="email@exemplo.com">
         </div>
         <div class="fld">
@@ -814,7 +814,7 @@ window.dispatchEvent(new Event('fb-ready'));
           <input type="date" id="emp-data-saida">
         </div>
         <div class="fld">
-          <label>Prazo de Devolução <span class="req">*</span></label>
+          <label>Prazo de Devolução </label>
           <input type="date" id="emp-data-prev">
         </div>
         <div class="fld full">
