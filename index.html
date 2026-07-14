@@ -1811,7 +1811,11 @@ function ver(id,lista){
     ['ISBN / ISSN',o.isbn],
     ['Tipo de material',o.tipo],
     ['Área do Direito',o.area||etqArea,true],
-    ['Localização',(o.classificacao||'')+(o.sobrenomeClass?'\n'+o.sobrenomeClass:'')],
+    ['Localização',(()=>{
+      const area=areaParaLabel(o);
+      const sob=(o.sobrenomeClass||sobrenome(o.autor||'')).toUpperCase();
+      return area+(sob?'\n'+sob:'');
+    })()],
     ['Assunto específico',o.assuntoEspecifico],
     ['Coleção',(o.colecao?colLabel(o.colecao):'')+((o.estante&&o.estante!=='-')?' — '+o.estante:'')],
     ['Exemplares',o.exemplares],
@@ -1824,9 +1828,10 @@ function ver(id,lista){
     .filter(([,v])=>v&&String(v).trim())
     .map(([l,v,f])=>{
       if(l==='Localização'){
-        const linhas=String(v).split('\n').filter(x=>x.trim());
-        const html=linhas.map((ln,i)=>`<div style="font-family:'Courier New',monospace;font-weight:700;font-size:${i===0?'11px':'13px'};letter-spacing:.08em;text-align:center;line-height:1.6">${ln.trim()}</div>`).join('');
-        return `<div class="mf"><label>${l}</label><div style="background:var(--navy);color:#fff;border-radius:8px;padding:12px 16px;margin-top:4px">${html}</div></div>`;
+        const loc=String(v);
+        const linhas=loc.split('\n').filter(x=>x.trim());
+        const html=linhas.map((ln,i)=>`<div style="font-family:'Courier New',monospace;font-weight:700;font-size:${i===0?'9px':'11px'};letter-spacing:.08em;text-align:center;line-height:1.6">${ln.trim().toUpperCase()}</div>`).join('');
+        return `<div class="mf"><label>${l}</label><div style="background:#1a2744;color:#fff;border-radius:6px;padding:8px 12px;margin-top:4px;display:inline-block;min-width:120px">${html}</div></div>`;
       }
       return '<div class="mf'+(f?' full':'')+'"><label>'+l+'</label><p>'+v+'</p></div>';
     })
