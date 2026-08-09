@@ -1159,6 +1159,7 @@ async function sbCarregarAcervo(){
           paginas:r.paginas,isbn:r.isbn,tipo:r.tipo,area:r.area,
           assunto:r.assunto,assuntoEspecifico:r.assunto_especifico,
           sobrenomeClass:r.sobrenome_class,localizacao:r.localizacao,
+          estante:r.estante,colecao:r.colecao||'gabinete',cdd:r.cdd||'',
           estante:r.estante,colecao:r.colecao||'gabinete',
           classificacao:r.classificacao,exemplares:r.exemplares,
           notas:r.notas,capaUrl:r.capa_url,dataCad:r.data_cad
@@ -1189,7 +1190,7 @@ async function sbSalvarAcervo(){
           tipo:o.tipo||'Livro',area:o.area||'',assunto:o.assunto||'',
           assunto_especifico:o.assuntoEspecifico||'',sobrenome_class:o.sobrenomeClass||'',
           localizacao:o.localizacao||'',estante:o.estante||'',
-          colecao:o.colecao||'gabinete',classificacao:o.classificacao||'',
+          colecao:o.colecao||'gabinete',classificacao:o.classificacao||'',cdd:o.cdd||'',
           exemplares:o.exemplares||'1',notas:o.notas||'',
           capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString()
         });
@@ -1713,7 +1714,7 @@ function salvar(e){e.preventDefault();
     titulo:normTitulo(gv('f-titulo')),subtitulo:normTitulo(gv('f-subtitulo')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
     editora:gv('f-editora'),local_pub:gv('f-local'),ano:gv('f-ano'),volume:gv('f-volume'),edicao:gv('f-edicao'),
     paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
-    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
+    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[\d.]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
     notas:gv('f-notas'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
     dataCad:curId?acervo.find(x=>x.id===curId).dataCad:new Date().toISOString()};
   if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
@@ -1812,8 +1813,16 @@ function ver(id,lista){
     ['Tipo de material',o.tipo],
     ['Área do Direito',o.area||etqArea,true],
     ['Localização',(()=>{
-      const area=areaParaLabel(o);
       const sob=(o.sobrenomeClass||sobrenome(o.autor||'')).toUpperCase();
+      if(o.colecao==='escritorio'){
+        // Escritório: CDD + assunto específico + sobrenome
+        const cdd=(o.cdd||o.classificacaoCdd||'').trim();
+        const assunto=(o.assuntoEspecifico||'').trim().toUpperCase();
+        const linhas=[cdd,assunto,sob].filter(x=>x);
+        return linhas.join('\n');
+      }
+      // Gabinete e Biblioteca: área + sobrenome
+      const area=areaParaLabel(o);
       return area+(sob?'\n'+sob:'');
     })()],
     ['Assunto específico',o.assuntoEspecifico],
@@ -2605,6 +2614,9 @@ function normalizarRegistro(o){
   o.titulo=normTitulo(o.titulo||'');
   o.subtitulo=normTitulo(o.subtitulo||'');
   o.autor=normAutor(o.autor||'');
+  // Guarda CDD original antes de normalizar (para etiqueta do Escritório)
+  const cddOriginal=(o.classificacao||'').trim();
+  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[\d.]+/)?.[0]||'';
   o.classificacao=normClassificacao(o);
   // Garante sobrenome para etiqueta
   if(!o.sobrenomeClass&&o.autor) o.sobrenomeClass=sobrenome(o.autor);
@@ -2721,13 +2733,16 @@ function renderEtiquetas(){
   if(!lista.length){grid.innerHTML='<div class="empty"><i class="ti ti-tag-off"></i><p>Nenhuma obra encontrada.</p></div>';return;}
 
   grid.innerHTML=lista.map(o=>{
-    const areaLabel=areaParaLabel(o);
+    const isEsc=o.colecao==='escritorio';
+    const areaLabel=isEsc?(o.cdd||''):(areaParaLabel(o));
+    const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
-    const extras=etqLinhas(o);
+    const extras=isEsc?[]:(etqLinhas(o));
     const selecionado=etqSelecionadas.has(o.tombo);
     return `<div onclick="toggleEtq('${o.tombo}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
       <div style="background:#fff;border:1.5px solid #1a2744;border-radius:5px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:64px">
         <div style="font-size:9px;font-weight:700;color:#1a2744;letter-spacing:.07em;line-height:1.3">${areaLabel}</div>
+        ${assunto?`<div style="font-size:8px;color:#333;font-style:italic;letter-spacing:.02em">${assunto}</div>`:''}
         ${extras.map(l=>l.tipo==='esp'
           ?`<div style="font-size:8px;color:#333;font-style:italic;letter-spacing:.02em">${l.txt}</div>`
           :`<div style="font-size:8px;color:#555;letter-spacing:.04em">${l.txt}</div>`).join('')}
@@ -2761,13 +2776,16 @@ function imprimirEtiquetas(modo){
   }
 
   const etqHTML=obras.map(o=>{
-    const areaLabel=areaParaLabel(o);
+    const isEsc=o.colecao==='escritorio';
+    const areaLabel=isEsc?(o.cdd||''):(areaParaLabel(o));
+    const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
-    const extras=etqLinhas(o);
-    const dotStyle=o.colecao==='escritorio'?'background:#e8c84c;border:1px solid #c9a84c':o.colecao==='mezanino'?'background:#1a2744;border:1.5px solid #7090c0':'background:#ddd;border:1px solid #bbb';
+    const extras=isEsc?[]:etqLinhas(o);
+    const dotStyle=o.colecao==='escritorio'?'background:#e8c84c;border:1px solid #c9a84c':o.colecao==='mezanino'||o.colecao==='biblioteca'?'background:#1a2744;border:1.5px solid #7090c0':'background:#ddd;border:1px solid #bbb';
     return `<div class="etq" style="position:relative">
       <div style="position:absolute;top:3mm;right:3mm;width:5mm;height:5mm;border-radius:50%;${dotStyle}"></div>
       <div class="etq-area">${areaLabel}</div>
+      ${assunto?`<div class="etq-esp">${assunto}</div>`:''}
       ${extras.map(l=>l.tipo==='esp'
         ?`<div class="etq-esp">${l.txt}</div>`
         :`<div class="etq-extra">${l.txt}</div>`).join('')}
