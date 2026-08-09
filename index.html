@@ -1815,13 +1815,13 @@ function ver(id,lista){
     ['Localização',(()=>{
       const sob=(o.sobrenomeClass||sobrenome(o.autor||'')).toUpperCase();
       if(o.colecao==='escritorio'){
-        // Escritório: CDD + assunto específico + sobrenome
-        const cdd=(o.cdd||o.classificacaoCdd||'').trim();
+        // Extrai só o CDD (número) do campo localizacao
+        const locRaw=(o.localizacao||'').trim();
+        const cdd=locRaw.match(/^[\d.]+/)?.[0]||o.cdd||'';
         const assunto=(o.assuntoEspecifico||'').trim().toUpperCase();
         const linhas=[cdd,assunto,sob].filter(x=>x);
         return linhas.join('\n');
       }
-      // Gabinete e Biblioteca: área + sobrenome
       const area=areaParaLabel(o);
       return area+(sob?'\n'+sob:'');
     })()],
@@ -2734,10 +2734,12 @@ function renderEtiquetas(){
 
   grid.innerHTML=lista.map(o=>{
     const isEsc=o.colecao==='escritorio';
-    const areaLabel=isEsc?(o.cdd||''):(areaParaLabel(o));
+    const locRaw=(o.localizacao||'').trim();
+    const cdd=isEsc?(locRaw.match(/^[\d.]+/)?.[0]||o.cdd||''):'';
+    const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
-    const extras=isEsc?[]:(etqLinhas(o));
+    const extras=isEsc?[]:etqLinhas(o);
     const selecionado=etqSelecionadas.has(o.tombo);
     return `<div onclick="toggleEtq('${o.tombo}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
       <div style="background:#fff;border:1.5px solid #1a2744;border-radius:5px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:64px">
@@ -2777,7 +2779,9 @@ function imprimirEtiquetas(modo){
 
   const etqHTML=obras.map(o=>{
     const isEsc=o.colecao==='escritorio';
-    const areaLabel=isEsc?(o.cdd||''):(areaParaLabel(o));
+    const locRaw=(o.localizacao||'').trim();
+    const cdd=isEsc?(locRaw.match(/^[\d.]+/)?.[0]||o.cdd||''):'';
+    const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     const extras=isEsc?[]:etqLinhas(o);
