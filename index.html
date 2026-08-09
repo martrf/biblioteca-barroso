@@ -677,13 +677,13 @@ window.dispatchEvent(new Event('fb-ready'));
             </select>
           </div>
           <div class="fld full"><label>Assunto / Palavras-chave</label><input type="text" id="f-assunto" placeholder="Termos separados por ponto-e-vírgula"></div>
-          <div class="fld"><label>Localização / Cota</label><input type="text" id="f-loc" placeholder="Ex.: Est. A, Prat. 3"></div>
-          <div class="fld"><label>Estante</label><input type="text" id="f-estante" placeholder="Ex.: Prateleira 3"></div>
+          <div class="fld"><label>Localização / Cota</label><input type="text" id="f-loc" placeholder="Ex.: Est. A, Prat. 3" oninput="atualizarClassPreview()"></div>
+          <div class="fld" style="display:none"><label>Estante</label><input type="text" id="f-estante" placeholder="Ex.: Prateleira 3"></div>
           <div class="fld"><label>Coleção / Localização</label>
-            <select id="f-colecao">
+            <select id="f-colecao" onchange="atualizarClassPreview()">
               <option value="gabinete">Gabinete</option>
               <option value="escritorio">Escritório</option>
-              <option value="mezanino">Mezanino</option>
+              <option value="biblioteca">Biblioteca</option>
             </select>
           </div>
           <div class="fld"><label>Classificação</label>
@@ -2578,20 +2578,29 @@ function atualizarClassPreview(){
   const autor=document.getElementById('f-autor')?.value||'';
   const esp=document.getElementById('f-class-especifico')?.value.trim()||'';
   const manual=(document.getElementById('f-class-area-manual')?.value||'').trim();
+  const colecao=document.getElementById('f-colecao')?.value||'gabinete';
+  const loc=(document.getElementById('f-loc')?.value||'').trim();
   // Sobrenome: usa campo editável se preenchido, senão extrai do autor
   const sobEl=document.getElementById('f-class-sobrenome');
   let sob=(sobEl?.value||'').trim();
   if(!sob) sob=autor?sobrenome(autor):'—';
-  // Auto-preenche o campo de sobrenome se ainda estiver vazio
   if(sobEl&&!sobEl.value&&autor) sobEl.value=sobrenome(autor);
-  // Área: manual override > área dropdown
-  const areaLabel=manual?manual.toUpperCase():(area?(AREA_LABEL[area]||area.toUpperCase()):'—');
   const el1=document.getElementById('f-class-area');
   const el2=document.getElementById('f-class-autor');
   const el3=document.getElementById('f-class-esp');
-  if(el1) el1.textContent=areaLabel;
-  if(el2) el2.textContent=sob.toUpperCase();
-  if(el3){if(esp){el3.textContent=esp;el3.style.display='block';}else{el3.textContent='';el3.style.display='none';}}
+  if(colecao==='escritorio'){
+    // Escritório: CDD do campo localização
+    const cdd=loc.match(/^[\d.]+/)?.[0]||'';
+    if(el1) el1.textContent=cdd||'—';
+    if(el3){if(esp){el3.textContent=esp.toUpperCase();el3.style.display='block';}else{el3.textContent='';el3.style.display='none';}}
+    if(el2) el2.textContent=sob.toUpperCase();
+  } else {
+    // Gabinete/Biblioteca: área + sobrenome
+    const areaLabel=manual?manual.toUpperCase():(area?(AREA_LABEL[area]||area.toUpperCase()):'—');
+    if(el1) el1.textContent=areaLabel;
+    if(el3){if(esp){el3.textContent=esp;el3.style.display='block';}else{el3.textContent='';el3.style.display='none';}}
+    if(el2) el2.textContent=sob.toUpperCase();
+  }
   const hid=document.getElementById('f-class');
   if(hid) hid.value=(manual||area)+(esp?'|'+esp:'');
 }
