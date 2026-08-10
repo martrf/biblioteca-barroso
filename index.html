@@ -677,8 +677,8 @@ window.dispatchEvent(new Event('fb-ready'));
             </select>
           </div>
           <div class="fld full"><label>Assunto / Palavras-chave</label><input type="text" id="f-assunto" placeholder="Termos separados por ponto-e-vírgula"></div>
-          <div class="fld"><label>Localização / Cota</label><input type="text" id="f-loc" placeholder="Ex.: Est. A, Prat. 3" oninput="atualizarClassPreview()"></div>
-          <div class="fld" style="display:none"><label>Estante</label><input type="text" id="f-estante" placeholder="Ex.: Prateleira 3"></div>
+          <div class="fld"><label>Localização / Cota</label><input type="text" id="f-loc" placeholder="Ex.: 341.2 ou Est. A" oninput="atualizarClassPreview()"></div>
+          <input type="hidden" id="f-estante">
           <div class="fld"><label>Coleção / Localização</label>
             <select id="f-colecao" onchange="atualizarClassPreview()">
               <option value="gabinete">Gabinete</option>
@@ -1615,17 +1615,51 @@ function mostrarRes(res,chips){document.getElementById('results-area').style.dis
 function renderResGrid(){
   const start=(resPg-1)*resPgTam,pg=resLista.slice(start,start+resPgTam),grid=document.getElementById('res-grid');
   if(!pg.length){grid.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Nenhuma obra encontrada.</p></div>';document.getElementById('res-pag').innerHTML='';return;}
-  const resIds=pg.map(o=>o.id);grid.innerHTML=pg.map((o,i)=>'<div class="res-card" onclick="verLista(\''+o.id+'\',resLista)">'
+  grid.innerHTML=pg.map((o,i)=>'<div class="res-card" style="position:relative">'
+    +'<input type="checkbox" class="res-sel" data-id="'+o.id+'" style="position:absolute;top:10px;left:10px;width:16px;height:16px;cursor:pointer;z-index:2" onclick="event.stopPropagation();toggleSelRes(this)" title="Selecionar">'
+    +'<div onclick="verLista(\''+o.id+'\',resLista)" style="cursor:pointer;display:flex;gap:12px;padding-left:28px">'
     +coverHtml(o,70,100)
     +'<div class="res-card-body"><div class="res-card-title">'+(o.titulo||'Sem título')+(o.subtitulo?': <span style="font-weight:400">'+o.subtitulo+'</span>':'')+'</div>'
     +'<div class="res-card-meta">'+(o.autor?'<span><i class="ti ti-user"></i>'+o.autor+'</span>':'')+' '+(o.editora?'<span><i class="ti ti-building"></i>'+o.editora+'</span>':'')+' '+(o.ano?'<span><i class="ti ti-calendar"></i>'+o.ano+'</span>':'')+' '+(o.estante?'<span><i class="ti ti-map-pin"></i>'+o.estante+'</span>':'')+'</div>'
     +'<div class="res-card-tags">'+(o.area?'<span class="tag tag-area">'+o.area+'</span>':'')+' '+(o.tipo?'<span class="tag tag-tipo-'+tcls2(o.tipo)+'">'+o.tipo+'</span>':'')+' '+colBadge(o.colecao||'gabinete')+'</div>'
-    +'</div><div class="res-card-tombo">'+o.tombo+'</div></div>').join('');
+    +'</div></div><div class="res-card-tombo">'+o.tombo+'</div></div>').join('');
+  // Restore checkboxes
+  document.querySelectorAll('.res-sel').forEach(cb=>{if(resSelecionados.has(cb.dataset.id))cb.checked=true;});
+  // Show selected count
+  atualizarBarraSel();
   const pages=Math.ceil(resLista.length/resPgTam);let html='';
   if(pages>1){for(let i=1;i<=Math.min(pages,15);i++)html+='<button onclick="irResPg('+i+')" class="'+(i===resPg?'active':'')+'">'+i+'</button>';}
   document.getElementById('res-pag').innerHTML=html;
 }
 function irResPg(p){resPg=p;renderResGrid();}
+let resSelecionados=new Set();
+function toggleSelRes(cb){if(cb.checked)resSelecionados.add(cb.dataset.id);else resSelecionados.delete(cb.dataset.id);atualizarBarraSel();}
+function atualizarBarraSel(){
+  let barra=document.getElementById('barra-sel');
+  if(!barra){
+    barra=document.createElement('div');
+    barra.id='barra-sel';
+    barra.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#1a2744;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:999;transform:translateY(100%);transition:transform .3s';
+    barra.innerHTML='<span id="barra-sel-txt"></span><div style="display:flex;gap:8px"><button onclick="exportSelCSV()" style="background:var(--gold);color:#1a2744;border:none;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer"><i class="ti ti-download"></i> Exportar selecionados</button><button onclick="limparSel()" style="background:rgba(255,255,255,.1);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer">Limpar</button></div>';
+    document.body.appendChild(barra);
+  }
+  if(resSelecionados.size>0){
+    document.getElementById('barra-sel-txt').textContent=resSelecionados.size+' obra(s) selecionada(s)';
+    barra.style.transform='translateY(0)';
+  } else {
+    barra.style.transform='translateY(100%)';
+  }
+}
+function limparSel(){resSelecionados.clear();document.querySelectorAll('.res-sel').forEach(cb=>cb.checked=false);atualizarBarraSel();}
+function exportSelCSV(){
+  const obras=acervo.filter(o=>resSelecionados.has(o.id));
+  if(!obras.length) return;
+  const hd=['tombo','titulo','autor','area','tipo','ano','localizacao','colecao'];
+  const rows=[hd.join(';'),...obras.map(o=>hd.map(h=>'"'+(o[h]||'').replace(/"/g,'""')+'"').join(';'))];
+  const b=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='selecionados_bmlrb.csv';a.click();
+  toast('CSV exportado com '+obras.length+' obras!','success');
+}
 let qfAtivo=null;
 
 function fmo(e){if(e.target===document.getElementById('mo'))fmob();}
@@ -1815,11 +1849,11 @@ function ver(id,lista){
     ['Localização',(()=>{
       const sob=(o.sobrenomeClass||sobrenome(o.autor||'')).toUpperCase();
       if(o.colecao==='escritorio'){
-        // Extrai só o CDD (número) do campo localizacao
         const locRaw=(o.localizacao||'').trim();
         const cdd=locRaw.match(/^[\d.]+/)?.[0]||o.cdd||'';
         const assunto=(o.assuntoEspecifico||'').trim().toUpperCase();
-        const linhas=[cdd,assunto,sob].filter(x=>x);
+        // Ordem: CDD + SOBRENOME + ASSUNTO
+        const linhas=[cdd,sob,assunto].filter(x=>x);
         return linhas.join('\n');
       }
       const area=areaParaLabel(o);
@@ -2069,10 +2103,27 @@ function parsearMARC(){
   const l022=getFirst('022');
   if(l022) issn=sub(l022,'a').trim();
 
-  // =084 / =082 — Classificação
+  // =084 / =082 — Classificação — extrai só o CDD sem cutter
   let classif='';
+  let cddPuro=''; // CDD sem cutter (ex: 341.3444)
   const l084=getFirst('084')||getFirst('082');
-  if(l084) classif=sub(l084,'a').trim();
+  if(l084){
+    const rawClassif=sub(l084,'a').trim();
+    // Extrai só o número CDD (sem cutter/sobrenome)
+    const m=rawClassif.match(/^([\d.]+)/);
+    cddPuro=m?m[1]:'';
+    classif=rawClassif;
+  }
+  // =092 ou =099 — Localização/cota local (alternativa)
+  const l092=getFirst('092')||getFirst('099');
+  let localizacao='';
+  if(l092){
+    const rawLoc=sub(l092,'a').trim()||l092.replace(/^=\d+\s+\S+\s+/,'').trim();
+    // Extrai só o CDD
+    const m=rawLoc.match(/^([\d.]+)/);
+    if(m) localizacao=m[1];
+  }
+  if(!localizacao&&cddPuro) localizacao=cddPuro;
 
   // =094 — Área do direito (campo local RVBI)
   let area='';
@@ -2148,6 +2199,8 @@ function parsearMARC(){
   set('f-assunto',assunto);
   set('f-class',classif);
   set('f-notas',notas);
+  // Preenche localização com CDD puro (sem cutter)
+  if(localizacao) set('f-loc',localizacao);
   if(tipo){document.getElementById('f-tipo').value=tipo;preenchidos++;}
   if(area){
     const sel=document.getElementById('f-area');
