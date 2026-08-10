@@ -1132,6 +1132,7 @@ let listaAc=[],pgAc=1,pgAcTam=50;
 let modalLista=[],modalIdx=0;
 let curId=null,capaBase64Temp='',ctr=1;
 let acervo=[],emprestimos=[],tabAtual='inicio';
+let perfilAtual=localStorage.getItem('bmlrb_perfil')||'gabinete';
 function fbDb(){return window._fbDb;}
 
 async function waitFb(){
@@ -1420,7 +1421,6 @@ function updStats(){
   document.getElementById('st-livros').textContent=filtrado.filter(o=>o.tipo==='Livro').length;
   updStatsEmp();
 }
-let perfilAtual=localStorage.getItem('bmlrb_perfil')||'gabinete';
 function trocarPerfil(perfil){
   perfilAtual=perfil;
   localStorage.setItem('bmlrb_perfil',perfil);
