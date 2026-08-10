@@ -1279,7 +1279,9 @@ async function load(){
         // Mostra PI só no Gabinete ou Todos
         const piSection=document.getElementById('pi-section');
         if(piSection) piSection.style.display=(perfilAtual==='todos'||perfilAtual==='gabinete')?'':'none';
-        renderCarousel();renderPI();
+        // Renderiza carrossel DEPOIS de definir o perfil
+        renderCarousel();
+        if(perfilAtual==='todos'||perfilAtual==='gabinete') renderPI();
       },50);
       setStatus('✅ '+acervo.length+' obras (cache)','#4caf81');
       setTimeout(()=>setStatus(''),3000);
