@@ -734,10 +734,18 @@ window.dispatchEvent(new Event('fb-ready'));
                   </div>
                 </div>
                 <div class="fld">
-                  <label>Ou faça upload da imagem da capa</label>
+                  <label>Upload ou cole a imagem da capa</label>
                   <input type="file" id="f-capa-file" accept="image/*" onchange="uploadCapa(event)" style="font-size:12px">
+                  <div id="capa-paste-area" onclick="document.getElementById('f-capa-file').click()" style="margin-top:8px;border:2px dashed var(--gold-dim);border-radius:8px;padding:14px;text-align:center;cursor:pointer;font-size:12px;color:var(--gray-400);transition:border-color .2s" 
+                    onpaste="colarImagemCapa(event)" tabindex="0"
+                    ondragover="event.preventDefault();this.style.borderColor='var(--gold)'" 
+                    ondragleave="this.style.borderColor=''" 
+                    ondrop="event.preventDefault();uploadCapa({target:{files:event.dataTransfer.files}})">
+                    <i class="ti ti-clipboard-text" style="font-size:20px;display:block;margin-bottom:4px"></i>
+                    Clique aqui e pressione <strong>Ctrl+V</strong> para colar imagem copiada do Google
+                  </div>
                 </div>
-                <div style="font-size:11px;color:var(--gray-400)"><i class="ti ti-info-circle" style="vertical-align:-2px"></i> Se tiver ISBN preenchido, clique em "Buscar" para obter a capa automaticamente. Ou cole uma URL ou faça upload de uma foto.</div>
+                <div style="font-size:11px;color:var(--gray-400)"><i class="ti ti-info-circle" style="vertical-align:-2px"></i> Cole uma URL, faça upload ou copie a imagem no Google → clique na área acima → Ctrl+V.</div>
                 <div id="isbn-status-capa" style="font-size:12px;display:none"></div>
               </div>
             </div>
@@ -1098,9 +1106,9 @@ window.dispatchEvent(new Event('fb-ready'));
 <!-- MODAL -->
 <div class="mo" id="mo" onclick="fmo(event)">
   <!-- Seta esquerda -->
-  <button id="btn-prev-modal" onclick="navModal(-1)" title="Anterior" style="position:fixed;left:12px;top:50%;transform:translateY(-50%);z-index:1001;background:var(--navy);border:2px solid var(--gold);border-radius:50%;width:48px;height:48px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3)"><i class="ti ti-chevron-left" style="font-size:22px;color:var(--gold)"></i></button>
+  <button id="btn-prev-modal" onclick="navModal(-1)" title="Anterior" style="position:fixed;left:calc(50% - 340px);top:50%;transform:translateY(-50%);z-index:1001;background:var(--navy);border:2px solid var(--gold);border-radius:50%;width:48px;height:48px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3)"><i class="ti ti-chevron-left" style="font-size:22px;color:var(--gold)"></i></button>
   <!-- Seta direita -->
-  <button id="btn-next-modal" onclick="navModal(1)" title="Próximo" style="position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:1001;background:var(--navy);border:2px solid var(--gold);border-radius:50%;width:48px;height:48px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3)"><i class="ti ti-chevron-right" style="font-size:22px;color:var(--gold)"></i></button>
+  <button id="btn-next-modal" onclick="navModal(1)" title="Próximo" style="position:fixed;right:calc(50% - 340px);top:50%;transform:translateY(-50%);z-index:1001;background:var(--navy);border:2px solid var(--gold);border-radius:50%;width:48px;height:48px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3)"><i class="ti ti-chevron-right" style="font-size:22px;color:var(--gold)"></i></button>
   <div class="md">
     <div class="mh">
       <div id="m-cover" style="margin-right:12px;flex-shrink:0"></div>
@@ -1692,6 +1700,19 @@ function previewCapa(url){
   } else {
     img.style.display='none';icon.style.display='block';
   }
+}
+function colarImagemCapa(e){
+  const items=e.clipboardData?.items;
+  if(!items) return;
+  for(const item of items){
+    if(item.type.startsWith('image/')){
+      e.preventDefault();
+      const file=item.getAsFile();
+      if(file) uploadCapa({target:{files:[file]}});
+      return;
+    }
+  }
+  toast('Nenhuma imagem encontrada. Copie a imagem primeiro (botão direito → Copiar imagem).','error');
 }
 function uploadCapa(e){
   const file=e.target.files[0];if(!file)return;
