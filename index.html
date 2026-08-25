@@ -446,6 +446,7 @@ window.dispatchEvent(new Event('fb-ready'));
           <select id="a-area">
 <option value="">Todas as áreas</option>
             <option>Administração</option>
+            <option>Administração Pública</option>
             <option>Arte e Cultura</option>
             <option>Biografia</option>
             <option>Ciência Política</option>
@@ -458,6 +459,7 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Direito Civil</option>
             <option>Direito Constitucional</option>
             <option>Direito da Saúde</option>
+            <option>Direito de Família e Sucessões</option>
             <option>Direito Digital / Tecnologia</option>
             <option>Direito do Consumidor</option>
             <option>Direito do Trabalho</option>
@@ -470,8 +472,12 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Direito Municipal</option>
             <option>Direito Penal</option>
             <option>Direito Previdenciário</option>
+            <option>Direito Processual</option>
             <option>Direito Processual Civil</option>
+            <option>Direito Processual Constitucional</option>
+            <option>Direito Processual do Trabalho</option>
             <option>Direito Processual Penal</option>
+            <option>Direito Público</option>
             <option>Direito Tributário</option>
             <option>Direitos Fundamentais</option>
             <option>Direitos Humanos</option>
@@ -627,8 +633,8 @@ window.dispatchEvent(new Event('fb-ready'));
           <div class="fld"><label>Editora</label><input type="text" id="f-editora" placeholder="Nome da editora"></div>
           <div class="fld"><label>Local de Publicação</label><input type="text" id="f-local" placeholder="Cidade, País"></div>
           <div class="fld"><label>Ano <span class="req">*</span></label><input type="number" id="f-ano" required placeholder="AAAA" min="1500" max="2099"></div>
-          <div class="fld"><label>Volume / Tomo</label><input type="text" id="f-volume" placeholder="Ex.: v. 1"></div>
-          <div class="fld"><label>Edição</label><input type="text" id="f-edicao" placeholder="Ex.: 3. ed."></div>
+          <div class="fld"><label>Volume / Tomo</label><input type="text" id="f-volume" placeholder="Ex.: v. 1" oninput="atualizarClassPreview()"></div>
+          <div class="fld"><label>Edição</label><input type="text" id="f-edicao" placeholder="Ex.: 3. ed." oninput="atualizarClassPreview()"></div>
           <div class="fld"><label>Páginas</label><input type="text" id="f-pag" placeholder="Ex.: 512 p."></div>
           <div class="fld"><label>ISBN / ISSN</label><input type="text" id="f-isbn" placeholder="ISBN ou ISSN"></div>
           <div class="fld"><label>Tipo de Material <span class="req">*</span></label>
@@ -638,6 +644,7 @@ window.dispatchEvent(new Event('fb-ready'));
             <select class="form-control" id="f-area">
 <option value="">Selecione a área</option>
               <option>Administração</option>
+              <option>Administração Pública</option>
               <option>Arte e Cultura</option>
               <option>Biografia</option>
               <option>Ciência Política</option>
@@ -650,6 +657,7 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direito Civil</option>
               <option>Direito Constitucional</option>
               <option>Direito da Saúde</option>
+              <option>Direito de Família e Sucessões</option>
               <option>Direito Digital / Tecnologia</option>
               <option>Direito do Consumidor</option>
               <option>Direito do Trabalho</option>
@@ -662,8 +670,12 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direito Municipal</option>
               <option>Direito Penal</option>
               <option>Direito Previdenciário</option>
+              <option>Direito Processual</option>
               <option>Direito Processual Civil</option>
+              <option>Direito Processual Constitucional</option>
+              <option>Direito Processual do Trabalho</option>
               <option>Direito Processual Penal</option>
+              <option>Direito Público</option>
               <option>Direito Tributário</option>
               <option>Direitos Fundamentais</option>
               <option>Direitos Humanos</option>
@@ -695,6 +707,7 @@ window.dispatchEvent(new Event('fb-ready'));
             <div id="f-class-preview" style="background:var(--navy);border-radius:var(--r);padding:10px 14px;text-align:center;min-height:64px;display:flex;flex-direction:column;justify-content:center;gap:3px;margin-bottom:8px;cursor:pointer" title="Clique para editar a grande área manualmente" onclick="toggleClassEdit()">
               <div id="f-class-area" style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.08em;line-height:1.3">—</div>
               <div id="f-class-esp" style="font-size:10px;font-weight:500;color:rgba(255,255,255,.7);letter-spacing:.03em;display:none"></div>
+              <div id="f-class-extra" style="font-size:9px;font-weight:500;color:rgba(255,255,255,.55);letter-spacing:.04em;display:none"></div>
               <div id="f-class-autor" style="font-size:12px;font-weight:700;color:#fff;letter-spacing:.06em">—</div>
               <div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:2px"><i class="ti ti-pencil" style="font-size:9px"></i> clique para editar a grande área</div>
             </div>
@@ -715,7 +728,8 @@ window.dispatchEvent(new Event('fb-ready'));
             <input type="hidden" id="f-class">
           </div>
           <div class="fld"><label>Exemplares</label><input type="number" id="f-ex" value="1" min="1"></div>
-          <div class="fld full"><label>Notas / Observações</label><textarea id="f-notas" placeholder="Observações adicionais..."></textarea></div>
+          <div class="fld full"><label>Notas</label><textarea id="f-notas" placeholder="Notas gerais sobre a obra..."></textarea></div>
+          <div class="fld full"><label>Observações</label><textarea id="f-observacoes" placeholder="Observações adicionais..."></textarea></div>
 
           <!-- CAPA -->
           <div class="fld full">
@@ -914,6 +928,7 @@ window.dispatchEvent(new Event('fb-ready'));
           <select id="etq-area" onchange="renderEtiquetas()">
             <option value="">Todas as áreas</option>
             <option>Administração</option>
+            <option>Administração Pública</option>
             <option>Arte e Cultura</option>
             <option>Biografia</option>
             <option>Ciência Política</option>
@@ -926,20 +941,25 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Direito Civil</option>
             <option>Direito Constitucional</option>
             <option>Direito da Saúde</option>
+            <option>Direito de Família e Sucessões</option>
             <option>Direito Digital / Tecnologia</option>
             <option>Direito do Consumidor</option>
             <option>Direito do Trabalho</option>
             <option>Direito Eleitoral</option>
             <option>Direito Empresarial / Comercial</option>
             <option>Direito Financeiro</option>
-            <option>Direito Internacional Público</option>
             <option>Direito Internacional Privado</option>
+            <option>Direito Internacional Público</option>
             <option>Direito Militar</option>
             <option>Direito Municipal</option>
             <option>Direito Penal</option>
             <option>Direito Previdenciário</option>
+            <option>Direito Processual</option>
             <option>Direito Processual Civil</option>
+            <option>Direito Processual Constitucional</option>
+            <option>Direito Processual do Trabalho</option>
             <option>Direito Processual Penal</option>
+            <option>Direito Público</option>
             <option>Direito Tributário</option>
             <option>Direitos Fundamentais</option>
             <option>Direitos Humanos</option>
@@ -954,69 +974,6 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Outras Áreas</option>
             <option>Religião / Espiritismo</option>
             <option>Tecnologia / Saúde</option>
-              <option>Direito Civil</option>
-              <option>Direito Empresarial / Comercial</option>
-              <option>Direito do Trabalho</option>
-              <option>Direito Processual Civil</option>
-              <option>Direitos Humanos</option>
-              <option>Direitos Fundamentais</option>
-              <option>Direito Penal</option>
-              <option>Criminologia</option>
-              <option>Direito Processual Penal</option>
-              <option>Filosofia do Direito / Teoria Geral</option>
-              <option>Direito</option>
-              <option>Ciência Política</option>
-              <option>Economia</option>
-              <option>Ciências Sociais</option>
-              <option>Educação</option>
-              <option>Filosofia</option>
-              <option>Administração</option>
-              <option>Ciências Exatas</option>
-              <option>Tecnologia / Saúde</option>
-              <option>Direito Digital / Tecnologia</option>
-              <option>Direito da Saúde</option>
-              <option>Literatura</option>
-              <option>História</option>
-              <option>Biografia</option>
-              <option>Religião / Espiritismo</option>
-              <option>Arte e Cultura</option>
-              <option>Linguística</option>
-              <option>Geografia / Viagens</option>
-              <option>Outras Áreas</option>
-              <option>Direito Civil</option>
-              <option>Direito Empresarial / Comercial</option>
-              <option>Direito do Trabalho</option>
-              <option>Direito Processual Civil</option>
-              <option>Direitos Humanos</option>
-              <option>Direitos Fundamentais</option>
-              <option>Direito Penal</option>
-              <option>Criminologia</option>
-              <option>Direito Processual Penal</option>
-              <option>Ciência Política</option>
-              <option>Economia</option>
-              <option>Ciências Sociais</option>
-              <option>Educação</option>
-              <option>Filosofia</option>
-              <option>Administração</option>
-              <option>Direito Digital / Tecnologia</option>
-              <option>Direito da Saúde</option>
-              <option>Direito</option>
-              <option>Literatura</option>
-              <option>História</option>
-              <option>Biografia</option>
-              <option>Religião / Espiritismo</option>
-              <option>Arte e Cultura</option>
-              <option>Filosofia do Direito / Teoria Geral</option>
-              <option>Linguística</option>
-              <option>Geografia / Viagens</option>
-              <option>Direito Civil</option><option>Direito Empresarial / Comercial</option>
-              <option>Direito do Consumidor</option><option>Direito de Família e Sucessões</option>
-              <option>Direito Processual Civil</option><option>Direito Processual Penal</option>
-              <option>Direito Processual Constitucional</option><option>Direito Processual do Trabalho</option>
-              <option>Direito do Trabalho</option><option>Direitos Humanos</option>
-              <option>Direito Penal</option><option>Criminologia</option>
-              <option>Direito Processual Penal</option>
-              <option>Filosofia do Direito / Teoria Geral</option>
           </select>
         </div>
         <div class="fld">
@@ -1177,7 +1134,7 @@ async function sbCarregarAcervo(){
           estante:r.estante,colecao:r.colecao||'gabinete',cdd:r.cdd||'',
           estante:r.estante,colecao:r.colecao||'gabinete',
           classificacao:r.classificacao,exemplares:r.exemplares,
-          notas:r.notas,capaUrl:r.capa_url,dataCad:r.data_cad
+          notas:r.notas,observacoes:r.observacoes,capaUrl:r.capa_url,dataCad:r.data_cad
         });
       });
       ultimo=snap.docs[snap.docs.length-1];
@@ -1206,7 +1163,7 @@ async function sbSalvarAcervo(){
           assunto_especifico:o.assuntoEspecifico||'',sobrenome_class:o.sobrenomeClass||'',
           localizacao:o.localizacao||'',estante:o.estante||'',
           colecao:o.colecao||'gabinete',classificacao:o.classificacao||'',cdd:o.cdd||'',
-          exemplares:o.exemplares||'1',notas:o.notas||'',
+          exemplares:o.exemplares||'1',notas:o.notas||'',observacoes:o.observacoes||'',
           capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString()
         });
       });
@@ -1228,7 +1185,7 @@ async function sbSalvarObra(o){
       assunto_especifico:o.assuntoEspecifico||'',sobrenome_class:o.sobrenomeClass||'',
       localizacao:o.localizacao||'',estante:o.estante||'',
       colecao:o.colecao||'gabinete',classificacao:o.classificacao||'',
-      exemplares:o.exemplares||'1',notas:o.notas||'',
+      exemplares:o.exemplares||'1',notas:o.notas||'',observacoes:o.observacoes||'',
       capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString()
     });
     return true;
@@ -1778,7 +1735,7 @@ function salvar(e){e.preventDefault();
     editora:gv('f-editora'),local_pub:gv('f-local'),ano:gv('f-ano'),volume:gv('f-volume'),edicao:gv('f-edicao'),
     paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
     localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[\d.]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
-    notas:gv('f-notas'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
+    notas:gv('f-notas'),observacoes:gv('f-observacoes'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
     dataCad:curId?acervo.find(x=>x.id===curId).dataCad:new Date().toISOString()};
   if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
   else{acervo.push(o);toast('Obra registrada! Tombo: '+o.tombo,'success');}
@@ -1827,7 +1784,7 @@ function dedupAcervo(){
   toast(removidos+' duplicata(s) removida(s)!','success');
 }
 function limparAc(){if(!acervo.length)return;if(!confirm('Excluir TODAS as obras do acervo? Esta ação não pode ser desfeita.'))return;acervo=[];save();updStats();listaAc=[];renderAcervo();toast('Acervo limpo.','error');}
-function exportCSV(){if(!acervo.length){toast('Nenhuma obra para exportar.');return;}const hd=['tombo','titulo','subtitulo','autor','organizador','editora','local_pub','ano','volume','edicao','paginas','isbn','tipo','area','assunto','localizacao','estante','classificacao','exemplares','notas'];const rows=[hd.join(';'),...acervo.map(o=>hd.map(h=>'"'+(o[h]||'').replace(/"/g,'""')+'"').join(';'))];const b=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='acervo_bmlrb.csv';a.click();toast('CSV exportado!','success');}
+function exportCSV(){if(!acervo.length){toast('Nenhuma obra para exportar.');return;}const hd=['tombo','titulo','subtitulo','autor','organizador','editora','local_pub','ano','volume','edicao','paginas','isbn','tipo','area','assunto','localizacao','estante','classificacao','exemplares','notas','observacoes'];const rows=[hd.join(';'),...acervo.map(o=>hd.map(h=>'"'+(o[h]||'').replace(/"/g,'""')+'"').join(';'))];const b=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='acervo_bmlrb.csv';a.click();toast('CSV exportado!','success');}
 
 // Lista de contexto para navegação no modal
 
@@ -1893,6 +1850,8 @@ function ver(id,lista){
     ['Exemplares',o.exemplares],
     ['Assunto / Palavras-chave',o.assunto,true],
     ['Notas',o.notas,true],
+    ['Observações',o.observacoes,true],
+    ['Observações',o.observacoes,true],
     ['Nº Tombo',o.tombo],
     ['Data de cadastro',o.dataCad?new Date(o.dataCad).toLocaleDateString('pt-BR'):''],
   ];
@@ -1968,7 +1927,7 @@ function editObra(){
   sw('cadastro');
   setTimeout(()=>{
     curId=editId; // restaura APÓS sw e limpar zerarem
-    const m={'f-titulo':'titulo','f-subtitulo':'subtitulo','f-autor':'autor','f-org':'organizador','f-editora':'editora','f-local':'local_pub','f-ano':'ano','f-volume':'volume','f-edicao':'edicao','f-pag':'paginas','f-isbn':'isbn','f-tipo':'tipo','f-area':'area','f-assunto':'assunto','f-loc':'localizacao','f-estante':'estante','f-colecao':'colecao','f-ex':'exemplares','f-notas':'notas'};
+    const m={'f-titulo':'titulo','f-subtitulo':'subtitulo','f-autor':'autor','f-org':'organizador','f-editora':'editora','f-local':'local_pub','f-ano':'ano','f-volume':'volume','f-edicao':'edicao','f-pag':'paginas','f-isbn':'isbn','f-tipo':'tipo','f-area':'area','f-assunto':'assunto','f-loc':'localizacao','f-estante':'estante','f-colecao':'colecao','f-ex':'exemplares','f-notas':'notas','f-observacoes':'observacoes'};
     Object.entries(m).forEach(([fid,k])=>{const el=document.getElementById(fid);if(el)el.value=o[k]||'';});
     const espEl=document.getElementById('f-class-especifico');if(espEl)espEl.value=o.assuntoEspecifico||'';
     const sobEl=document.getElementById('f-class-sobrenome');if(sobEl)sobEl.value=o.sobrenomeClass||sobrenome(o.autor||'');
@@ -2022,7 +1981,7 @@ function cancelImp(){document.getElementById('map-section').style.display='none'
 async function confirmarImport(){const mapping=pendHeaders.map((_,i)=>document.getElementById('map-'+i)?.value||'');const pb=document.getElementById('prog-bar'),pf=document.getElementById('prog-fill'),pl=document.getElementById('prog-label');pb.style.display='block';pl.style.display='block';let imp=0,skip=0;const total=pendRows.length;for(let ri=0;ri<pendRows.length;ri++){const row=pendRows[ri];const o={id:(Date.now()+'_'+ri+'_'+Math.random()),tombo:gtombo(),dataCad:new Date().toISOString(),tipo:'Livro',colecao:'gabinete'};let temTit=false;mapping.forEach((campo,ci)=>{if(campo){const v=String(row[ci]||'').replace(/\n/g,' ').trim();if(v)o[campo]=v;if(campo==='titulo'&&v)temTit=true;}});if(!temTit){skip++;ctr--;continue;}
     normalizarRegistro(o);
     acervo.push(o);imp++;if(ri%300===0){pf.style.width=Math.round((ri/total)*100)+'%';pl.textContent='Importando… '+imp+' de ~'+total;await new Promise(r=>setTimeout(r,0));}}pf.style.width='100%';save();updStats();document.getElementById('map-section').style.display='none';document.getElementById('imp-result').innerHTML='<div style="margin-top:16px;padding:14px 18px;background:#e8f5ef;border:1px solid #a3d4be;border-radius:var(--r);font-size:13px;color:#1a5c32"><strong><i class="ti ti-check" style="vertical-align:-2px"></i> Importação concluída!</strong> '+imp+' obra(s) importada(s).'+( skip?' '+skip+' ignorada(s).':'')+' <button class="btn btn-sm btn-o" style="margin-left:12px" onclick="sw(\'acervo\')"><i class="ti ti-layout-list"></i> Ver acervo</button></div>';toast(imp+' obra(s) importada(s)! Normalizando...','success');acervo.forEach(o=>normalizarRegistro(o));save();sbSalvarAcervo().then(()=>toast('Sincronizado com a nuvem!','success'));renderCarousel();pb.style.display='none';pl.style.display='none';pendRows=[];pendHeaders=[];}
-function baixarModelo(){const h='titulo;subtitulo;autor;organizador;editora;local_pub;ano;volume;edicao;paginas;isbn;tipo;area;assunto;localizacao;estante;classificacao;exemplares;notas\n';const ex='"Título da Obra";"Subtítulo";"SOBRENOME, Nome";"";"Editora";"São Paulo";"2023";"v. 1";"3. ed.";"400 p.";"978-85-...";"Livro";"Direito Constitucional";"assunto";"Est. A";"Gabinete";"341.2";"2";""';const b=new Blob(['\uFEFF'+h+ex],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='modelo_bmlrb.csv';a.click();}
+function baixarModelo(){const h='titulo;subtitulo;autor;organizador;editora;local_pub;ano;volume;edicao;paginas;isbn;tipo;area;assunto;localizacao;estante;classificacao;exemplares;notas;observacoes\n';const ex='"Título da Obra";"Subtítulo";"SOBRENOME, Nome";"";"Editora";"São Paulo";"2023";"v. 1";"3. ed.";"400 p.";"978-85-...";"Livro";"Direito Constitucional";"assunto";"Est. A";"Gabinete";"341.2";"2";"";""';const b=new Blob(['\uFEFF'+h+ex],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='modelo_bmlrb.csv';a.click();}
 function toast(msg,type){const c=document.getElementById('toasts'),t=document.createElement('div');t.className='toast'+(type?' '+type:'');const ic={success:'ti-check',error:'ti-alert-circle','':'ti-info-circle'};t.innerHTML='<i class="ti '+(ic[type||''])+'"></i>'+msg;c.appendChild(t);setTimeout(()=>t.remove(),4000);}
 function trocarAbaAuto(aba){
   const isISBN=aba==='isbn';
@@ -2557,8 +2516,11 @@ const AREA_LABEL = {
   'Direito Contratual':'DIREITO CONTRATUAL',
   'Direito Processual Civil':'DIREITO PROCESSUAL CIVIL',
   'Direito Processual Penal':'DIREITO PROCESSUAL PENAL',
+  'Direito Processual':'DIREITO PROCESSUAL',
   'Direito Processual Constitucional':'DIREITO PROCESSUAL',
   'Direito Processual do Trabalho':'DIREITO PROCESSUAL DO TRABALHO',
+  'Direito Público':'DIREITO PÚBLICO',
+  'Administração Pública':'ADMINISTRAÇÃO PÚBLICA',
   'Direito do Trabalho':'DIREITO DO TRABALHO',
   'Direitos Humanos':'DIREITOS HUMANOS',
   'Direito da Criança e do Adolescente':'DIREITO DA CRIANÇA',
@@ -2671,6 +2633,13 @@ function atualizarClassPreview(){
   const el1=document.getElementById('f-class-area');
   const el2=document.getElementById('f-class-autor');
   const el3=document.getElementById('f-class-esp');
+  const el4=document.getElementById('f-class-extra');
+  // Volume / Tomo + Edição — mesma lógica usada na etiqueta impressa
+  const extras=etqLinhas({volume:document.getElementById('f-volume')?.value||'',edicao:document.getElementById('f-edicao')?.value||''});
+  if(el4){
+    if(extras.length){el4.textContent=extras.map(l=>l.txt).join(' • ');el4.style.display='block';}
+    else{el4.textContent='';el4.style.display='none';}
+  }
   if(colecao==='escritorio'){
     // Escritório: CDD do campo localização
     const cdd=loc.match(/^[\d.]+/)?.[0]||'';
