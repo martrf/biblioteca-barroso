@@ -78,7 +78,7 @@
 
   /* RESULTADOS */
   .results-area{background:var(--cream);padding:24px}
-  body.has-selbar .results-area{padding-bottom:88px}
+  body.has-selbar{padding-bottom:90px}
   .res-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
   .res-count{font-size:14px;color:var(--gray-600);font-weight:500}
   .res-count strong{color:var(--navy)}
@@ -1115,6 +1115,8 @@ window.dispatchEvent(new Event('fb-ready'));
     <div class="mb"><div id="proj-obras-lista" style="padding:16px"></div></div>
     <div class="ma">
       <button class="btn btn-sm btn-o" onclick="renomearProjeto()"><i class="ti ti-edit"></i> Renomear</button>
+      <button class="btn btn-sm btn-o" onclick="emailDoProjeto()"><i class="ti ti-mail"></i> E-mail</button>
+      <button class="btn btn-sm btn-o" onclick="whatsappDoProjeto()"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
       <button class="btn btn-sm btn-g" onclick="exportarProjetoPDF()"><i class="ti ti-download"></i> Exportar PDF</button>
       <button class="btn btn-sm btn-d" onclick="excluirProjeto()"><i class="ti ti-trash"></i> Excluir projeto</button>
     </div>
@@ -1150,6 +1152,8 @@ window.dispatchEvent(new Event('fb-ready'));
     <div class="mb"><div id="preview-pdf-lista" style="padding:16px"></div></div>
     <div class="ma">
       <button class="btn btn-sm btn-o" onclick="abrirEscolherProjeto()"><i class="ti ti-circle-plus"></i> Salvar em projeto</button>
+      <button class="btn btn-sm btn-o" onclick="emailDaPrevia()"><i class="ti ti-mail"></i> E-mail</button>
+      <button class="btn btn-sm btn-o" onclick="whatsappDaPrevia()"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
       <button class="btn btn-sm btn-g" onclick="gerarPDFDaPrevia()"><i class="ti ti-download"></i> Gerar PDF</button>
     </div>
   </div>
@@ -1786,9 +1790,11 @@ function atualizarBarraSel(){
     document.getElementById('barra-sel-txt').textContent=resSelecionados.size+' obra(s) selecionada(s)';
     barra.style.transform='translateY(0)';
     document.body.classList.add('has-selbar');
+    document.body.style.paddingBottom='90px';
   } else {
     barra.style.transform='translateY(100%)';
     document.body.classList.remove('has-selbar');
+    document.body.style.paddingBottom='';
   }
 }
 function limparSel(){resSelecionados.clear();document.querySelectorAll('.res-sel').forEach(cb=>cb.checked=false);atualizarBarraSel();}
@@ -1824,7 +1830,7 @@ function gerarPDFDaPrevia(){
   exportSelPDF();
 }
 function exportSelCSV(){exportSelPDF();}
-function gerarPDFListaObras(obras,subtitulo,nomeArquivo){
+function construirPDFListaObras(obras,subtitulo){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'});
   const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
@@ -1842,7 +1848,47 @@ function gerarPDFListaObras(obras,subtitulo,nomeArquivo){
     alternateRowStyles:{fillColor:[247,244,237]},
     margin:{left:30,right:30}
   });
+  return doc;
+}
+function gerarPDFListaObras(obras,subtitulo,nomeArquivo){
+  const doc=construirPDFListaObras(obras,subtitulo);
   doc.save(nomeArquivo);
+}
+function slugNome(s){return (s||'lista').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
+async function compartilharEmail(obras,subtitulo,nomeArquivo){
+  if(!obras.length){toast('Nenhuma obra para compartilhar.','');return;}
+  const doc=construirPDFListaObras(obras,subtitulo);
+  const linhas=obras.map(o=>'- '+(o.titulo||'Sem título')+(o.autor?' — '+o.autor:'')).join('\n');
+  const assunto='Biblioteca Ministro Luís Roberto Barroso — '+subtitulo;
+  try{
+    const blob=doc.output('blob');
+    const file=new File([blob],nomeArquivo,{type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:assunto,text:'Segue a lista de obras em PDF.'});
+      return;
+    }
+  }catch(e){if(e && e.name==='AbortError') return;}
+  doc.save(nomeArquivo);
+  const corpo='Segue a lista de obras (o PDF foi baixado — anexe-o a este e-mail):\n\n'+linhas;
+  window.open('mailto:?subject='+encodeURIComponent(assunto)+'&body='+encodeURIComponent(corpo),'_blank');
+  toast('PDF baixado! Anexe-o manualmente no e-mail que abrimos para você.','');
+}
+async function compartilharWhatsApp(obras,subtitulo,nomeArquivo){
+  if(!obras.length){toast('Nenhuma obra para compartilhar.','');return;}
+  const doc=construirPDFListaObras(obras,subtitulo);
+  try{
+    const blob=doc.output('blob');
+    const file=new File([blob],nomeArquivo,{type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'Biblioteca Ministro Luís Roberto Barroso',text:subtitulo});
+      return;
+    }
+  }catch(e){if(e && e.name==='AbortError') return;}
+  doc.save(nomeArquivo);
+  const linhas=obras.map(o=>'• '+(o.titulo||'Sem título')+(o.autor?' — '+o.autor:'')).join('\n');
+  const texto=subtitulo+' — Biblioteca Ministro Luís Roberto Barroso\n\n'+linhas;
+  window.open('https://wa.me/?text='+encodeURIComponent(texto),'_blank');
+  toast('PDF baixado! No WhatsApp que abrimos, anexe o arquivo manualmente.','');
 }
 function exportSelPDF(){
   const obras=acervo.filter(o=>resSelecionados.has(o.id));
@@ -1850,6 +1896,13 @@ function exportSelPDF(){
   gerarPDFListaObras(obras,'Resultado de pesquisa','resultado_pesquisa_bmlrb.pdf');
   toast('PDF gerado com '+obras.length+' obra(s)!','success');
 }
+function obrasDaPrevia(){return acervo.filter(o=>resSelecionados.has(o.id));}
+function emailDaPrevia(){compartilharEmail(obrasDaPrevia(),'Resultado de pesquisa','resultado_pesquisa_bmlrb.pdf');}
+function whatsappDaPrevia(){compartilharWhatsApp(obrasDaPrevia(),'Resultado de pesquisa','resultado_pesquisa_bmlrb.pdf');}
+function obrasDoProjetoAberto(){const p=projetos.find(x=>x.id===projetoAberto);return p?acervo.filter(o=>(p.obraIds||[]).includes(o.id)):[];}
+function emailDoProjeto(){const p=projetos.find(x=>x.id===projetoAberto);if(!p)return;compartilharEmail(obrasDoProjetoAberto(),'Projeto: '+p.nome,'projeto_'+slugNome(p.nome)+'.pdf');}
+function whatsappDoProjeto(){const p=projetos.find(x=>x.id===projetoAberto);if(!p)return;compartilharWhatsApp(obrasDoProjetoAberto(),'Projeto: '+p.nome,'projeto_'+slugNome(p.nome)+'.pdf');}
+
 
 // ══ PROJETOS ══
 let projetoAberto=null;
