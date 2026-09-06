@@ -1665,12 +1665,14 @@ function buscarAdv(){
   const op2=document.getElementById('a-op2')?.value||'e';
   const op3=document.getElementById('a-op3')?.value||'e';
   const ftmb=gv('a-tombo').toLowerCase(),farea=gv('a-area'),ftipo=gv('a-tipo'),fest=gv('a-estante').toLowerCase();
+  const flng=gv('a-lingua');
   const chips=[];
   if(ft)chips.push({label:'Título: '+gv('a-titulo')});
   if(fa)chips.push({label:'Autor: '+gv('a-autor')});
   if(fano)chips.push({label:'Ano: '+fano});
   if(farea)chips.push({label:'Área: '+farea});
   if(ftipo)chips.push({label:'Tipo: '+ftipo});
+  if(flng)chips.push({label:'Língua: '+flng});
   if(fass)chips.push({label:'Assunto: '+gv('a-assunto')});
   if(fass2)chips.push({label:op2.toUpperCase()+': '+gv('a-assunto2')});
   if(fass3)chips.push({label:op3.toUpperCase()+': '+gv('a-assunto3')});
@@ -1680,6 +1682,7 @@ function buscarAdv(){
   if(fa)res=res.filter(o=>normBusca(o.autor||'').includes(normBusca(fa)));
   if(fano){const range=fano.match(/(\d{4})-(\d{4})/);if(range)res=res.filter(o=>{const y=parseInt(o.ano);return y>=parseInt(range[1])&&y<=parseInt(range[2]);});else res=res.filter(o=>(o.ano||'').toString().includes(fano));}
   if(fed)res=res.filter(o=>(o.editora||'').toLowerCase().includes(fed));
+  if(flng)res=res.filter(o=>(o.lingua||'Português (Brasil)')===flng);
   if(fass||fass2||fass3){
     res=res.filter(o=>{
       const campo=(o.assunto||'').toLowerCase()+' '+(o.titulo||'').toLowerCase()+' '+(o.assuntoEspecifico||'').toLowerCase();
