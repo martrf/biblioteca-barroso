@@ -1391,6 +1391,28 @@ async function carregarProjetos(){
   }catch(e){console.error('Erro ao carregar projetos:',e);}
   if(tabAtual==='projetos') renderProjetos();
 }
+function salvarCacheAcervo(){
+  try{
+    localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));
+    return true;
+  }catch(e){
+    // Provavelmente estourou o limite do localStorage (capas grandes em base64).
+    // Salva uma versão sem as capas embutidas, só pra garantir que o cache rápido funcione.
+    try{
+      const leve=acervo.map(o=>{
+        const c=Object.assign({},o);
+        if(c.capaUrl&&c.capaUrl.startsWith('data:image')) c.capaUrl='';
+        if(c.capaBase64) c.capaBase64='';
+        return c;
+      });
+      localStorage.setItem('bmlrb_ac',JSON.stringify(leve));
+      console.warn('Cache salvo sem capas em base64 — dados grandes demais para o navegador. Use "Compactar capas" na tela de Etiquetas.');
+    }catch(e2){
+      console.error('Não foi possível salvar o cache do acervo:',e2);
+    }
+    return false;
+  }
+}
 async function load(){
   const sbStatus=document.getElementById('sb-status');
   function setStatus(msg,color){if(sbStatus){sbStatus.textContent=msg;sbStatus.style.color=color||'var(--gold)';}}
@@ -1426,17 +1448,14 @@ async function load(){
   // Sem cache — carrega do Firebase pela primeira vez
   setStatus('⏳ Carregando acervo...','var(--gold)');
   try{
-    const fbAcervo=await sbCarregarAcervo();
-    const fbEmp=await sbCarregarEmprestimos();
+    const [fbAcervo,fbEmp]=await Promise.all([sbCarregarAcervo(),sbCarregarEmprestimos()]);
     if(fbAcervo&&fbAcervo.length>0){
       acervo=fbAcervo;
       emprestimos=fbEmp||[];
       acervo.forEach(o=>{if(!o.colecao)o.colecao='gabinete';});
       // Salva no cache
-      try{
-        localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));
-        localStorage.setItem('bmlrb_emp',JSON.stringify(emprestimos));
-      }catch(e){}
+      salvarCacheAcervo();
+      try{localStorage.setItem('bmlrb_emp',JSON.stringify(emprestimos));}catch(e){}
       setStatus('✅ '+acervo.length+' obras','#4caf81');
       setTimeout(()=>setStatus(''),4000);
     } else {
@@ -1458,7 +1477,7 @@ async function atualizarDoFirebase(){
     if(fbAcervo&&fbAcervo.length>0){
       acervo=fbAcervo;
       acervo.forEach(o=>{if(!o.colecao)o.colecao='gabinete';});
-      try{localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));}catch(e){}
+      salvarCacheAcervo();
       updStats();
       renderCarousel();
       renderPI();
@@ -1469,10 +1488,8 @@ async function atualizarDoFirebase(){
 }
 
 function save(){
-  try{
-    localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));
-    localStorage.setItem('bmlrb_ctr',ctr);
-  }catch(e){}
+  salvarCacheAcervo();
+  try{localStorage.setItem('bmlrb_ctr',ctr);}catch(e){}
   // Sincroniza com Supabase (debounce 2s)
   clearTimeout(window._sbTimer);
   window._sbTimer=setTimeout(()=>{
