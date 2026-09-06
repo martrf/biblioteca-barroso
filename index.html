@@ -101,10 +101,12 @@
   .tag-tipo-periodico{background:#e3f0e6;color:#1a5c32}
   .tag-tipo-tese{background:#f5eaf8;color:#5a2e7a}
   .res-card-tombo{font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:var(--gray-400);margin-left:auto;white-space:nowrap;padding-top:2px}
-  .pag{display:flex;gap:6px;justify-content:center;padding:20px 0 8px;flex-wrap:wrap}
+  .pag{display:flex;gap:6px;justify-content:center;align-items:center;padding:20px 0 8px;flex-wrap:wrap}
   .pag button{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r);padding:6px 12px;font-size:13px;cursor:pointer;font-family:var(--font-b);transition:all .15s}
   .pag button.active{background:var(--navy);color:var(--gold);border-color:var(--navy);font-weight:700}
-  .pag button:hover:not(.active){background:var(--gold-pale);border-color:var(--gold)}
+  .pag button:hover:not(.active):not(:disabled){background:var(--gold-pale);border-color:var(--gold)}
+  .pag button:disabled{opacity:.35;cursor:default}
+  .pag .pag-dots{padding:0 4px;color:var(--gray-400);font-size:13px}
   .empty{text-align:center;padding:52px 20px;color:var(--gray-400)}
   .empty i{font-size:52px;display:block;margin-bottom:14px;color:var(--gray-200)}
   .empty p{font-size:14px;line-height:1.7}
@@ -500,6 +502,7 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Organização Judiciária</option>
             <option>Outras Áreas</option>
             <option>Religião / Espiritismo</option>
+            <option>Sociologia</option>
             <option>Tecnologia / Saúde</option>
           </select>
         </div>
@@ -553,7 +556,17 @@ window.dispatchEvent(new Event('fb-ready'));
     <div class="res-header">
       <div class="res-count" id="res-count"></div>
       <div class="res-chips" id="res-chips"></div>
-      <button class="btn btn-sm btn-o" style="margin-left:auto" onclick="limparRes()"><i class="ti ti-x"></i> Limpar busca</button>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray-600);margin-left:auto">
+        Ordenar por:
+        <select id="res-ordenar" onchange="reordenarRes()" style="padding:5px 8px;border:1px solid var(--gray-200);border-radius:6px;font-size:12px">
+          <option value="relevancia">Relevância</option>
+          <option value="titulo">Título (A-Z)</option>
+          <option value="autor">Autor (A-Z)</option>
+          <option value="ano">Ano de publicação (mais recente)</option>
+          <option value="recente">Data de cadastro (mais recente)</option>
+        </select>
+      </label>
+      <button class="btn btn-sm btn-o" onclick="limparRes()"><i class="ti ti-x"></i> Limpar busca</button>
     </div>
     <div class="res-grid" id="res-grid"></div>
     <div class="pag" id="res-pag"></div>
@@ -722,6 +735,7 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Organização Judiciária</option>
               <option>Outras Áreas</option>
               <option>Religião / Espiritismo</option>
+              <option>Sociologia</option>
               <option>Tecnologia / Saúde</option>
             </select>
           </div>
@@ -1007,6 +1021,7 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Organização Judiciária</option>
             <option>Outras Áreas</option>
             <option>Religião / Espiritismo</option>
+            <option>Sociologia</option>
             <option>Tecnologia / Saúde</option>
           </select>
         </div>
@@ -1050,6 +1065,16 @@ window.dispatchEvent(new Event('fb-ready'));
           <span style="font-size:12px">Ajusta a classificação (CDD) para 341.272 nas obras de Direitos Humanos e para 341.27 nas de Direitos Fundamentais, verificando assunto geral, assunto específico e título.</span>
         </div>
         <button class="btn btn-sm btn-p" onclick="padronizarDireitosHumanosFundamentais()"><i class="ti ti-refresh"></i> Padronizar agora</button>
+      </div>
+
+      <!-- Compactar capas grandes (performance) -->
+      <div class="callout" style="margin-bottom:18px;display:flex;align-items:center;gap:12px">
+        <i class="ti ti-photo" style="font-size:20px;color:var(--gold-dim)"></i>
+        <div style="flex:1">
+          <strong>Compactar capas grandes (melhora a velocidade do site)</strong><br>
+          <span style="font-size:12px">Fotos de capa enviadas por upload sem compressão podem deixar o site lento para carregar. Esta ferramenta reduz o tamanho de todas as capas já salvas, sem perda visível de qualidade na exibição.</span>
+        </div>
+        <button class="btn btn-sm btn-p" id="btn-compactar-capas" onclick="compactarCapasExistentes()"><i class="ti ti-photo-minus"></i> Compactar capas</button>
       </div>
 
       <!-- Preview -->
@@ -1115,8 +1140,6 @@ window.dispatchEvent(new Event('fb-ready'));
     <div class="mb"><div id="proj-obras-lista" style="padding:16px"></div></div>
     <div class="ma">
       <button class="btn btn-sm btn-o" onclick="renomearProjeto()"><i class="ti ti-edit"></i> Renomear</button>
-      <button class="btn btn-sm btn-o" onclick="emailDoProjeto()"><i class="ti ti-mail"></i> E-mail</button>
-      <button class="btn btn-sm btn-o" onclick="whatsappDoProjeto()"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
       <button class="btn btn-sm btn-g" onclick="exportarProjetoPDF()"><i class="ti ti-download"></i> Exportar PDF</button>
       <button class="btn btn-sm btn-d" onclick="excluirProjeto()"><i class="ti ti-trash"></i> Excluir projeto</button>
     </div>
@@ -1152,8 +1175,6 @@ window.dispatchEvent(new Event('fb-ready'));
     <div class="mb"><div id="preview-pdf-lista" style="padding:16px"></div></div>
     <div class="ma">
       <button class="btn btn-sm btn-o" onclick="abrirEscolherProjeto()"><i class="ti ti-circle-plus"></i> Salvar em projeto</button>
-      <button class="btn btn-sm btn-o" onclick="emailDaPrevia()"><i class="ti ti-mail"></i> E-mail</button>
-      <button class="btn btn-sm btn-o" onclick="whatsappDaPrevia()"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
       <button class="btn btn-sm btn-g" onclick="gerarPDFDaPrevia()"><i class="ti ti-download"></i> Gerar PDF</button>
     </div>
   </div>
@@ -1199,7 +1220,7 @@ window.dispatchEvent(new Event('fb-ready'));
 <script>
 // ══ FIREBASE CONFIG — v2.1 ══
 const TIPO_ICON={'Livro':'ti-book','Periódico':'ti-news','Tese':'ti-school','Dissertação':'ti-school','Monografia':'ti-file-text','E-book':'ti-device-tablet'};
-let resLista=[],resPg=1,resPgTam=20;
+let resLista=[],resListaOriginal=[],resPg=1,resPgTam=20;
 let listaAc=[],pgAc=1,pgAcTam=50;
 let modalLista=[],modalIdx=0;
 let curId=null,capaBase64Temp='',ctr=1;
@@ -1754,7 +1775,16 @@ function renderCarousel(){
   }).join('');
 }
 function carScroll(dir){document.getElementById('carousel').scrollBy({left:dir*420,behavior:'smooth'});}
-function mostrarRes(res,chips){document.getElementById('results-area').style.display='block';document.getElementById('inicio-default').style.display='none';resLista=res;resPg=1;document.getElementById('res-count').innerHTML='<strong>'+res.length+'</strong> obra'+(res.length!==1?'s':'')+' encontrada'+(res.length!==1?'s':'');document.getElementById('res-chips').innerHTML=chips.map(c=>'<span class="res-chip"><i class="ti ti-tag" style="font-size:11px"></i>'+c.label+'</span>').join('');renderResGrid();}
+function mostrarRes(res,chips){document.getElementById('results-area').style.display='block';document.getElementById('inicio-default').style.display='none';resListaOriginal=res.slice();resLista=res;resPg=1;const selOrd=document.getElementById('res-ordenar');if(selOrd)selOrd.value='relevancia';document.getElementById('res-count').innerHTML='<strong>'+res.length+'</strong> obra'+(res.length!==1?'s':'')+' encontrada'+(res.length!==1?'s':'');document.getElementById('res-chips').innerHTML=chips.map(c=>'<span class="res-chip"><i class="ti ti-tag" style="font-size:11px"></i>'+c.label+'</span>').join('');renderResGrid();}
+function reordenarRes(){
+  const modo=document.getElementById('res-ordenar').value;
+  let arr=resListaOriginal.slice();
+  if(modo==='titulo') arr.sort((a,b)=>normBusca(a.titulo||'').localeCompare(normBusca(b.titulo||'')));
+  else if(modo==='autor') arr.sort((a,b)=>normBusca(a.autor||'').localeCompare(normBusca(b.autor||'')));
+  else if(modo==='ano') arr.sort((a,b)=>(parseInt(b.ano)||0)-(parseInt(a.ano)||0));
+  else if(modo==='recente') arr.sort((a,b)=>new Date(b.dataCad||0)-new Date(a.dataCad||0));
+  resLista=arr;resPg=1;renderResGrid();
+}
 function renderResGrid(){
   const start=(resPg-1)*resPgTam,pg=resLista.slice(start,start+resPgTam),grid=document.getElementById('res-grid');
   if(!pg.length){grid.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Nenhuma obra encontrada.</p></div>';document.getElementById('res-pag').innerHTML='';return;}
@@ -1770,11 +1800,26 @@ function renderResGrid(){
   document.querySelectorAll('.res-sel').forEach(cb=>{if(resSelecionados.has(cb.dataset.id))cb.checked=true;});
   // Show selected count
   atualizarBarraSel();
-  const pages=Math.ceil(resLista.length/resPgTam);let html='';
-  if(pages>1){for(let i=1;i<=Math.min(pages,15);i++)html+='<button onclick="irResPg('+i+')" class="'+(i===resPg?'active':'')+'">'+i+'</button>';}
-  document.getElementById('res-pag').innerHTML=html;
+  const pages=Math.ceil(resLista.length/resPgTam);
+  document.getElementById('res-pag').innerHTML=gerarPaginacaoHTML(resPg,pages,'irResPg');
 }
-function irResPg(p){resPg=p;renderResGrid();}
+function gerarPaginacaoHTML(paginaAtual,totalPaginas,fn){
+  if(totalPaginas<=1) return '';
+  let html='<button onclick="'+fn+'('+(paginaAtual-1)+')"'+(paginaAtual===1?' disabled':'')+'><i class="ti ti-chevron-left"></i></button>';
+  const delta=2;
+  const conjunto=new Set([1,totalPaginas]);
+  for(let i=paginaAtual-delta;i<=paginaAtual+delta;i++){if(i>=1&&i<=totalPaginas) conjunto.add(i);}
+  const ordenadas=[...conjunto].sort((a,b)=>a-b);
+  let ultimo=0;
+  ordenadas.forEach(p=>{
+    if(ultimo&&p-ultimo>1) html+='<span class="pag-dots">…</span>';
+    html+='<button onclick="'+fn+'('+p+')" class="'+(p===paginaAtual?'active':'')+'">'+p+'</button>';
+    ultimo=p;
+  });
+  html+='<button onclick="'+fn+'('+(paginaAtual+1)+')"'+(paginaAtual===totalPaginas?' disabled':'')+'><i class="ti ti-chevron-right"></i></button>';
+  return html;
+}
+function irResPg(p){const total=Math.ceil(resLista.length/resPgTam);if(p<1||p>total)return;resPg=p;renderResGrid();window.scrollTo({top:document.getElementById('results-area').offsetTop-20,behavior:'smooth'});}
 let resSelecionados=new Set();
 function toggleSelRes(cb){if(cb.checked)resSelecionados.add(cb.dataset.id);else resSelecionados.delete(cb.dataset.id);atualizarBarraSel();}
 function atualizarBarraSel(){
@@ -1855,41 +1900,6 @@ function gerarPDFListaObras(obras,subtitulo,nomeArquivo){
   doc.save(nomeArquivo);
 }
 function slugNome(s){return (s||'lista').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
-async function compartilharEmail(obras,subtitulo,nomeArquivo){
-  if(!obras.length){toast('Nenhuma obra para compartilhar.','');return;}
-  const doc=construirPDFListaObras(obras,subtitulo);
-  const linhas=obras.map(o=>'- '+(o.titulo||'Sem título')+(o.autor?' — '+o.autor:'')).join('\n');
-  const assunto='Biblioteca Ministro Luís Roberto Barroso — '+subtitulo;
-  try{
-    const blob=doc.output('blob');
-    const file=new File([blob],nomeArquivo,{type:'application/pdf'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:assunto,text:'Segue a lista de obras em PDF.'});
-      return;
-    }
-  }catch(e){if(e && e.name==='AbortError') return;}
-  doc.save(nomeArquivo);
-  const corpo='Segue a lista de obras (o PDF foi baixado — anexe-o a este e-mail):\n\n'+linhas;
-  window.open('mailto:?subject='+encodeURIComponent(assunto)+'&body='+encodeURIComponent(corpo),'_blank');
-  toast('PDF baixado! Anexe-o manualmente no e-mail que abrimos para você.','');
-}
-async function compartilharWhatsApp(obras,subtitulo,nomeArquivo){
-  if(!obras.length){toast('Nenhuma obra para compartilhar.','');return;}
-  const doc=construirPDFListaObras(obras,subtitulo);
-  try{
-    const blob=doc.output('blob');
-    const file=new File([blob],nomeArquivo,{type:'application/pdf'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:'Biblioteca Ministro Luís Roberto Barroso',text:subtitulo});
-      return;
-    }
-  }catch(e){if(e && e.name==='AbortError') return;}
-  doc.save(nomeArquivo);
-  const linhas=obras.map(o=>'• '+(o.titulo||'Sem título')+(o.autor?' — '+o.autor:'')).join('\n');
-  const texto=subtitulo+' — Biblioteca Ministro Luís Roberto Barroso\n\n'+linhas;
-  window.open('https://wa.me/?text='+encodeURIComponent(texto),'_blank');
-  toast('PDF baixado! No WhatsApp que abrimos, anexe o arquivo manualmente.','');
-}
 function exportSelPDF(){
   const obras=acervo.filter(o=>resSelecionados.has(o.id));
   if(!obras.length) return;
@@ -1897,12 +1907,7 @@ function exportSelPDF(){
   toast('PDF gerado com '+obras.length+' obra(s)!','success');
 }
 function obrasDaPrevia(){return acervo.filter(o=>resSelecionados.has(o.id));}
-function emailDaPrevia(){compartilharEmail(obrasDaPrevia(),'Resultado de pesquisa','resultado_pesquisa_bmlrb.pdf');}
-function whatsappDaPrevia(){compartilharWhatsApp(obrasDaPrevia(),'Resultado de pesquisa','resultado_pesquisa_bmlrb.pdf');}
 function obrasDoProjetoAberto(){const p=projetos.find(x=>x.id===projetoAberto);return p?acervo.filter(o=>(p.obraIds||[]).includes(o.id)):[];}
-function emailDoProjeto(){const p=projetos.find(x=>x.id===projetoAberto);if(!p)return;compartilharEmail(obrasDoProjetoAberto(),'Projeto: '+p.nome,'projeto_'+slugNome(p.nome)+'.pdf');}
-function whatsappDoProjeto(){const p=projetos.find(x=>x.id===projetoAberto);if(!p)return;compartilharWhatsApp(obrasDoProjetoAberto(),'Projeto: '+p.nome,'projeto_'+slugNome(p.nome)+'.pdf');}
-
 
 // ══ PROJETOS ══
 let projetoAberto=null;
@@ -2069,17 +2074,84 @@ function colarImagemCapa(e){
   }
   toast('Nenhuma imagem encontrada. Copie a imagem primeiro (botão direito → Copiar imagem).','error');
 }
-function uploadCapa(e){
+function comprimirImagem(file,maxDim,qualidade){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      const img=new Image();
+      img.onload=function(){
+        let w=img.width,h=img.height;
+        if(w>maxDim||h>maxDim){
+          if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}
+          else{w=Math.round(w*maxDim/h);h=maxDim;}
+        }
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',qualidade));
+      };
+      img.onerror=()=>reject(new Error('Não foi possível ler a imagem.'));
+      img.src=ev.target.result;
+    };
+    reader.onerror=()=>reject(new Error('Falha ao ler o arquivo.'));
+    reader.readAsDataURL(file);
+  });
+}
+function comprimirDataURL(dataUrl,maxDim,qualidade){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=function(){
+      let w=img.width,h=img.height;
+      if(w>maxDim||h>maxDim){
+        if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}
+        else{w=Math.round(w*maxDim/h);h=maxDim;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(canvas.toDataURL('image/jpeg',qualidade));
+    };
+    img.onerror=()=>reject(new Error('Falha ao carregar imagem'));
+    img.src=dataUrl;
+  });
+}
+async function compactarCapasExistentes(){
+  const alvo=acervo.filter(o=>{
+    const c=o.capaUrl||o.capaBase64||'';
+    return c.startsWith('data:image')&&c.length>60000;
+  });
+  if(!alvo.length){toast('Nenhuma capa grande encontrada — tudo já está compactado!','success');return;}
+  if(!confirm('Compactar '+alvo.length+' capa(s) grande(s)? Isso pode levar alguns segundos, sem fechar esta aba.')) return;
+  const btn=document.getElementById('btn-compactar-capas');
+  const textoOriginal=btn.innerHTML;
+  let ok=0,falhas=0;
+  for(let i=0;i<alvo.length;i++){
+    const o=alvo[i];
+    btn.innerHTML='<i class="ti ti-loader-2"></i> Compactando '+(i+1)+'/'+alvo.length+'...';
+    try{
+      const original=o.capaUrl||o.capaBase64;
+      const nova=await comprimirDataURL(original,500,0.72);
+      o.capaUrl=nova;
+      if(o.capaBase64) o.capaBase64=nova;
+      ok++;
+    }catch(e){falhas++;}
+  }
+  btn.innerHTML=textoOriginal;
+  save();
+  toast(ok+' capa(s) compactada(s)'+(falhas?', '+falhas+' com erro':'')+'! O site deve carregar bem mais rápido agora.','success');
+}
+async function uploadCapa(e){
   const file=e.target.files[0];if(!file)return;
-  if(file.size>3*1024*1024){toast('Imagem muito grande. Use uma menor que 3MB.','error');return;}
-  const reader=new FileReader();
-  reader.onload=function(ev){
-    capaBase64Temp=ev.target.result;
+  if(file.size>10*1024*1024){toast('Imagem muito grande. Use uma menor que 10MB.','error');return;}
+  try{
+    const dataUrl=await comprimirImagem(file,500,0.75);
+    capaBase64Temp=dataUrl;
     previewCapa(capaBase64Temp);
     document.getElementById('f-capa-url').value='';
-    toast('Imagem carregada com sucesso!','success');
-  };
-  reader.readAsDataURL(file);
+    toast('Imagem carregada e compactada com sucesso!','success');
+  }catch(err){
+    toast('Erro ao processar imagem: '+err.message,'error');
+  }
 }
 async function buscarCapaGoogle(){
   const isbn=(document.getElementById('f-isbn').value||'').replace(/[^0-9X]/gi,'');
@@ -2132,8 +2204,8 @@ function salvar(e){e.preventDefault();
     titulo:normTitulo(gv('f-titulo')),subtitulo:normTitulo(gv('f-subtitulo')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
     editora:gv('f-editora'),local_pub:gv('f-local'),ano:gv('f-ano'),volume:gv('f-volume'),edicao:gv('f-edicao'),
     paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
-    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[\d.]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
-    notas:gv('f-notas'),observacoes:gv('f-observacoes'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
+    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[A-Za-z\d.()/:-]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
+    notas:gv('f-notas'),observacoes:gv('f-observacoes'),lingua:gv('f-lingua'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
     dataCad:curId?acervo.find(x=>x.id===curId).dataCad:new Date().toISOString()};
   if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
   else{acervo.push(o);toast('Obra registrada! Tombo: '+o.tombo,'success');}
@@ -2234,7 +2306,7 @@ function ver(id,lista){
       const sob=(o.sobrenomeClass||sobrenome(o.autor||'')).toUpperCase();
       if(o.colecao==='escritorio'){
         const locRaw=(o.localizacao||'').trim();
-        const cdd=locRaw.match(/^[\d.]+/)?.[0]||o.cdd||'';
+        const cdd=locRaw.match(/^[A-Za-z\d.()/:-]+/)?.[0]||o.cdd||'';
         const assunto=(o.assuntoEspecifico||'').trim().toUpperCase();
         // Ordem: CDD + SOBRENOME + ASSUNTO
         const linhas=[cdd,sob,assunto].filter(x=>x);
@@ -2497,7 +2569,7 @@ function parsearMARC(){
   if(l084){
     const rawClassif=sub(l084,'a').trim();
     // Extrai só o número CDD (sem cutter/sobrenome)
-    const m=rawClassif.match(/^([\d.]+)/);
+    const m=rawClassif.match(/^([A-Za-z\d.()/:-]+)/);
     cddPuro=m?m[1]:'';
     classif=rawClassif;
   }
@@ -2507,7 +2579,7 @@ function parsearMARC(){
   if(l092){
     const rawLoc=sub(l092,'a').trim()||l092.replace(/^=\d+\s+\S+\s+/,'').trim();
     // Extrai só o CDD
-    const m=rawLoc.match(/^([\d.]+)/);
+    const m=rawLoc.match(/^([A-Za-z\d.()/:-]+)/);
     if(m) localizacao=m[1];
   }
   if(!localizacao&&cddPuro) localizacao=cddPuro;
@@ -2937,7 +3009,7 @@ const AREA_LABEL = {
 function cdd_para_area(cdd){
     cdd=(cdd||'').trim().split('\n')[0].trim();
     if(!cdd||!cdd[0].match(/\d/)) return '';
-    const n=cdd.match(/^[\d.]+/);
+    const n=cdd.match(/^[A-Za-z\d.()/:-]+/);
     if(!n) return '';
     const c=n[0];
     if(c.startsWith('341.28')) return 'Direito Eleitoral';
@@ -2985,11 +3057,17 @@ function sobrenome(autor){
 }
 
 // Normalização de títulos — caixa baixa exceto primeira letra
+// Nomes próprios/siglas comuns que devem manter a inicial maiúscula mesmo em título/subtítulo
+const PROPRIOS_TITULO=['brasil','brasileiro','brasileira','brasileiros','brasileiras','brasília','são','paulo','rio','janeiro','minas','gerais','stf','stj','tst','tse','cnj','cpc','cf','adi','adpf','adc','onu','oea','oab','ue','portugal','espanha','frança','itália','alemanha','inglaterra','união','europeia','europeu','américa','latina'];
 function normTitulo(t){
   if(!t) return t;
   const excecoes=['do','da','de','dos','das','e','o','a','os','as','em','com','por','para','pelo','pela','um','uma','no','na','nos','nas'];
   return t.toLowerCase().replace(/[^\s:–—-]+/g,(w,i)=>{
+    // Preserva siglas que já estavam totalmente em maiúsculas no texto original
+    const original=t.slice(i,i+w.length);
+    if(/^[A-ZÀ-Ú]{2,}$/.test(original)) return original;
     if(i===0) return w.charAt(0).toUpperCase()+w.slice(1);
+    if(PROPRIOS_TITULO.includes(w)) return w.charAt(0).toUpperCase()+w.slice(1);
     if(excecoes.includes(w)) return w;
     // After colon or dash, capitalize
     const before=t.toLowerCase().slice(0,i).trimEnd();
@@ -3041,7 +3119,7 @@ function atualizarClassPreview(){
   }
   if(colecao==='escritorio'){
     // Escritório: CDD do campo localização
-    const cdd=loc.match(/^[\d.]+/)?.[0]||'';
+    const cdd=loc.match(/^[A-Za-z\d.()/:-]+/)?.[0]||'';
     if(el1) el1.textContent=cdd||'—';
     if(el3){if(esp){el3.textContent=esp.toUpperCase();el3.style.display='block';}else{el3.textContent='';el3.style.display='none';}}
     if(el2) el2.textContent=sob.toUpperCase();
@@ -3065,7 +3143,7 @@ function normClassificacao(o){
   const c=(o.classificacao||'').trim();
   if(!c) return '';
   if(!/^\d/.test(c)) return c; // já é texto
-  const codigo=c.match(/^[\d.]+/)?.[0]||'';
+  const codigo=c.match(/^[A-Za-z\d.()/:-]+/)?.[0]||'';
   return cdd_para_area(codigo)||c;
 }
 
@@ -3076,7 +3154,7 @@ function normalizarRegistro(o){
   o.autor=normAutor(o.autor||'');
   // Guarda CDD original antes de normalizar (para etiqueta do Escritório)
   const cddOriginal=(o.classificacao||'').trim();
-  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[\d.]+/)?.[0]||'';
+  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[A-Za-z\d.()/:-]+/)?.[0]||'';
   o.classificacao=normClassificacao(o);
   // Garante sobrenome para etiqueta
   if(!o.sobrenomeClass&&o.autor) o.sobrenomeClass=sobrenome(o.autor);
@@ -3197,7 +3275,7 @@ function renderEtiquetas(){
   grid.innerHTML=lista.map(o=>{
     const isEsc=o.colecao==='escritorio';
     const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[\d.]+/)?.[0]||o.cdd||''):'';
+    const cdd=isEsc?(locRaw.match(/^[A-Za-z\d.()/:-]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
@@ -3244,7 +3322,7 @@ function imprimirEtiquetas(modo){
   const etqHTML=obras.map(o=>{
     const isEsc=o.colecao==='escritorio';
     const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[\d.]+/)?.[0]||o.cdd||''):'';
+    const cdd=isEsc?(locRaw.match(/^[A-Za-z\d.()/:-]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
