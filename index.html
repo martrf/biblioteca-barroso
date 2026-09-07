@@ -101,12 +101,10 @@
   .tag-tipo-periodico{background:#e3f0e6;color:#1a5c32}
   .tag-tipo-tese{background:#f5eaf8;color:#5a2e7a}
   .res-card-tombo{font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:var(--gray-400);margin-left:auto;white-space:nowrap;padding-top:2px}
-  .pag{display:flex;gap:6px;justify-content:center;align-items:center;padding:20px 0 8px;flex-wrap:wrap}
+  .pag{display:flex;gap:6px;justify-content:center;padding:20px 0 8px;flex-wrap:wrap}
   .pag button{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--r);padding:6px 12px;font-size:13px;cursor:pointer;font-family:var(--font-b);transition:all .15s}
   .pag button.active{background:var(--navy);color:var(--gold);border-color:var(--navy);font-weight:700}
-  .pag button:hover:not(.active):not(:disabled){background:var(--gold-pale);border-color:var(--gold)}
-  .pag button:disabled{opacity:.35;cursor:default}
-  .pag .pag-dots{padding:0 4px;color:var(--gray-400);font-size:13px}
+  .pag button:hover:not(.active){background:var(--gold-pale);border-color:var(--gold)}
   .empty{text-align:center;padding:52px 20px;color:var(--gray-400)}
   .empty i{font-size:52px;display:block;margin-bottom:14px;color:var(--gray-200)}
   .empty p{font-size:14px;line-height:1.7}
@@ -299,6 +297,8 @@
   }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 firebase.initializeApp({
@@ -310,6 +310,8 @@ firebase.initializeApp({
   appId:"1:608560273578:web:d6b4a77d455dcd229518d3"
 });
 window._fbDb=firebase.firestore();
+window._fbAuth=firebase.auth();
+window._fbStorage=firebase.storage();
 window._fbReady=true;
 window.dispatchEvent(new Event('fb-ready'));
 </script>
@@ -384,6 +386,7 @@ window.dispatchEvent(new Event('fb-ready'));
 <div class="admin-bar" id="admin-bar">
   <i class="ti ti-shield-lock"></i> Modo administrador ativo
   <button onclick="sw('inicio')"><i class="ti ti-home"></i> Página inicial</button>
+  <button id="btn-migrar-capas" onclick="migrarCapasParaStorage()"><i class="ti ti-cloud-upload"></i> Migrar capas</button>
   <button onclick="logoutAdmin()"><i class="ti ti-logout"></i> Sair</button>
 </div>
 
@@ -411,12 +414,33 @@ window.dispatchEvent(new Event('fb-ready'));
       <p>Biblioteca Ministro Luís Roberto Barroso</p>
     </div>
     <div class="login-body">
-      <div class="login-error" id="login-error">Senha incorreta. Tente novamente.</div>
-      <div class="fld" style="margin-bottom:14px">
-        <label>Senha</label>
-        <input type="password" id="login-senha" placeholder="Digite a senha de administrador"
-          onkeydown="if(event.key==='Enter')fazerLogin()" style="font-size:14px">
-      </div>
+      <div class="login-error" id="login-error">
+  Não foi possível entrar. Verifique o e-mail e a senha.
+</div>
+
+<div class="fld" style="margin-bottom:14px">
+  <label>E-mail</label>
+  <input
+    type="email"
+    id="login-email"
+    placeholder="Digite seu e-mail"
+    autocomplete="username"
+    onkeydown="if(event.key==='Enter')document.getElementById('login-senha').focus()"
+    style="font-size:14px"
+  >
+</div>
+
+<div class="fld" style="margin-bottom:14px">
+  <label>Senha</label>
+  <input
+    type="password"
+    id="login-senha"
+    placeholder="Digite sua senha"
+    autocomplete="current-password"
+    onkeydown="if(event.key==='Enter')fazerLogin()"
+    style="font-size:14px"
+  >
+</div>
       <button class="btn btn-g" onclick="fazerLogin()" style="width:100%;justify-content:center">
         <i class="ti ti-login"></i> Entrar
       </button>
@@ -502,7 +526,6 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Organização Judiciária</option>
             <option>Outras Áreas</option>
             <option>Religião / Espiritismo</option>
-            <option>Sociologia</option>
             <option>Tecnologia / Saúde</option>
           </select>
         </div>
@@ -556,17 +579,7 @@ window.dispatchEvent(new Event('fb-ready'));
     <div class="res-header">
       <div class="res-count" id="res-count"></div>
       <div class="res-chips" id="res-chips"></div>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray-600);margin-left:auto">
-        Ordenar por:
-        <select id="res-ordenar" onchange="reordenarRes()" style="padding:5px 8px;border:1px solid var(--gray-200);border-radius:6px;font-size:12px">
-          <option value="relevancia">Relevância</option>
-          <option value="titulo">Título (A-Z)</option>
-          <option value="autor">Autor (A-Z)</option>
-          <option value="ano">Ano de publicação (mais recente)</option>
-          <option value="recente">Data de cadastro (mais recente)</option>
-        </select>
-      </label>
-      <button class="btn btn-sm btn-o" onclick="limparRes()"><i class="ti ti-x"></i> Limpar busca</button>
+      <button class="btn btn-sm btn-o" style="margin-left:auto" onclick="limparRes()"><i class="ti ti-x"></i> Limpar busca</button>
     </div>
     <div class="res-grid" id="res-grid"></div>
     <div class="pag" id="res-pag"></div>
@@ -735,7 +748,6 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Organização Judiciária</option>
               <option>Outras Áreas</option>
               <option>Religião / Espiritismo</option>
-              <option>Sociologia</option>
               <option>Tecnologia / Saúde</option>
             </select>
           </div>
@@ -1021,7 +1033,6 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Organização Judiciária</option>
             <option>Outras Áreas</option>
             <option>Religião / Espiritismo</option>
-            <option>Sociologia</option>
             <option>Tecnologia / Saúde</option>
           </select>
         </div>
@@ -1065,16 +1076,6 @@ window.dispatchEvent(new Event('fb-ready'));
           <span style="font-size:12px">Ajusta a classificação (CDD) para 341.272 nas obras de Direitos Humanos e para 341.27 nas de Direitos Fundamentais, verificando assunto geral, assunto específico e título.</span>
         </div>
         <button class="btn btn-sm btn-p" onclick="padronizarDireitosHumanosFundamentais()"><i class="ti ti-refresh"></i> Padronizar agora</button>
-      </div>
-
-      <!-- Compactar capas grandes (performance) -->
-      <div class="callout" style="margin-bottom:18px;display:flex;align-items:center;gap:12px">
-        <i class="ti ti-photo" style="font-size:20px;color:var(--gold-dim)"></i>
-        <div style="flex:1">
-          <strong>Compactar capas grandes (melhora a velocidade do site)</strong><br>
-          <span style="font-size:12px">Fotos de capa enviadas por upload sem compressão podem deixar o site lento para carregar. Esta ferramenta reduz o tamanho de todas as capas já salvas, sem perda visível de qualidade na exibição.</span>
-        </div>
-        <button class="btn btn-sm btn-p" id="btn-compactar-capas" onclick="compactarCapasExistentes()"><i class="ti ti-photo-minus"></i> Compactar capas</button>
       </div>
 
       <!-- Preview -->
@@ -1140,6 +1141,8 @@ window.dispatchEvent(new Event('fb-ready'));
     <div class="mb"><div id="proj-obras-lista" style="padding:16px"></div></div>
     <div class="ma">
       <button class="btn btn-sm btn-o" onclick="renomearProjeto()"><i class="ti ti-edit"></i> Renomear</button>
+      <button class="btn btn-sm btn-o" onclick="emailDoProjeto()"><i class="ti ti-mail"></i> E-mail</button>
+      <button class="btn btn-sm btn-o" onclick="whatsappDoProjeto()"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
       <button class="btn btn-sm btn-g" onclick="exportarProjetoPDF()"><i class="ti ti-download"></i> Exportar PDF</button>
       <button class="btn btn-sm btn-d" onclick="excluirProjeto()"><i class="ti ti-trash"></i> Excluir projeto</button>
     </div>
@@ -1175,6 +1178,8 @@ window.dispatchEvent(new Event('fb-ready'));
     <div class="mb"><div id="preview-pdf-lista" style="padding:16px"></div></div>
     <div class="ma">
       <button class="btn btn-sm btn-o" onclick="abrirEscolherProjeto()"><i class="ti ti-circle-plus"></i> Salvar em projeto</button>
+      <button class="btn btn-sm btn-o" onclick="emailDaPrevia()"><i class="ti ti-mail"></i> E-mail</button>
+      <button class="btn btn-sm btn-o" onclick="whatsappDaPrevia()"><i class="ti ti-brand-whatsapp"></i> WhatsApp</button>
       <button class="btn btn-sm btn-g" onclick="gerarPDFDaPrevia()"><i class="ti ti-download"></i> Gerar PDF</button>
     </div>
   </div>
@@ -1220,7 +1225,7 @@ window.dispatchEvent(new Event('fb-ready'));
 <script>
 // ══ FIREBASE CONFIG — v2.1 ══
 const TIPO_ICON={'Livro':'ti-book','Periódico':'ti-news','Tese':'ti-school','Dissertação':'ti-school','Monografia':'ti-file-text','E-book':'ti-device-tablet'};
-let resLista=[],resListaOriginal=[],resPg=1,resPgTam=20;
+let resLista=[],resPg=1,resPgTam=20;
 let listaAc=[],pgAc=1,pgAcTam=50;
 let modalLista=[],modalIdx=0;
 let curId=null,capaBase64Temp='',ctr=1;
@@ -1391,28 +1396,6 @@ async function carregarProjetos(){
   }catch(e){console.error('Erro ao carregar projetos:',e);}
   if(tabAtual==='projetos') renderProjetos();
 }
-function salvarCacheAcervo(){
-  try{
-    localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));
-    return true;
-  }catch(e){
-    // Provavelmente estourou o limite do localStorage (capas grandes em base64).
-    // Salva uma versão sem as capas embutidas, só pra garantir que o cache rápido funcione.
-    try{
-      const leve=acervo.map(o=>{
-        const c=Object.assign({},o);
-        if(c.capaUrl&&c.capaUrl.startsWith('data:image')) c.capaUrl='';
-        if(c.capaBase64) c.capaBase64='';
-        return c;
-      });
-      localStorage.setItem('bmlrb_ac',JSON.stringify(leve));
-      console.warn('Cache salvo sem capas em base64 — dados grandes demais para o navegador. Use "Compactar capas" na tela de Etiquetas.');
-    }catch(e2){
-      console.error('Não foi possível salvar o cache do acervo:',e2);
-    }
-    return false;
-  }
-}
 async function load(){
   const sbStatus=document.getElementById('sb-status');
   function setStatus(msg,color){if(sbStatus){sbStatus.textContent=msg;sbStatus.style.color=color||'var(--gold)';}}
@@ -1448,14 +1431,17 @@ async function load(){
   // Sem cache — carrega do Firebase pela primeira vez
   setStatus('⏳ Carregando acervo...','var(--gold)');
   try{
-    const [fbAcervo,fbEmp]=await Promise.all([sbCarregarAcervo(),sbCarregarEmprestimos()]);
+    const fbAcervo=await sbCarregarAcervo();
+    const fbEmp=await sbCarregarEmprestimos();
     if(fbAcervo&&fbAcervo.length>0){
       acervo=fbAcervo;
       emprestimos=fbEmp||[];
       acervo.forEach(o=>{if(!o.colecao)o.colecao='gabinete';});
       // Salva no cache
-      salvarCacheAcervo();
-      try{localStorage.setItem('bmlrb_emp',JSON.stringify(emprestimos));}catch(e){}
+      try{
+        localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));
+        localStorage.setItem('bmlrb_emp',JSON.stringify(emprestimos));
+      }catch(e){}
       setStatus('✅ '+acervo.length+' obras','#4caf81');
       setTimeout(()=>setStatus(''),4000);
     } else {
@@ -1477,7 +1463,7 @@ async function atualizarDoFirebase(){
     if(fbAcervo&&fbAcervo.length>0){
       acervo=fbAcervo;
       acervo.forEach(o=>{if(!o.colecao)o.colecao='gabinete';});
-      salvarCacheAcervo();
+      try{localStorage.setItem('bmlrb_ac',JSON.stringify(acervo));}catch(e){}
       updStats();
       renderCarousel();
       renderPI();
@@ -1488,17 +1474,12 @@ async function atualizarDoFirebase(){
 }
 
 function save(){
-  salvarCacheAcervo();
-  try{localStorage.setItem('bmlrb_ctr',ctr);}catch(e){}
-  // Sincroniza com Supabase (debounce 2s)
-  clearTimeout(window._sbTimer);
-  window._sbTimer=setTimeout(()=>{
-    sbSalvarAcervo().then(()=>{
-      const n=document.getElementById('sb-status');
-      if(n){n.textContent='✅ Sincronizado';n.style.color='#4caf81';
-        setTimeout(()=>{n.textContent='';},3000);}
-    });
-  },2000);
+  try{
+    localStorage.setItem('bmlrb_ac', JSON.stringify(acervo));
+    localStorage.setItem('bmlrb_ctr', ctr);
+  }catch(e){
+    console.error('Erro ao salvar cache local:', e);
+  }
 }
 
 function salvarBackupHTML(){
@@ -1546,9 +1527,27 @@ function mostrarNotifBackup(){
 }
 
 function saveEmp(){
-  try{localStorage.setItem('bmlrb_emp',JSON.stringify(emprestimos));}catch(e){}
-  clearTimeout(window._backupTimer);
-  window._backupTimer=setTimeout(()=>salvarBackupHTML(),3000);
+  try{
+    localStorage.setItem(
+      'bmlrb_emp',
+      JSON.stringify(emprestimos)
+    );
+  }catch(e){
+    console.error('Erro ao salvar empréstimos no cache:', e);
+  }
+
+  sbSalvarEmprestimos().then(()=>{
+    const n=document.getElementById('sb-status');
+
+    if(n){
+      n.textContent='✅ Empréstimos sincronizados';
+      n.style.color='#4caf81';
+
+      setTimeout(()=>{
+        n.textContent='';
+      },3000);
+    }
+  });
 }
 function gtombo(){
   // Garante que o ctr seja sempre maior que o último tombo existente
@@ -1665,14 +1664,12 @@ function buscarAdv(){
   const op2=document.getElementById('a-op2')?.value||'e';
   const op3=document.getElementById('a-op3')?.value||'e';
   const ftmb=gv('a-tombo').toLowerCase(),farea=gv('a-area'),ftipo=gv('a-tipo'),fest=gv('a-estante').toLowerCase();
-  const flng=gv('a-lingua');
   const chips=[];
   if(ft)chips.push({label:'Título: '+gv('a-titulo')});
   if(fa)chips.push({label:'Autor: '+gv('a-autor')});
   if(fano)chips.push({label:'Ano: '+fano});
   if(farea)chips.push({label:'Área: '+farea});
   if(ftipo)chips.push({label:'Tipo: '+ftipo});
-  if(flng)chips.push({label:'Língua: '+flng});
   if(fass)chips.push({label:'Assunto: '+gv('a-assunto')});
   if(fass2)chips.push({label:op2.toUpperCase()+': '+gv('a-assunto2')});
   if(fass3)chips.push({label:op3.toUpperCase()+': '+gv('a-assunto3')});
@@ -1682,7 +1679,6 @@ function buscarAdv(){
   if(fa)res=res.filter(o=>normBusca(o.autor||'').includes(normBusca(fa)));
   if(fano){const range=fano.match(/(\d{4})-(\d{4})/);if(range)res=res.filter(o=>{const y=parseInt(o.ano);return y>=parseInt(range[1])&&y<=parseInt(range[2]);});else res=res.filter(o=>(o.ano||'').toString().includes(fano));}
   if(fed)res=res.filter(o=>(o.editora||'').toLowerCase().includes(fed));
-  if(flng)res=res.filter(o=>(o.lingua||'Português (Brasil)')===flng);
   if(fass||fass2||fass3){
     res=res.filter(o=>{
       const campo=(o.assunto||'').toLowerCase()+' '+(o.titulo||'').toLowerCase()+' '+(o.assuntoEspecifico||'').toLowerCase();
@@ -1795,16 +1791,7 @@ function renderCarousel(){
   }).join('');
 }
 function carScroll(dir){document.getElementById('carousel').scrollBy({left:dir*420,behavior:'smooth'});}
-function mostrarRes(res,chips){document.getElementById('results-area').style.display='block';document.getElementById('inicio-default').style.display='none';resListaOriginal=res.slice();resLista=res;resPg=1;const selOrd=document.getElementById('res-ordenar');if(selOrd)selOrd.value='relevancia';document.getElementById('res-count').innerHTML='<strong>'+res.length+'</strong> obra'+(res.length!==1?'s':'')+' encontrada'+(res.length!==1?'s':'');document.getElementById('res-chips').innerHTML=chips.map(c=>'<span class="res-chip"><i class="ti ti-tag" style="font-size:11px"></i>'+c.label+'</span>').join('');renderResGrid();}
-function reordenarRes(){
-  const modo=document.getElementById('res-ordenar').value;
-  let arr=resListaOriginal.slice();
-  if(modo==='titulo') arr.sort((a,b)=>normBusca(a.titulo||'').localeCompare(normBusca(b.titulo||'')));
-  else if(modo==='autor') arr.sort((a,b)=>normBusca(a.autor||'').localeCompare(normBusca(b.autor||'')));
-  else if(modo==='ano') arr.sort((a,b)=>(parseInt(b.ano)||0)-(parseInt(a.ano)||0));
-  else if(modo==='recente') arr.sort((a,b)=>new Date(b.dataCad||0)-new Date(a.dataCad||0));
-  resLista=arr;resPg=1;renderResGrid();
-}
+function mostrarRes(res,chips){document.getElementById('results-area').style.display='block';document.getElementById('inicio-default').style.display='none';resLista=res;resPg=1;document.getElementById('res-count').innerHTML='<strong>'+res.length+'</strong> obra'+(res.length!==1?'s':'')+' encontrada'+(res.length!==1?'s':'');document.getElementById('res-chips').innerHTML=chips.map(c=>'<span class="res-chip"><i class="ti ti-tag" style="font-size:11px"></i>'+c.label+'</span>').join('');renderResGrid();}
 function renderResGrid(){
   const start=(resPg-1)*resPgTam,pg=resLista.slice(start,start+resPgTam),grid=document.getElementById('res-grid');
   if(!pg.length){grid.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Nenhuma obra encontrada.</p></div>';document.getElementById('res-pag').innerHTML='';return;}
@@ -1820,26 +1807,11 @@ function renderResGrid(){
   document.querySelectorAll('.res-sel').forEach(cb=>{if(resSelecionados.has(cb.dataset.id))cb.checked=true;});
   // Show selected count
   atualizarBarraSel();
-  const pages=Math.ceil(resLista.length/resPgTam);
-  document.getElementById('res-pag').innerHTML=gerarPaginacaoHTML(resPg,pages,'irResPg');
+  const pages=Math.ceil(resLista.length/resPgTam);let html='';
+  if(pages>1){for(let i=1;i<=Math.min(pages,15);i++)html+='<button onclick="irResPg('+i+')" class="'+(i===resPg?'active':'')+'">'+i+'</button>';}
+  document.getElementById('res-pag').innerHTML=html;
 }
-function gerarPaginacaoHTML(paginaAtual,totalPaginas,fn){
-  if(totalPaginas<=1) return '';
-  let html='<button onclick="'+fn+'('+(paginaAtual-1)+')"'+(paginaAtual===1?' disabled':'')+'><i class="ti ti-chevron-left"></i></button>';
-  const delta=2;
-  const conjunto=new Set([1,totalPaginas]);
-  for(let i=paginaAtual-delta;i<=paginaAtual+delta;i++){if(i>=1&&i<=totalPaginas) conjunto.add(i);}
-  const ordenadas=[...conjunto].sort((a,b)=>a-b);
-  let ultimo=0;
-  ordenadas.forEach(p=>{
-    if(ultimo&&p-ultimo>1) html+='<span class="pag-dots">…</span>';
-    html+='<button onclick="'+fn+'('+p+')" class="'+(p===paginaAtual?'active':'')+'">'+p+'</button>';
-    ultimo=p;
-  });
-  html+='<button onclick="'+fn+'('+(paginaAtual+1)+')"'+(paginaAtual===totalPaginas?' disabled':'')+'><i class="ti ti-chevron-right"></i></button>';
-  return html;
-}
-function irResPg(p){const total=Math.ceil(resLista.length/resPgTam);if(p<1||p>total)return;resPg=p;renderResGrid();window.scrollTo({top:document.getElementById('results-area').offsetTop-20,behavior:'smooth'});}
+function irResPg(p){resPg=p;renderResGrid();}
 let resSelecionados=new Set();
 function toggleSelRes(cb){if(cb.checked)resSelecionados.add(cb.dataset.id);else resSelecionados.delete(cb.dataset.id);atualizarBarraSel();}
 function atualizarBarraSel(){
@@ -1920,6 +1892,41 @@ function gerarPDFListaObras(obras,subtitulo,nomeArquivo){
   doc.save(nomeArquivo);
 }
 function slugNome(s){return (s||'lista').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');}
+async function compartilharEmail(obras,subtitulo,nomeArquivo){
+  if(!obras.length){toast('Nenhuma obra para compartilhar.','');return;}
+  const doc=construirPDFListaObras(obras,subtitulo);
+  const linhas=obras.map(o=>'- '+(o.titulo||'Sem título')+(o.autor?' — '+o.autor:'')).join('\n');
+  const assunto='Biblioteca Ministro Luís Roberto Barroso — '+subtitulo;
+  try{
+    const blob=doc.output('blob');
+    const file=new File([blob],nomeArquivo,{type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:assunto,text:'Segue a lista de obras em PDF.'});
+      return;
+    }
+  }catch(e){if(e && e.name==='AbortError') return;}
+  doc.save(nomeArquivo);
+  const corpo='Segue a lista de obras (o PDF foi baixado — anexe-o a este e-mail):\n\n'+linhas;
+  window.open('mailto:?subject='+encodeURIComponent(assunto)+'&body='+encodeURIComponent(corpo),'_blank');
+  toast('PDF baixado! Anexe-o manualmente no e-mail que abrimos para você.','');
+}
+async function compartilharWhatsApp(obras,subtitulo,nomeArquivo){
+  if(!obras.length){toast('Nenhuma obra para compartilhar.','');return;}
+  const doc=construirPDFListaObras(obras,subtitulo);
+  try{
+    const blob=doc.output('blob');
+    const file=new File([blob],nomeArquivo,{type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:'Biblioteca Ministro Luís Roberto Barroso',text:subtitulo});
+      return;
+    }
+  }catch(e){if(e && e.name==='AbortError') return;}
+  doc.save(nomeArquivo);
+  const linhas=obras.map(o=>'• '+(o.titulo||'Sem título')+(o.autor?' — '+o.autor:'')).join('\n');
+  const texto=subtitulo+' — Biblioteca Ministro Luís Roberto Barroso\n\n'+linhas;
+  window.open('https://wa.me/?text='+encodeURIComponent(texto),'_blank');
+  toast('PDF baixado! No WhatsApp que abrimos, anexe o arquivo manualmente.','');
+}
 function exportSelPDF(){
   const obras=acervo.filter(o=>resSelecionados.has(o.id));
   if(!obras.length) return;
@@ -1927,7 +1934,12 @@ function exportSelPDF(){
   toast('PDF gerado com '+obras.length+' obra(s)!','success');
 }
 function obrasDaPrevia(){return acervo.filter(o=>resSelecionados.has(o.id));}
+function emailDaPrevia(){compartilharEmail(obrasDaPrevia(),'Resultado de pesquisa','resultado_pesquisa_bmlrb.pdf');}
+function whatsappDaPrevia(){compartilharWhatsApp(obrasDaPrevia(),'Resultado de pesquisa','resultado_pesquisa_bmlrb.pdf');}
 function obrasDoProjetoAberto(){const p=projetos.find(x=>x.id===projetoAberto);return p?acervo.filter(o=>(p.obraIds||[]).includes(o.id)):[];}
+function emailDoProjeto(){const p=projetos.find(x=>x.id===projetoAberto);if(!p)return;compartilharEmail(obrasDoProjetoAberto(),'Projeto: '+p.nome,'projeto_'+slugNome(p.nome)+'.pdf');}
+function whatsappDoProjeto(){const p=projetos.find(x=>x.id===projetoAberto);if(!p)return;compartilharWhatsApp(obrasDoProjetoAberto(),'Projeto: '+p.nome,'projeto_'+slugNome(p.nome)+'.pdf');}
+
 
 // ══ PROJETOS ══
 let projetoAberto=null;
@@ -2094,85 +2106,263 @@ function colarImagemCapa(e){
   }
   toast('Nenhuma imagem encontrada. Copie a imagem primeiro (botão direito → Copiar imagem).','error');
 }
-function comprimirImagem(file,maxDim,qualidade){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      const img=new Image();
-      img.onload=function(){
-        let w=img.width,h=img.height;
-        if(w>maxDim||h>maxDim){
-          if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}
-          else{w=Math.round(w*maxDim/h);h=maxDim;}
-        }
-        const canvas=document.createElement('canvas');
-        canvas.width=w;canvas.height=h;
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        resolve(canvas.toDataURL('image/jpeg',qualidade));
-      };
-      img.onerror=()=>reject(new Error('Não foi possível ler a imagem.'));
-      img.src=ev.target.result;
-    };
-    reader.onerror=()=>reject(new Error('Falha ao ler o arquivo.'));
-    reader.readAsDataURL(file);
-  });
+async function uploadCapa(e){
+  const file=e.target.files[0];
+
+  if(!file) return;
+
+  if(!isAdmin()){
+    toast('Entre como administradora para enviar capas.','error');
+    return;
+  }
+
+  if(!file.type.startsWith('image/')){
+    toast('Selecione um arquivo de imagem válido.','error');
+    return;
+  }
+
+  if(file.size>=2*1024*1024){
+    toast('A imagem deve ter menos de 2 MB.','error');
+    return;
+  }
+
+  try{
+    toast('Enviando capa para a nuvem...','');
+
+    const nomeOriginal=file.name || 'capa.jpg';
+    const nomeSeguro=nomeOriginal
+      .replace(/[^a-zA-Z0-9._-]/g,'_');
+
+    const caminho=
+      'capas/' +
+      Date.now() +
+      '_' +
+      Math.random().toString(36).slice(2) +
+      '_' +
+      nomeSeguro;
+
+    const referencia=window._fbStorage
+      .ref()
+      .child(caminho);
+
+    const envio=await referencia.put(file,{
+      contentType:file.type
+    });
+
+    const url=await envio.ref.getDownloadURL();
+
+    capaBase64Temp='';
+    document.getElementById('f-capa-url').value=url;
+
+    previewCapa(url);
+
+    toast('Capa enviada com sucesso!','success');
+
+  }catch(e){
+    console.error('Erro ao enviar capa:',e);
+    toast(
+      'Não foi possível enviar a capa para o Storage.',
+      'error'
+    );
+  }
 }
-function comprimirDataURL(dataUrl,maxDim,qualidade){
+
+let migracaoCapasEmAndamento=false;
+let pararMigracaoCapas=false;
+
+function base64DaObra(o){
+  const candidatos=[o.capaUrl,o.capaBase64];
+  return candidatos.find(v=>
+    typeof v==='string' && /^data:image\//i.test(v)
+  )||'';
+}
+
+async function otimizarCapaBase64(dataUrl){
+  const resposta=await fetch(dataUrl);
+  const original=await resposta.blob();
+
+  if(original.size<1800*1024){
+    return original;
+  }
+
   return new Promise((resolve,reject)=>{
     const img=new Image();
-    img.onload=function(){
-      let w=img.width,h=img.height;
-      if(w>maxDim||h>maxDim){
-        if(w>h){h=Math.round(h*maxDim/w);w=maxDim;}
-        else{w=Math.round(w*maxDim/h);h=maxDim;}
+    const url=URL.createObjectURL(original);
+
+    img.onload=()=>{
+      try{
+        const maxLargura=1200;
+        const maxAltura=1800;
+        const escala=Math.min(
+          1,
+          maxLargura/img.naturalWidth,
+          maxAltura/img.naturalHeight
+        );
+        const canvas=document.createElement('canvas');
+        canvas.width=Math.max(1,Math.round(img.naturalWidth*escala));
+        canvas.height=Math.max(1,Math.round(img.naturalHeight*escala));
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(blob=>{
+          if(blob) resolve(blob);
+          else reject(new Error('Falha ao compactar a imagem'));
+        },'image/jpeg',0.82);
+      }catch(e){
+        URL.revokeObjectURL(url);
+        reject(e);
       }
-      const canvas=document.createElement('canvas');
-      canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      resolve(canvas.toDataURL('image/jpeg',qualidade));
     };
-    img.onerror=()=>reject(new Error('Falha ao carregar imagem'));
-    img.src=dataUrl;
+
+    img.onerror=()=>{
+      URL.revokeObjectURL(url);
+      reject(new Error('Imagem Base64 inválida'));
+    };
+
+    img.src=url;
   });
 }
-async function compactarCapasExistentes(){
-  const alvo=acervo.filter(o=>{
-    const c=o.capaUrl||o.capaBase64||'';
-    return c.startsWith('data:image')&&c.length>60000;
-  });
-  if(!alvo.length){toast('Nenhuma capa grande encontrada — tudo já está compactado!','success');return;}
-  if(!confirm('Compactar '+alvo.length+' capa(s) grande(s)? Isso pode levar alguns segundos, sem fechar esta aba.')) return;
-  const btn=document.getElementById('btn-compactar-capas');
-  const textoOriginal=btn.innerHTML;
-  let ok=0,falhas=0;
-  for(let i=0;i<alvo.length;i++){
-    const o=alvo[i];
-    btn.innerHTML='<i class="ti ti-loader-2"></i> Compactando '+(i+1)+'/'+alvo.length+'...';
+
+function criarPainelMigracaoCapas(total){
+  let painel=document.getElementById('painel-migracao-capas');
+  if(painel) painel.remove();
+
+  painel=document.createElement('div');
+  painel.id='painel-migracao-capas';
+  painel.style.cssText='position:fixed;right:18px;bottom:58px;z-index:1200;width:min(360px,calc(100vw - 36px));background:#fff;border:1px solid #d7dce5;border-radius:10px;box-shadow:0 8px 28px rgba(26,39,68,.25);padding:16px;font-size:13px;color:#1a2744';
+  painel.innerHTML=`
+    <div style="font-weight:700;margin-bottom:9px">Migração das capas</div>
+    <div id="migracao-capas-texto">Preparando 0 de ${total}...</div>
+    <div style="height:8px;background:#edf0f5;border-radius:8px;overflow:hidden;margin:10px 0">
+      <div id="migracao-capas-barra" style="height:100%;width:0;background:#c9a84c;transition:width .2s"></div>
+    </div>
+    <div id="migracao-capas-erros" style="font-size:11px;color:#b84040"></div>
+    <button id="migracao-capas-pausar" class="btn btn-sm btn-o" style="margin-top:10px" onclick="pararMigracaoCapas=true">Pausar com segurança</button>
+  `;
+  document.body.appendChild(painel);
+  return painel;
+}
+
+function atualizarPainelMigracaoCapas(feitas,total,falhas,mensagem){
+  const texto=document.getElementById('migracao-capas-texto');
+  const barra=document.getElementById('migracao-capas-barra');
+  const erros=document.getElementById('migracao-capas-erros');
+  if(texto) texto.textContent=mensagem||`${feitas} de ${total} processadas`;
+  if(barra) barra.style.width=(total?Math.round(feitas/total*100):100)+'%';
+  if(erros) erros.textContent=falhas?`${falhas} capa(s) não puderam ser migradas nesta tentativa.`:'';
+}
+
+async function migrarCapasParaStorage(){
+  if(migracaoCapasEmAndamento){
+    toast('A migração já está em andamento.','');
+    return;
+  }
+
+  if(!isAdmin()){
+    toast('Entre como administradora para migrar as capas.','error');
+    abrirLogin();
+    return;
+  }
+
+  const pendentes=acervo.filter(o=>base64DaObra(o));
+
+  if(!pendentes.length){
+    toast('Todas as capas já foram migradas!','success');
+    return;
+  }
+
+  if(!confirm(
+    `Foram encontradas ${pendentes.length} capas em Base64. `+
+    'Deseja iniciar a migração? Você poderá pausar e retomar depois.'
+  )) return;
+
+  migracaoCapasEmAndamento=true;
+  pararMigracaoCapas=false;
+  let concluidas=0;
+  let falhas=0;
+  const total=pendentes.length;
+  criarPainelMigracaoCapas(total);
+
+  const botao=document.getElementById('btn-migrar-capas');
+  if(botao) botao.disabled=true;
+
+  for(const obra of pendentes){
+    if(pararMigracaoCapas) break;
+
     try{
-      const original=o.capaUrl||o.capaBase64;
-      const nova=await comprimirDataURL(original,500,0.72);
-      o.capaUrl=nova;
-      if(o.capaBase64) o.capaBase64=nova;
-      ok++;
-    }catch(e){falhas++;}
+      atualizarPainelMigracaoCapas(
+        concluidas,total,falhas,
+        `Enviando ${concluidas+1} de ${total}: ${obra.titulo||obra.tombo||'Sem título'}`
+      );
+
+      const dataUrl=base64DaObra(obra);
+      const blob=await otimizarCapaBase64(dataUrl);
+
+      if(blob.size>=2*1024*1024){
+        throw new Error('Imagem permanece maior que 2 MB');
+      }
+
+      const idSeguro=String(obra.id||obra.tombo||Date.now())
+        .replace(/[^a-zA-Z0-9._-]/g,'_');
+      const extensao=blob.type==='image/png'?'png':'jpg';
+      const referencia=window._fbStorage
+        .ref()
+        .child(`capas/migrada_${idSeguro}.${extensao}`);
+
+      const envio=await referencia.put(blob,{contentType:blob.type});
+      const url=await envio.ref.getDownloadURL();
+
+      await window._fbDb
+        .collection('acervo')
+        .doc(String(obra.id))
+        .update({capa_url:url});
+
+      obra.capaUrl=url;
+      delete obra.capaBase64;
+      concluidas++;
+
+      if(concluidas%20===0) save();
+      await new Promise(resolve=>setTimeout(resolve,80));
+
+    }catch(e){
+      falhas++;
+      console.error('Falha ao migrar capa:',obra.id,e);
+    }
+
+    atualizarPainelMigracaoCapas(
+      concluidas+falhas,total,falhas
+    );
   }
-  btn.innerHTML=textoOriginal;
+
   save();
-  toast(ok+' capa(s) compactada(s)'+(falhas?', '+falhas+' com erro':'')+'! O site deve carregar bem mais rápido agora.','success');
-}
-async function uploadCapa(e){
-  const file=e.target.files[0];if(!file)return;
-  if(file.size>10*1024*1024){toast('Imagem muito grande. Use uma menor que 10MB.','error');return;}
-  try{
-    const dataUrl=await comprimirImagem(file,500,0.75);
-    capaBase64Temp=dataUrl;
-    previewCapa(capaBase64Temp);
-    document.getElementById('f-capa-url').value='';
-    toast('Imagem carregada e compactada com sucesso!','success');
-  }catch(err){
-    toast('Erro ao processar imagem: '+err.message,'error');
+  renderCarousel();
+  renderPI();
+  migracaoCapasEmAndamento=false;
+  if(botao) botao.disabled=false;
+
+  const pausar=document.getElementById('migracao-capas-pausar');
+  if(pausar) pausar.remove();
+
+  if(pararMigracaoCapas){
+    atualizarPainelMigracaoCapas(
+      concluidas+falhas,total,falhas,
+      `Migração pausada: ${concluidas} concluídas. Clique em “Migrar capas” para retomar.`
+    );
+    toast('Migração pausada com segurança.','');
+  }else{
+    atualizarPainelMigracaoCapas(
+      total,total,falhas,
+      falhas
+        ? `Migração concluída com ${falhas} falha(s). Execute novamente para tentar as restantes.`
+        : `Migração concluída: ${concluidas} capas enviadas com sucesso!`
+    );
+    toast(
+      falhas?'Migração concluída com algumas falhas.':'Capas migradas com sucesso!',
+      falhas?'error':'success'
+    );
   }
 }
+
 async function buscarCapaGoogle(){
   const isbn=(document.getElementById('f-isbn').value||'').replace(/[^0-9X]/gi,'');
   const titulo=document.getElementById('f-titulo').value.trim();
@@ -2224,13 +2414,13 @@ function salvar(e){e.preventDefault();
     titulo:normTitulo(gv('f-titulo')),subtitulo:normTitulo(gv('f-subtitulo')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
     editora:gv('f-editora'),local_pub:gv('f-local'),ano:gv('f-ano'),volume:gv('f-volume'),edicao:gv('f-edicao'),
     paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
-    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[A-Za-z\d.()/:-]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
-    notas:gv('f-notas'),observacoes:gv('f-observacoes'),lingua:gv('f-lingua'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
+    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[\d.]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
+    notas:gv('f-notas'),observacoes:gv('f-observacoes'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
     dataCad:curId?acervo.find(x=>x.id===curId).dataCad:new Date().toISOString()};
   if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
   else{acervo.push(o);toast('Obra registrada! Tombo: '+o.tombo,'success');}
   save();updStats();renderCarousel();renderPI();
-  // Sync só este registro para o Supabase
+  // Sincroniza somente este registro com o Firebase
   sbSalvarObra(o).then(()=>toast('Sincronizado com a nuvem ✅','success'));
   limpar();
 }
@@ -2326,7 +2516,7 @@ function ver(id,lista){
       const sob=(o.sobrenomeClass||sobrenome(o.autor||'')).toUpperCase();
       if(o.colecao==='escritorio'){
         const locRaw=(o.localizacao||'').trim();
-        const cdd=locRaw.match(/^[A-Za-z\d.()/:-]+/)?.[0]||o.cdd||'';
+        const cdd=locRaw.match(/^[\d.]+/)?.[0]||o.cdd||'';
         const assunto=(o.assuntoEspecifico||'').trim().toUpperCase();
         // Ordem: CDD + SOBRENOME + ASSUNTO
         const linhas=[cdd,sob,assunto].filter(x=>x);
@@ -2589,7 +2779,7 @@ function parsearMARC(){
   if(l084){
     const rawClassif=sub(l084,'a').trim();
     // Extrai só o número CDD (sem cutter/sobrenome)
-    const m=rawClassif.match(/^([A-Za-z\d.()/:-]+)/);
+    const m=rawClassif.match(/^([\d.]+)/);
     cddPuro=m?m[1]:'';
     classif=rawClassif;
   }
@@ -2599,7 +2789,7 @@ function parsearMARC(){
   if(l092){
     const rawLoc=sub(l092,'a').trim()||l092.replace(/^=\d+\s+\S+\s+/,'').trim();
     // Extrai só o CDD
-    const m=rawLoc.match(/^([A-Za-z\d.()/:-]+)/);
+    const m=rawLoc.match(/^([\d.]+)/);
     if(m) localizacao=m[1];
   }
   if(!localizacao&&cddPuro) localizacao=cddPuro;
@@ -3029,7 +3219,7 @@ const AREA_LABEL = {
 function cdd_para_area(cdd){
     cdd=(cdd||'').trim().split('\n')[0].trim();
     if(!cdd||!cdd[0].match(/\d/)) return '';
-    const n=cdd.match(/^[A-Za-z\d.()/:-]+/);
+    const n=cdd.match(/^[\d.]+/);
     if(!n) return '';
     const c=n[0];
     if(c.startsWith('341.28')) return 'Direito Eleitoral';
@@ -3077,17 +3267,11 @@ function sobrenome(autor){
 }
 
 // Normalização de títulos — caixa baixa exceto primeira letra
-// Nomes próprios/siglas comuns que devem manter a inicial maiúscula mesmo em título/subtítulo
-const PROPRIOS_TITULO=['brasil','brasileiro','brasileira','brasileiros','brasileiras','brasília','são','paulo','rio','janeiro','minas','gerais','stf','stj','tst','tse','cnj','cpc','cf','adi','adpf','adc','onu','oea','oab','ue','portugal','espanha','frança','itália','alemanha','inglaterra','união','europeia','europeu','américa','latina'];
 function normTitulo(t){
   if(!t) return t;
   const excecoes=['do','da','de','dos','das','e','o','a','os','as','em','com','por','para','pelo','pela','um','uma','no','na','nos','nas'];
   return t.toLowerCase().replace(/[^\s:–—-]+/g,(w,i)=>{
-    // Preserva siglas que já estavam totalmente em maiúsculas no texto original
-    const original=t.slice(i,i+w.length);
-    if(/^[A-ZÀ-Ú]{2,}$/.test(original)) return original;
     if(i===0) return w.charAt(0).toUpperCase()+w.slice(1);
-    if(PROPRIOS_TITULO.includes(w)) return w.charAt(0).toUpperCase()+w.slice(1);
     if(excecoes.includes(w)) return w;
     // After colon or dash, capitalize
     const before=t.toLowerCase().slice(0,i).trimEnd();
@@ -3139,7 +3323,7 @@ function atualizarClassPreview(){
   }
   if(colecao==='escritorio'){
     // Escritório: CDD do campo localização
-    const cdd=loc.match(/^[A-Za-z\d.()/:-]+/)?.[0]||'';
+    const cdd=loc.match(/^[\d.]+/)?.[0]||'';
     if(el1) el1.textContent=cdd||'—';
     if(el3){if(esp){el3.textContent=esp.toUpperCase();el3.style.display='block';}else{el3.textContent='';el3.style.display='none';}}
     if(el2) el2.textContent=sob.toUpperCase();
@@ -3163,7 +3347,7 @@ function normClassificacao(o){
   const c=(o.classificacao||'').trim();
   if(!c) return '';
   if(!/^\d/.test(c)) return c; // já é texto
-  const codigo=c.match(/^[A-Za-z\d.()/:-]+/)?.[0]||'';
+  const codigo=c.match(/^[\d.]+/)?.[0]||'';
   return cdd_para_area(codigo)||c;
 }
 
@@ -3174,7 +3358,7 @@ function normalizarRegistro(o){
   o.autor=normAutor(o.autor||'');
   // Guarda CDD original antes de normalizar (para etiqueta do Escritório)
   const cddOriginal=(o.classificacao||'').trim();
-  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[A-Za-z\d.()/:-]+/)?.[0]||'';
+  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[\d.]+/)?.[0]||'';
   o.classificacao=normClassificacao(o);
   // Garante sobrenome para etiqueta
   if(!o.sobrenomeClass&&o.autor) o.sobrenomeClass=sobrenome(o.autor);
@@ -3182,16 +3366,51 @@ function normalizarRegistro(o){
 }
 
 function normalizarTodos(){
-  if(!acervo.length){toast('Nenhum registro para normalizar.','');return;}
-  if(!confirm('Normalizar títulos, autores e classificações de todos os '+acervo.length+' registros?')) return;
+  if(!acervo.length){
+    toast('Nenhum registro para normalizar.','');
+    return;
+  }
+
+  if(!confirm(
+    'Normalizar títulos, autores e classificações de todos os ' +
+    acervo.length +
+    ' registros?'
+  )) return;
+
   let mod=0;
+
   acervo.forEach(o=>{
-    const t0=o.titulo,a0=o.autor,c0=o.classificacao;
+    const t0=o.titulo;
+    const a0=o.autor;
+    const c0=o.classificacao;
+
     normalizarRegistro(o);
-    if(o.titulo!==t0||o.autor!==a0||o.classificacao!==c0) mod++;
+
+    if(
+      o.titulo!==t0 ||
+      o.autor!==a0 ||
+      o.classificacao!==c0
+    ){
+      mod++;
+    }
   });
-  save();renderAcervo();renderEtiquetas();
-  toast(mod+' registro(s) normalizados com sucesso!','success');
+
+  save();
+  renderAcervo();
+  renderEtiquetas();
+
+  if(mod>0){
+    toast('Sincronizando alterações com a nuvem...','');
+
+    sbSalvarAcervo().then(()=>{
+      toast(
+        mod+' registro(s) normalizados e sincronizados!',
+        'success'
+      );
+    });
+  }else{
+    toast('Nenhum registro precisava ser alterado.','');
+  }
 }
 
 function padronizarDireitosHumanosFundamentais(){
@@ -3210,8 +3429,22 @@ function padronizarDireitosHumanosFundamentais(){
     else if(txt.includes('direitos fundamentais')) novoCdd='341.27';
     if(novoCdd && o.classificacao!==novoCdd){o.classificacao=novoCdd;mod++;}
   });
-  save();renderAcervo();renderEtiquetas();
-  toast(mod+' registro(s) com classificação padronizada!','success');
+   save();
+  renderAcervo();
+  renderEtiquetas();
+
+  if(mod>0){
+    toast('Sincronizando alterações com a nuvem...','');
+
+    sbSalvarAcervo().then(()=>{
+      toast(
+        mod+' registro(s) padronizados e sincronizados!',
+        'success'
+      );
+    });
+  }else{
+    toast('Nenhum registro precisava ser alterado.','');
+  }
 }
 
 // ── ETIQUETAS ──
@@ -3295,7 +3528,7 @@ function renderEtiquetas(){
   grid.innerHTML=lista.map(o=>{
     const isEsc=o.colecao==='escritorio';
     const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[A-Za-z\d.()/:-]+/)?.[0]||o.cdd||''):'';
+    const cdd=isEsc?(locRaw.match(/^[\d.]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
@@ -3342,7 +3575,7 @@ function imprimirEtiquetas(modo){
   const etqHTML=obras.map(o=>{
     const isEsc=o.colecao==='escritorio';
     const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[A-Za-z\d.()/:-]+/)?.[0]||o.cdd||''):'';
+    const cdd=isEsc?(locRaw.match(/^[\d.]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
@@ -3440,25 +3673,26 @@ function imprimirEtiquetas(modo){
 }
 
 // ══ ADMINISTRADOR ══
-const ADMIN_HASH='6b359e7a5e5c5e5a5f5d5b5c5e5a5b5c'; // placeholder — computed below
-const ADMIN_SENHA='barroso';
-
-function hashSenha(s){
-  // Simple but effective: sum of char codes salted
-  let h=0;
-  for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))&0xffffffff;
-  return h.toString(16);
-}
-
 function isAdmin(){
-  return sessionStorage.getItem('bmlrb_admin')==='1';
+  return sessionStorage.getItem('bmlrb_admin')==='1'
+    && window._fbAuth
+    && window._fbAuth.currentUser;
 }
 
 function abrirLogin(){
-  if(isAdmin()){logoutAdmin();return;}
+  if(isAdmin()){
+    logoutAdmin();
+    return;
+  }
+
+  const erro=document.getElementById('login-error');
+  if(erro) erro.style.display='none';
+
   document.getElementById('login-overlay').classList.add('open');
-  document.getElementById('login-erro') && (document.getElementById('login-erro').style.display='none');
-  setTimeout(()=>document.getElementById('login-senha').focus(),100);
+
+  setTimeout(()=>{
+    document.getElementById('login-email').focus();
+  },100);
 }
 
 function fecharLogin(){
@@ -3466,19 +3700,69 @@ function fecharLogin(){
   document.getElementById('login-senha').value='';
 }
 
-function fazerLogin(){
+async function fazerLogin(){
+  const email=document.getElementById('login-email').value.trim();
   const senha=document.getElementById('login-senha').value;
-  const err=document.getElementById('login-error');
-  if(senha===ADMIN_SENHA){
+  const erro=document.getElementById('login-error');
+
+  erro.style.display='none';
+
+  if(!email || !senha){
+    erro.textContent='Informe o e-mail e a senha.';
+    erro.style.display='block';
+    return;
+  }
+
+  try{
+    const credencial=await window._fbAuth
+      .signInWithEmailAndPassword(email,senha);
+
+    const adminDoc=await window._fbDb
+      .collection('admins')
+      .doc(credencial.user.uid)
+      .get();
+
+    if(!adminDoc.exists || adminDoc.data().role!=='admin'){
+      await window._fbAuth.signOut();
+      throw new Error('Usuário sem permissão administrativa');
+    }
+
     sessionStorage.setItem('bmlrb_admin','1');
+
     fecharLogin();
     ativarAdmin();
-    toast('Bem-vindo, administrador!','success');
-  } else {
-    err.style.display='block';
+
+    emprestimos=await sbCarregarEmprestimos();
+
+    try{
+      localStorage.setItem(
+        'bmlrb_emp',
+        JSON.stringify(emprestimos)
+      );
+    }catch(e){}
+
+    updStatsEmp();
+
+    if(tabAtual==='circulacao'){
+      renderEmprestimos();
+      verificarAtrasos();
+    }
+
+    toast('Bem-vinda à área administrativa!','success');
+
+  }catch(e){
+    console.error('Erro no login:',e);
+
+    sessionStorage.removeItem('bmlrb_admin');
     document.getElementById('login-senha').value='';
-    document.getElementById('login-senha').focus();
-    setTimeout(()=>err.style.display='none',3000);
+
+    erro.textContent=
+      'Não foi possível entrar. Verifique o e-mail e a senha.';
+    erro.style.display='block';
+
+    setTimeout(()=>{
+      erro.style.display='none';
+    },5000);
   }
 }
 
@@ -3486,21 +3770,81 @@ function ativarAdmin(){
   document.getElementById('admin-tabs').classList.add('visible');
   document.getElementById('admin-bar').classList.add('visible');
   document.getElementById('admin-footer-btn').textContent='sair do admin';
-  document.getElementById('admin-footer-btn').style.color='rgba(255,100,100,.5)';
+  document.getElementById('admin-footer-btn').style.color=
+    'rgba(255,100,100,.5)';
   document.body.classList.add('admin-mode');
 }
 
-function logoutAdmin(){
+async function logoutAdmin(){
   sessionStorage.removeItem('bmlrb_admin');
+
+  try{
+    await window._fbAuth.signOut();
+  }catch(e){
+    console.error('Erro ao encerrar sessão:',e);
+  }
+
   document.getElementById('admin-tabs').classList.remove('visible');
   document.getElementById('admin-bar').classList.remove('visible');
   document.getElementById('admin-footer-btn').textContent='admin';
   document.getElementById('admin-footer-btn').style.color='';
   document.body.classList.remove('admin-mode');
-  const abasAdmin=['cadastro','acervo','circulacao','etiquetas','importar'];
-  if(abasAdmin.includes(tabAtual)) sw('inicio');
+
+  emprestimos=[];
+
+  try{
+    localStorage.removeItem('bmlrb_emp');
+  }catch(e){}
+
+  updStatsEmp();
+
+  const abasAdmin=[
+    'cadastro',
+    'acervo',
+    'circulacao',
+    'etiquetas',
+    'importar'
+  ];
+
+  if(abasAdmin.includes(tabAtual)){
+    sw('inicio');
+  }
+
   toast('Sessão encerrada.','');
 }
+window._fbAuth.onAuthStateChanged(async user=>{
+  if(
+    user &&
+    sessionStorage.getItem('bmlrb_admin')==='1'
+  ){
+    try{
+      const adminDoc=await window._fbDb
+        .collection('admins')
+        .doc(user.uid)
+        .get();
+
+      if(adminDoc.exists && adminDoc.data().role==='admin'){
+        ativarAdmin();
+
+        emprestimos=await sbCarregarEmprestimos();
+
+        try{
+          localStorage.setItem(
+            'bmlrb_emp',
+            JSON.stringify(emprestimos)
+          );
+        }catch(e){}
+
+        updStatsEmp();
+        return;
+      }
+    }catch(e){
+      console.error('Erro ao restaurar sessão:',e);
+    }
+  }
+
+  sessionStorage.removeItem('bmlrb_admin');
+});
 
 // Inicialização
 load().then(()=>{
