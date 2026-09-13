@@ -588,12 +588,16 @@ window.dispatchEvent(new Event('fb-ready'));
           <option value="relevancia">Relevância</option>
           <option value="titulo">Título (A-Z)</option>
           <option value="autor">Autor (A-Z)</option>
+          <option value="titulo-z">Título (Z-A)</option>
           <option value="ano">Ano de publicação (mais recente)</option>
+          <option value="ano-antigo">Ano de publicação (mais antigo)</option>
           <option value="recente">Data de cadastro (mais recente)</option>
+          <option value="antigo">Data de cadastro (mais antigo)</option>
         </select>
       </label>
       <button class="btn btn-sm btn-o" onclick="limparRes()"><i class="ti ti-x"></i> Limpar busca</button>
     </div>
+    <div class="pag" id="res-pag-topo" style="margin-bottom:14px"></div>
     <div class="res-grid" id="res-grid"></div>
     <div class="pag" id="res-pag"></div>
   </div>
@@ -638,6 +642,21 @@ window.dispatchEvent(new Event('fb-ready'));
   <div class="page-wrap">
     <div class="fc">
       <div class="fct"><i class="ti ti-book-2"></i> Novo Registro Bibliográfico <span class="tb2" id="prev-tombo">Próximo: —</span></div>
+
+      <!-- NAVEGAÇÃO ENTRE REGISTROS (modo edição) -->
+      <div id="edicao-nav" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;background:#fdf1e3;border:1.5px solid #e67e22;border-radius:var(--rl);padding:10px 14px;margin-bottom:18px">
+        <button type="button" class="btn btn-sm btn-o" onclick="navEdicao(-1)" id="edicao-prev" title="Registro anterior (sem salvar)">
+          <i class="ti ti-chevron-left"></i> Anterior
+        </button>
+        <span id="edicao-pos" style="font-size:12px;font-weight:700;color:#b35c00;letter-spacing:.03em"></span>
+        <button type="button" class="btn btn-sm btn-o" onclick="navEdicao(1)" id="edicao-next" title="Próximo registro (sem salvar)">
+          Próximo <i class="ti ti-chevron-right"></i>
+        </button>
+        <span id="edicao-titulo" style="font-size:12px;color:var(--gray-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:320px"></span>
+        <button type="button" class="btn btn-sm btn-g" onclick="salvarEProximo()" id="edicao-salvar-next" style="margin-left:auto" title="Salva as alterações e abre o próximo registro da lista">
+          <i class="ti ti-device-floppy"></i> Salvar e ir ao próximo
+        </button>
+      </div>
 
       <!-- PREENCHIMENTO AUTOMÁTICO -->
       <div style="background:var(--gold-pale);border:1.5px solid rgba(201,168,76,.4);border-radius:var(--rl);padding:16px 20px;margin-bottom:22px">
@@ -1307,6 +1326,7 @@ const TIPO_ICON={'Livro':'ti-book','Periódico':'ti-news','Tese':'ti-school','Di
 let resLista=[],resListaOriginal=[],resPg=1,resPgTam=20;
 let listaAc=[],pgAc=1,pgAcTam=50;
 let modalLista=[],modalIdx=0;
+let edicaoLista=[],edicaoIdx=-1;
 let curId=null,capaBase64Temp='',ctr=1;
 let acervo=[],emprestimos=[],projetos=[],tabAtual='inicio';
 let perfilAtual=localStorage.getItem('bmlrb_perfil')||'gabinete';
@@ -1727,7 +1747,7 @@ function buscar(){
   });
   if(!termos.length){limparRes();return;}
   const res=getAcervoPerfil().filter(o=>{
-    const txt=normBusca([o.titulo,o.subtitulo,o.autor,o.area,o.assunto,o.assuntoEspecifico,o.editora,o.tombo,o.classificacao].join(' '));
+    const txt=normBusca([o.titulo,o.subtitulo,o.autor,o.area,o.assunto,o.assuntoEspecifico,o.editora,o.tombo,o.classificacao,o.lingua,linguaCanonica(o.lingua)].join(' '));
     let resultado=null;
     termos.forEach((t,i)=>{
       let m=txt.includes(normBusca(t.texto));
@@ -1744,12 +1764,14 @@ function buscarAdv(){
   const op2=document.getElementById('a-op2')?.value||'e';
   const op3=document.getElementById('a-op3')?.value||'e';
   const ftmb=gv('a-tombo').toLowerCase(),farea=gv('a-area'),ftipo=gv('a-tipo'),fest=gv('a-estante').toLowerCase();
+  const fling=gv('a-lingua');
   const chips=[];
   if(ft)chips.push({label:'Título: '+gv('a-titulo')});
   if(fa)chips.push({label:'Autor: '+gv('a-autor')});
   if(fano)chips.push({label:'Ano: '+fano});
   if(farea)chips.push({label:'Área: '+farea});
   if(ftipo)chips.push({label:'Tipo: '+ftipo});
+  if(fling)chips.push({label:'Língua: '+fling});
   if(fass)chips.push({label:'Assunto: '+gv('a-assunto')});
   if(fass2)chips.push({label:op2.toUpperCase()+': '+gv('a-assunto2')});
   if(fass3)chips.push({label:op3.toUpperCase()+': '+gv('a-assunto3')});
@@ -1775,6 +1797,7 @@ function buscarAdv(){
   if(ftmb)res=res.filter(o=>(o.tombo||'').toLowerCase().includes(ftmb));
   if(farea)res=res.filter(o=>(o.area||'').toLowerCase()===farea.toLowerCase());
   if(ftipo)res=res.filter(o=>o.tipo===ftipo);
+  if(fling){const alvo=linguaCanonica(fling);res=res.filter(o=>linguaCanonica(o.lingua)===alvo);}
   if(fest)res=res.filter(o=>(o.estante||o.localizacao||'').toLowerCase().includes(fest));
   mostrarRes(res,chips);
 }
@@ -1876,14 +1899,17 @@ function reordenarRes(){
   const modo=document.getElementById('res-ordenar').value;
   let arr=resListaOriginal.slice();
   if(modo==='titulo') arr.sort((a,b)=>normBusca(a.titulo||'').localeCompare(normBusca(b.titulo||'')));
+  else if(modo==='titulo-z') arr.sort((a,b)=>normBusca(b.titulo||'').localeCompare(normBusca(a.titulo||'')));
   else if(modo==='autor') arr.sort((a,b)=>normBusca(a.autor||'').localeCompare(normBusca(b.autor||'')));
   else if(modo==='ano') arr.sort((a,b)=>(parseInt(b.ano)||0)-(parseInt(a.ano)||0));
+  else if(modo==='ano-antigo') arr.sort((a,b)=>(parseInt(a.ano)||9999)-(parseInt(b.ano)||9999));
   else if(modo==='recente') arr.sort((a,b)=>new Date(b.dataCad||0)-new Date(a.dataCad||0));
+  else if(modo==='antigo') arr.sort((a,b)=>new Date(a.dataCad||0)-new Date(b.dataCad||0));
   resLista=arr;resPg=1;renderResGrid();
 }
 function renderResGrid(){
   const start=(resPg-1)*resPgTam,pg=resLista.slice(start,start+resPgTam),grid=document.getElementById('res-grid');
-  if(!pg.length){grid.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Nenhuma obra encontrada.</p></div>';document.getElementById('res-pag').innerHTML='';return;}
+  if(!pg.length){grid.innerHTML='<div class="empty"><i class="ti ti-search-off"></i><p>Nenhuma obra encontrada.</p></div>';document.getElementById('res-pag').innerHTML='';const pt0=document.getElementById('res-pag-topo');if(pt0)pt0.innerHTML='';return;}
   grid.innerHTML=pg.map((o,i)=>'<div class="res-card" style="position:relative">'
     +'<input type="checkbox" class="res-sel" data-id="'+o.id+'" style="position:absolute;top:10px;left:10px;width:16px;height:16px;cursor:pointer;z-index:2" onclick="event.stopPropagation();toggleSelRes(this)" title="Selecionar">'
     +'<div onclick="verLista(\''+o.id+'\',resLista)" style="cursor:pointer;display:flex;gap:12px;padding-left:28px">'
@@ -1897,7 +1923,10 @@ function renderResGrid(){
   // Show selected count
   atualizarBarraSel();
   const pages=Math.ceil(resLista.length/resPgTam);
-  document.getElementById('res-pag').innerHTML=gerarPaginacaoHTML(resPg,pages,'irResPg');
+  const pagHTML=gerarPaginacaoHTML(resPg,pages,'irResPg');
+  document.getElementById('res-pag').innerHTML=pagHTML;
+  const pagTopo=document.getElementById('res-pag-topo');
+  if(pagTopo) pagTopo.innerHTML=pagHTML;
 }
 function gerarPaginacaoHTML(paginaAtual,totalPaginas,fn){
   if(totalPaginas<=1) return '';
@@ -2141,8 +2170,32 @@ function fmob(){document.getElementById('mo').classList.remove('open');document.
 // Normaliza texto removendo acentos para busca
 function normBusca(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
 
+// Reconhece variações de grafia da língua registrada no acervo (importações antigas,
+// abreviaturas, acentuação diferente) e devolve sempre o nome canônico.
+const LINGUA_ALIAS={
+  'ingles':'Inglês','english':'Inglês','en':'Inglês','eng':'Inglês','ing':'Inglês',
+  'espanhol':'Espanhol','espanol':'Espanhol','castelhano':'Espanhol','es':'Espanhol','spa':'Espanhol','esp':'Espanhol',
+  'frances':'Francês','francais':'Francês','french':'Francês','fr':'Francês','fra':'Francês',
+  'italiano':'Italiano','italian':'Italiano','it':'Italiano','ita':'Italiano',
+  'alemao':'Alemão','alemam':'Alemão','deutsch':'Alemão','german':'Alemão','de':'Alemão','ale':'Alemão','ger':'Alemão',
+  'portuguesportugal':'Português (Portugal)','ptportugal':'Português (Portugal)','ptpt':'Português (Portugal)','portuguesdeportugal':'Português (Portugal)',
+  'portuguesbrasil':'Português (Brasil)','portuguesdobrasil':'Português (Brasil)','ptbr':'Português (Brasil)','ptbrasil':'Português (Brasil)',
+  'portugues':'Português (Brasil)','pt':'Português (Brasil)','por':'Português (Brasil)','brasileiro':'Português (Brasil)'
+};
+function linguaCanonica(v){
+  if(!v) return '';
+  const n=normBusca(String(v)).replace(/[^a-z]/g,'');
+  if(!n) return '';
+  if(LINGUA_ALIAS[n]) return LINGUA_ALIAS[n];
+  if(typeof LINGUA_INFO!=='undefined'){
+    const k=Object.keys(LINGUA_INFO).find(x=>normBusca(x).replace(/[^a-z]/g,'')===n);
+    if(k) return k;
+  }
+  return String(v).trim();
+}
+
 function limparRes(){document.getElementById('results-area').style.display='none';document.getElementById('inicio-default').style.display='block';document.getElementById('s-main').value='';if(qfAtivo){qfAtivo.classList.remove('on');qfAtivo=null;}}
-function limparAdv(){['a-titulo','a-autor','a-ano','a-editora','a-assunto','a-assunto2','a-assunto3','a-tombo','a-area','a-tipo','a-estante'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+function limparAdv(){['a-titulo','a-autor','a-ano','a-editora','a-assunto','a-assunto2','a-assunto3','a-tombo','a-area','a-tipo','a-estante','a-lingua'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
 function toggleAdv(){const p=document.getElementById('adv-panel'),b=document.getElementById('adv-btn');p.classList.toggle('open');b.classList.toggle('open');}
 function qfClick(btn,area){if(qfAtivo&&qfAtivo!==btn)qfAtivo.classList.remove('on');if(btn.classList.contains('on')){btn.classList.remove('on');qfAtivo=null;limparRes();return;}btn.classList.add('on');qfAtivo=btn;document.getElementById('s-main').value=area;mostrarRes(acervo.filter(o=>(o.area||'').includes(area)),[{label:'Área: '+area}]);}
 function tcls2(t){if(!t)return 'livro';if(t==='Periódico')return 'periodico';if(['Tese','Dissertação','Monografia'].includes(t))return 'tese';return 'livro';}
@@ -2473,7 +2526,8 @@ async function buscarCapaGoogle(){
     status.innerHTML='<span style="color:var(--danger)"><i class="ti ti-alert-circle" style="vertical-align:-2px"></i> Erro de conexão ao buscar capa.</span>';
   }
 }
-function salvar(e){e.preventDefault();
+function salvar(e,opts){if(e&&e.preventDefault)e.preventDefault();
+  const irProximo=!!(opts&&opts.proximo);
   const capaUrl=document.getElementById('f-capa-url').value.trim();
   const o={id:curId||(Date.now()+'_'+Math.random()),tombo:curId?acervo.find(x=>x.id===curId).tombo:gtombo(),
     titulo:normTitulo(gv('f-titulo')),subtitulo:normTitulo(gv('f-subtitulo')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
@@ -2485,11 +2539,20 @@ function salvar(e){e.preventDefault();
   if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
   else{acervo.push(o);toast('Obra registrada! Tombo: '+o.tombo,'success');}
   save();updStats();renderCarousel();renderPI();
+  sincronizarListas(o);
+  if(document.getElementById('results-area')?.style.display!=='none') renderResGrid();
   // Sincroniza somente este registro com o Firebase
   sbSalvarObra(o).then(()=>toast('Sincronizado com a nuvem ✅','success'));
-  limpar();
+  if(irProximo&&edicaoIdx>=0&&edicaoIdx<edicaoLista.length-1){
+    navEdicao(1,true);
+  }else if(irProximo){
+    toast('Último registro da lista — edição concluída.','');
+    limpar();
+  }else{
+    limpar();
+  }
 }
-function limpar(){
+function limpar(manterEdicao){
   document.getElementById('form-cad').reset();
   document.getElementById('isbn-lookup').value='';
   document.getElementById('marc-input').value='';
@@ -2505,6 +2568,10 @@ function limpar(){
   document.getElementById('cover-preview-icon').style.display='block';
   capaBase64Temp='';
   curId=null;
+  if(!manterEdicao){
+    edicaoIdx=-1;edicaoLista=[];
+    const navBar=document.getElementById('edicao-nav');if(navBar)navBar.style.display='none';
+  }
   setModoEdicao(false);
   atualizarClassPreview();
   updPrev();
@@ -2668,11 +2735,26 @@ function editObra(){
   if(!curId)return;
   const o=acervo.find(x=>x.id===curId);
   if(!o)return;
+  // Guarda a lista de navegação (resultado da busca, acervo, etc.) para permitir
+  // avançar de registro em registro sem voltar ao resultado da pesquisa.
   const editId=o.id; // preserva antes de qualquer reset
+  const lst=(modalLista&&modalLista.length?modalLista:acervo).slice();
+  let idx=lst.findIndex(x=>x.id===editId);
   fmob();
   sw('cadastro');
   setTimeout(()=>{
-    curId=editId; // restaura APÓS sw e limpar zerarem
+    edicaoLista=idx>=0?lst:[o];
+    edicaoIdx=idx>=0?idx:0;
+    preencherFormEdicao(editId);
+  },100);
+}
+
+// Carrega um registro do acervo no formulário, em modo edição.
+function preencherFormEdicao(id){
+    const o=acervo.find(x=>x.id===id)||edicaoLista.find(x=>x.id===id);
+    if(!o)return;
+    limpar(true);
+    curId=o.id; // restaura APÓS limpar zerar
     const m={'f-titulo':'titulo','f-subtitulo':'subtitulo','f-autor':'autor','f-org':'organizador','f-editora':'editora','f-local':'local_pub','f-ano':'ano','f-volume':'volume','f-edicao':'edicao','f-pag':'paginas','f-isbn':'isbn','f-tipo':'tipo','f-area':'area','f-assunto':'assunto','f-loc':'localizacao','f-estante':'estante','f-colecao':'colecao','f-ex':'exemplares','f-notas':'notas','f-observacoes':'observacoes','f-lingua':'lingua','f-assuntos':'assuntos'};
     Object.entries(m).forEach(([fid,k])=>{const el=document.getElementById(fid);if(el)el.value=o[k]||'';});
     const espEl=document.getElementById('f-class-especifico');if(espEl)espEl.value=o.assuntoEspecifico||'';
@@ -2682,7 +2764,44 @@ function editObra(){
     if(o.capaUrl){document.getElementById('f-capa-url').value=o.capaUrl;previewCapa(o.capaUrl);}
     else if(o.capaBase64){capaBase64Temp=o.capaBase64;previewCapa(o.capaBase64);}
     setModoEdicao(true);aoTrocarColecaoForm();atualizarClassPreview();
-  },100);
+    atualizarNavEdicao();
+}
+
+// ── Navegação entre registros durante a edição ──
+function atualizarNavEdicao(){
+  const bar=document.getElementById('edicao-nav');
+  if(!bar)return;
+  if(!curId||edicaoIdx<0||edicaoLista.length<2){bar.style.display='none';return;}
+  bar.style.display='flex';
+  document.getElementById('edicao-pos').textContent='Registro '+(edicaoIdx+1)+' de '+edicaoLista.length;
+  const prox=edicaoLista[edicaoIdx+1];
+  const bp=document.getElementById('edicao-prev'),bn=document.getElementById('edicao-next'),bs=document.getElementById('edicao-salvar-next');
+  if(bp)bp.disabled=edicaoIdx<=0;
+  if(bn)bn.disabled=edicaoIdx>=edicaoLista.length-1;
+  if(bs)bs.disabled=false;
+  const t=document.getElementById('edicao-titulo');
+  if(t)t.textContent=prox?('Próximo: '+(prox.titulo||'(sem título)')):'Último registro da lista';
+}
+function navEdicao(dir,pularAviso){
+  const novo=edicaoIdx+dir;
+  if(novo<0||novo>=edicaoLista.length)return;
+  if(!pularAviso&&!confirm('Ir para o próximo registro SEM salvar as alterações deste?\n\nUse "Salvar e ir ao próximo" para gravar antes de avançar.'))return;
+  edicaoIdx=novo;
+  preencherFormEdicao(edicaoLista[novo].id);
+  setTimeout(()=>{const topo=document.getElementById('edicao-nav');if(topo)topo.scrollIntoView({behavior:'smooth',block:'start'});},380);
+}
+function salvarEProximo(){
+  const form=document.getElementById('form-cad');
+  if(form&&!form.reportValidity())return;
+  salvar(null,{proximo:true});
+}
+// Mantém as listas em memória (busca, acervo, edição, modal) apontando para o registro atualizado
+function sincronizarListas(o){
+  [resLista,resListaOriginal,listaAc,modalLista,edicaoLista].forEach(l=>{
+    if(!Array.isArray(l))return;
+    const i=l.findIndex(x=>x&&x.id===o.id);
+    if(i>=0) l[i]=o;
+  });
 }
 function delObra(){
   if(!curId)return;
@@ -3542,7 +3661,7 @@ const LINGUA_INFO={
   'Alemão':{cor:'#1a1a1a',sigla:'DE'}
 };
 function linguaStripe(o,tamanho){
-  const info=LINGUA_INFO[o.lingua];
+  const info=LINGUA_INFO[linguaCanonica(o.lingua)];
   if(!info) return '';
   const alturaImg=tamanho==='mm'?'3mm':'6px';
   const fonte=tamanho==='mm'?'6px':'7px';
@@ -3618,7 +3737,7 @@ function renderEtiquetas(){
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     const extras=isEsc?[]:etqLinhas(o);
     const selecionado=etqSelecionadas.has(o.tombo);
-    const temFaixa=!!LINGUA_INFO[o.lingua];
+    const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
     return `<div onclick="toggleEtq('${o.tombo}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
       <div style="position:relative;background:#fff;border:1.5px solid #1a2744;border-radius:5px;padding:8px 6px ${temFaixa?'14px':'8px'};text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:64px">
         <div style="font-size:9px;font-weight:700;color:#1a2744;letter-spacing:.07em;line-height:1.3">${areaLabel}</div>
@@ -3665,7 +3784,7 @@ function imprimirEtiquetas(modo){
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     const extras=isEsc?[]:etqLinhas(o);
     const dotStyle=o.colecao==='escritorio'?'background:#e8c84c;border:1px solid #c9a84c':o.colecao==='mezanino'||o.colecao==='biblioteca'?'background:#1a2744;border:1.5px solid #7090c0':'background:#ddd;border:1px solid #bbb';
-    const temFaixa=!!LINGUA_INFO[o.lingua];
+    const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
     return `<div class="etq" style="position:relative${temFaixa?';padding-bottom:6mm':''}">
       <div style="position:absolute;top:3mm;right:3mm;width:5mm;height:5mm;border-radius:50%;${dotStyle}"></div>
       <div class="etq-area">${areaLabel}</div>
@@ -3685,8 +3804,8 @@ function imprimirEtiquetas(modo){
 <title>Etiquetas — Biblioteca M. L. R. Barroso</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@600;700&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Source Sans 3',Arial,sans-serif;background:#fff}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-family:'Source Sans 3',Arial,sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .page{
     width:210mm;
     padding:10mm 5mm;
@@ -3733,8 +3852,9 @@ function imprimirEtiquetas(modo){
     letter-spacing:.02em;
   }
   @media print{
-    body{margin:0}
+    body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .page{padding:10mm 5mm}
+    .etq{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     @page{size:A4;margin:0}
   }
 </style>
