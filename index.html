@@ -548,9 +548,40 @@ window.dispatchEvent(new Event('fb-ready'));
           </select>
         </div>
         <!-- Assuntos — linha completa -->
-        <div class="af"><label>Assunto 1</label><input type="text" id="a-assunto" placeholder="Primeiro assunto ou palavra-chave"></div>
+        <div class="af"><label>Assunto 1 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--gray-400)">(lista controlada)</span></label>
+          <select id="a-assunto" data-placeholder="Todos os assuntos">
+            <option value="">Todos os assuntos</option>
+            <option>Administração Pública</option>
+            <option>Comunicação, internet e democracia digital</option>
+            <option>Constituição e Direito Internacional</option>
+            <option>Controle de constitucionalidade</option>
+            <option>Direito comparado e constituições estrangeiras</option>
+            <option>Direito constitucional geral</option>
+            <option>Direito penal e processual penal na Constituição</option>
+            <option>Direitos e garantias fundamentais</option>
+            <option>Direitos políticos, partidos e eleições</option>
+            <option>Funções essenciais à Justiça</option>
+            <option>História constitucional e constitucionalismo</option>
+            <option>Meio ambiente e direitos intergeracionais</option>
+            <option>Nacionalidade</option>
+            <option>Ordem econômica</option>
+            <option>Ordem social e direitos sociais</option>
+            <option>Ordem tributária, financeira e orçamentária</option>
+            <option>Organização do Estado e federalismo</option>
+            <option>Poder Executivo</option>
+            <option>Poder Judiciário e jurisdição constitucional</option>
+            <option>Poder Legislativo e processo legislativo</option>
+            <option>Povos indígenas, comunidades tradicionais e direitos coletivos</option>
+            <option>Processo civil e Constituição</option>
+            <option>Remédios constitucionais</option>
+            <option>Segurança pública, defesa do Estado e instituições militares</option>
+            <option>Separação dos Poderes e relações institucionais</option>
+            <option>Teoria da Constituição, poder constituinte e hermenêutica constitucional</option>
+            <option>Teoria e filosofia do Direito</option>
+          </select>
+        </div>
         <div class="af">
-          <label>Assunto 2</label>
+          <label>Assunto 2 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--gray-400)">(texto livre)</span></label>
           <div style="display:flex;gap:6px;align-items:center">
             <select id="a-op2" style="flex:0 0 58px;font-size:11px;padding:8px 4px;font-weight:700;color:var(--navy);background:var(--gold-pale);border:1px solid rgba(201,168,76,.4)">
               <option value="e">E</option>
@@ -560,7 +591,7 @@ window.dispatchEvent(new Event('fb-ready'));
           </div>
         </div>
         <div class="af">
-          <label>Assunto 3</label>
+          <label>Assunto 3 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--gray-400)">(texto livre)</span></label>
           <div style="display:flex;gap:6px;align-items:center">
             <select id="a-op3" style="flex:0 0 58px;font-size:11px;padding:8px 4px;font-weight:700;color:var(--navy);background:var(--gold-pale);border:1px solid rgba(201,168,76,.4)">
               <option value="e">E</option>
@@ -786,7 +817,7 @@ window.dispatchEvent(new Event('fb-ready'));
           </div>
           <div class="fld full" id="f-assuntos-wrap" style="display:none">
             <label>Assuntos</label>
-            <select id="f-assuntos" onchange="atualizarClassPreview()">
+            <select id="f-assuntos" onchange="atualizarClassPreview()" data-placeholder="— Selecione —">
               <option value="">— Selecione —</option>
               <option>Administração Pública</option>
               <option>Comunicação, internet e democracia digital</option>
@@ -795,12 +826,10 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Direito comparado e constituições estrangeiras</option>
               <option>Direito constitucional geral</option>
               <option>Direito penal e processual penal na Constituição</option>
-              <option>Direito processual civil e Constituição</option>
               <option>Direitos e garantias fundamentais</option>
               <option>Direitos políticos, partidos e eleições</option>
               <option>Funções essenciais à Justiça</option>
-              <option>Hermenêutica constitucional</option>
-              <option>História constitucional</option>
+              <option>História constitucional e constitucionalismo</option>
               <option>Meio ambiente e direitos intergeracionais</option>
               <option>Nacionalidade</option>
               <option>Ordem econômica</option>
@@ -811,10 +840,11 @@ window.dispatchEvent(new Event('fb-ready'));
               <option>Poder Judiciário e jurisdição constitucional</option>
               <option>Poder Legislativo e processo legislativo</option>
               <option>Povos indígenas, comunidades tradicionais e direitos coletivos</option>
+              <option>Processo civil e Constituição</option>
               <option>Remédios constitucionais</option>
               <option>Segurança pública, defesa do Estado e instituições militares</option>
               <option>Separação dos Poderes e relações institucionais</option>
-              <option>Teoria da Constituição e poder constituinte</option>
+              <option>Teoria da Constituição, poder constituinte e hermenêutica constitucional</option>
               <option>Teoria e filosofia do Direito</option>
             </select>
           </div>
@@ -1106,7 +1136,7 @@ window.dispatchEvent(new Event('fb-ready'));
         </div>
         <div class="fld">
           <label>Assuntos</label>
-          <select id="etq-assuntos" onchange="renderEtiquetas()">
+          <select id="etq-assuntos" onchange="renderEtiquetas()" data-placeholder="Todos os assuntos">
             <option value="">Todos os assuntos</option>
             <option>Administração Pública</option>
             <option>Comunicação, internet e democracia digital</option>
@@ -1115,12 +1145,10 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Direito comparado e constituições estrangeiras</option>
             <option>Direito constitucional geral</option>
             <option>Direito penal e processual penal na Constituição</option>
-            <option>Direito processual civil e Constituição</option>
             <option>Direitos e garantias fundamentais</option>
             <option>Direitos políticos, partidos e eleições</option>
             <option>Funções essenciais à Justiça</option>
-            <option>Hermenêutica constitucional</option>
-            <option>História constitucional</option>
+            <option>História constitucional e constitucionalismo</option>
             <option>Meio ambiente e direitos intergeracionais</option>
             <option>Nacionalidade</option>
             <option>Ordem econômica</option>
@@ -1131,10 +1159,11 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Poder Judiciário e jurisdição constitucional</option>
             <option>Poder Legislativo e processo legislativo</option>
             <option>Povos indígenas, comunidades tradicionais e direitos coletivos</option>
+            <option>Processo civil e Constituição</option>
             <option>Remédios constitucionais</option>
             <option>Segurança pública, defesa do Estado e instituições militares</option>
             <option>Separação dos Poderes e relações institucionais</option>
-            <option>Teoria da Constituição e poder constituinte</option>
+            <option>Teoria da Constituição, poder constituinte e hermenêutica constitucional</option>
             <option>Teoria e filosofia do Direito</option>
           </select>
         </div>
@@ -1747,7 +1776,7 @@ function buscar(){
   });
   if(!termos.length){limparRes();return;}
   const res=getAcervoPerfil().filter(o=>{
-    const txt=normBusca([o.titulo,o.subtitulo,o.autor,o.area,o.assunto,o.assuntoEspecifico,o.editora,o.tombo,o.classificacao,o.lingua,linguaCanonica(o.lingua)].join(' '));
+    const txt=normBusca([o.titulo,o.subtitulo,o.autor,o.area,o.assunto,o.assuntoEspecifico,o.editora,o.tombo,o.classificacao,o.lingua,linguaCanonica(o.lingua),o.assuntos,assuntoCanonico(o.assuntos)].join(' '));
     let resultado=null;
     termos.forEach((t,i)=>{
       let m=txt.includes(normBusca(t.texto));
@@ -1760,7 +1789,7 @@ function buscar(){
 }
 function buscarAdv(){
   const ft=gv('a-titulo').toLowerCase(),fa=gv('a-autor').toLowerCase(),fano=gv('a-ano'),fed=gv('a-editora').toLowerCase();
-  const fass=gv('a-assunto').toLowerCase(),fass2=gv('a-assunto2').toLowerCase(),fass3=gv('a-assunto3').toLowerCase();
+  const fass=gv('a-assunto'),fass2=gv('a-assunto2').toLowerCase(),fass3=gv('a-assunto3').toLowerCase();
   const op2=document.getElementById('a-op2')?.value||'e';
   const op3=document.getElementById('a-op3')?.value||'e';
   const ftmb=gv('a-tombo').toLowerCase(),farea=gv('a-area'),ftipo=gv('a-tipo'),fest=gv('a-estante').toLowerCase();
@@ -1772,7 +1801,7 @@ function buscarAdv(){
   if(farea)chips.push({label:'Área: '+farea});
   if(ftipo)chips.push({label:'Tipo: '+ftipo});
   if(fling)chips.push({label:'Língua: '+fling});
-  if(fass)chips.push({label:'Assunto: '+gv('a-assunto')});
+  if(fass)chips.push({label:'Assunto: '+fass});
   if(fass2)chips.push({label:op2.toUpperCase()+': '+gv('a-assunto2')});
   if(fass3)chips.push({label:op3.toUpperCase()+': '+gv('a-assunto3')});
   if(!chips.length&&!ftmb&&!fed&&!fest){alert('Preencha ao menos um campo para pesquisar.');return;}
@@ -1783,10 +1812,10 @@ function buscarAdv(){
   if(fed)res=res.filter(o=>(o.editora||'').toLowerCase().includes(fed));
   if(fass||fass2||fass3){
     res=res.filter(o=>{
-      const campo=(o.assunto||'').toLowerCase()+' '+(o.titulo||'').toLowerCase()+' '+(o.assuntoEspecifico||'').toLowerCase();
-      const m1=!fass||campo.includes(fass);
-      const m2=!fass2||campo.includes(fass2);
-      const m3=!fass3||campo.includes(fass3);
+      const campo=normBusca([o.assunto,o.titulo,o.assuntoEspecifico,o.assuntos].join(' '));
+      const m1=!fass||obraTemAssunto(o,fass);
+      const m2=!fass2||campo.includes(normBusca(fass2));
+      const m3=!fass3||campo.includes(normBusca(fass3));
       // Aplica operadores: E = AND, OU = OR
       let resultado=m1;
       if(fass2) resultado=op2==='ou'?(resultado||m2):(resultado&&m2);
@@ -2172,6 +2201,95 @@ function normBusca(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u
 
 // Reconhece variações de grafia da língua registrada no acervo (importações antigas,
 // abreviaturas, acentuação diferente) e devolve sempre o nome canônico.
+// ══ VOCABULÁRIO DE ASSUNTOS — perfil Escritório ══
+// Fonte única: alimenta o formulário de catalogação, o filtro de etiquetas e o
+// campo "Assunto 1" da busca avançada. Ordem temática (não alfabética).
+const ASSUNTOS_ESCRITORIO=[
+  // Ordem alfabética
+  'Administração Pública',
+  'Comunicação, internet e democracia digital',
+  'Constituição e Direito Internacional',
+  'Controle de constitucionalidade',
+  'Direito comparado e constituições estrangeiras',
+  'Direito constitucional geral',
+  'Direito penal e processual penal na Constituição',
+  'Direitos e garantias fundamentais',
+  'Direitos políticos, partidos e eleições',
+  'Funções essenciais à Justiça',
+  'História constitucional e constitucionalismo',
+  'Meio ambiente e direitos intergeracionais',
+  'Nacionalidade',
+  'Ordem econômica',
+  'Ordem social e direitos sociais',
+  'Ordem tributária, financeira e orçamentária',
+  'Organização do Estado e federalismo',
+  'Poder Executivo',
+  'Poder Judiciário e jurisdição constitucional',
+  'Poder Legislativo e processo legislativo',
+  'Povos indígenas, comunidades tradicionais e direitos coletivos',
+  'Processo civil e Constituição',
+  'Remédios constitucionais',
+  'Segurança pública, defesa do Estado e instituições militares',
+  'Separação dos Poderes e relações institucionais',
+  'Teoria da Constituição, poder constituinte e hermenêutica constitucional',
+  'Teoria e filosofia do Direito'
+];
+// Termos usados em versões anteriores do vocabulário → termo atual.
+// Garante que registros já catalogados continuem sendo localizados na busca.
+const ASSUNTOS_LEGADO={
+  'Teoria da Constituição e poder constituinte':'Teoria da Constituição, poder constituinte e hermenêutica constitucional',
+  'Teoria da Constituição e hermenêutica constitucional':'Teoria da Constituição, poder constituinte e hermenêutica constitucional',
+  'Hermenêutica constitucional':'Teoria da Constituição, poder constituinte e hermenêutica constitucional',
+  'História constitucional':'História constitucional e constitucionalismo',
+  'Direito processual civil e Constituição':'Processo civil e Constituição',
+  'Direito constitucional penal e processual penal':'Direito penal e processual penal na Constituição',
+  'Direito internacional e Constituição':'Constituição e Direito Internacional',
+  'Poder Judiciário':'Poder Judiciário e jurisdição constitucional'
+};
+function assuntoCanonico(v){
+  const t=String(v||'').trim();
+  if(!t) return '';
+  if(ASSUNTOS_LEGADO[t]) return ASSUNTOS_LEGADO[t];
+  const n=normBusca(t);
+  const exato=ASSUNTOS_ESCRITORIO.find(x=>normBusca(x)===n);
+  if(exato) return exato;
+  const leg=Object.keys(ASSUNTOS_LEGADO).find(x=>normBusca(x)===n);
+  if(leg) return ASSUNTOS_LEGADO[leg];
+  return t;
+}
+// Verdadeiro se a obra pertence ao assunto do vocabulário controlado
+function obraTemAssunto(o,termo){
+  const alvo=assuntoCanonico(termo);
+  if(!alvo) return true;
+  if(assuntoCanonico(o.assuntos)===alvo) return true;
+  const txt=normBusca([o.assunto,o.titulo,o.assuntoEspecifico,o.assuntos].join(' '));
+  return txt.includes(normBusca(alvo));
+}
+// Garante que um valor gravado fora do vocabulário atual não se perca ao editar
+function garantirOpcao(sel,valor){
+  if(!sel||!valor) return;
+  if([...sel.options].some(op=>op.value===valor)) return;
+  const op=document.createElement('option');
+  op.value=valor;op.textContent=valor+'  (termo antigo)';
+  sel.appendChild(op);
+}
+function popularSelectsAssuntos(){
+  // As opções já vêm no HTML; aqui apenas garantimos que nenhuma falte
+  // (a constante ASSUNTOS_ESCRITORIO continua sendo a fonte única).
+  ['f-assuntos','etq-assuntos','a-assunto'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel) return;
+    const atual=sel.value;
+    const existentes=[...sel.options].map(op=>op.value||op.textContent);
+    ASSUNTOS_ESCRITORIO.forEach(a=>{
+      if(!existentes.includes(a)){
+        const op=document.createElement('option');op.textContent=a;sel.appendChild(op);
+      }
+    });
+    if(atual) sel.value=atual;
+  });
+}
+
 const LINGUA_ALIAS={
   'ingles':'Inglês','english':'Inglês','en':'Inglês','eng':'Inglês','ing':'Inglês',
   'espanhol':'Espanhol','espanol':'Espanhol','castelhano':'Espanhol','es':'Espanhol','spa':'Espanhol','esp':'Espanhol',
@@ -2756,6 +2874,7 @@ function preencherFormEdicao(id){
     limpar(true);
     curId=o.id; // restaura APÓS limpar zerar
     const m={'f-titulo':'titulo','f-subtitulo':'subtitulo','f-autor':'autor','f-org':'organizador','f-editora':'editora','f-local':'local_pub','f-ano':'ano','f-volume':'volume','f-edicao':'edicao','f-pag':'paginas','f-isbn':'isbn','f-tipo':'tipo','f-area':'area','f-assunto':'assunto','f-loc':'localizacao','f-estante':'estante','f-colecao':'colecao','f-ex':'exemplares','f-notas':'notas','f-observacoes':'observacoes','f-lingua':'lingua','f-assuntos':'assuntos'};
+    garantirOpcao(document.getElementById('f-assuntos'),o.assuntos||'');
     Object.entries(m).forEach(([fid,k])=>{const el=document.getElementById(fid);if(el)el.value=o[k]||'';});
     const espEl=document.getElementById('f-class-especifico');if(espEl)espEl.value=o.assuntoEspecifico||'';
     const sobEl=document.getElementById('f-class-sobrenome');if(sobEl)sobEl.value=o.sobrenomeClass||sobrenome(o.autor||'');
@@ -3679,7 +3798,7 @@ function filtrarListaEtq(){
   const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
   return acervo.filter(o=>{
     if(area&&!(o.area||'').includes(area))return false;
-    if(assuntos&&(o.assuntos||'')!==assuntos)return false;
+    if(assuntos&&assuntoCanonico(o.assuntos)!==assuntoCanonico(assuntos))return false;
     if(colecao&&(o.colecao||'gabinete')!==colecao)return false;
     if(filtro&&![o.titulo,o.autor,o.tombo,o.area,o.classificacao].some(v=>(v||'').toLowerCase().includes(filtro)))return false;
     const n=tomboNum(o.tombo);
@@ -4051,6 +4170,7 @@ window._fbAuth.onAuthStateChanged(async user=>{
 });
 
 // Inicialização
+popularSelectsAssuntos();
 load().then(()=>{
   carregarProjetos();
   updPrev();
