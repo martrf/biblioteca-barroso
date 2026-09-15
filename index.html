@@ -3792,15 +3792,17 @@ function normalizarTodos(){
   }
 
   if(!confirm(
-    'Normalizar títulos, autores e classificações de todos os ' +
+    'Normalizar títulos, SUBTÍTULOS, autores e classificações de todos os ' +
     acervo.length +
-    ' registros?'
+    ' registros?\n\nTítulo com inicial maiúscula, subtítulo com inicial minúscula, ' +
+    'nomes próprios e siglas corrigidos.'
   )) return;
 
   let mod=0;
 
   acervo.forEach(o=>{
     const t0=o.titulo;
+    const s0=o.subtitulo;
     const a0=o.autor;
     const c0=o.classificacao;
 
@@ -3808,6 +3810,7 @@ function normalizarTodos(){
 
     if(
       o.titulo!==t0 ||
+      o.subtitulo!==s0 ||
       o.autor!==a0 ||
       o.classificacao!==c0
     ){
@@ -4302,7 +4305,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-i</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-j</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
