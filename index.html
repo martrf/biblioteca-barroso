@@ -3604,6 +3604,46 @@ const SIGLAS_TITULO=new Set(['stf','stj','tst','tse','tcu','stm','cnj','cnmp','a
 
 function capitalizar(w){return w.charAt(0).toUpperCase()+w.slice(1);}
 
+// ── Nomes de pessoas identificados pelo contexto ──
+// "homenagem à professora patrícia baptista" → "…professora Patrícia Baptista"
+const GATILHOS_NOME=new Set(['professor','professora','prof','profa','ministro','ministra','min',
+  'juiz','juíza','juiza','desembargador','desembargadora','procurador','procuradora',
+  'promotor','promotora','advogado','advogada','doutor','doutora','dr','dra',
+  'presidente','senador','senadora','deputado','deputada','governador','governadora',
+  'papa','dom','frei','são','santo','santa','mestre','jurista','homenagem','memória','memoria','honra']);
+// Partículas que podem aparecer antes ou dentro do nome
+const LIGACOES_NOME=new Set(['a','ao','à','aos','às','o','os','as','de','do','da','dos','das','em','e']);
+// Se vier uma destas logo após o gatilho, não é nome de pessoa
+const NAO_E_NOME=new Set(['direito','direitos','ciência','ciencia','ciências','obra','obras','vida',
+  'justiça','justica','trabalho','tempo','saber','estudos','curso','memória','memoria','constituição',
+  'constituicao','república','republica','história','historia','teoria','prática','pratica','processo']);
+
+function capitalizarNomesProprios(texto){
+  const partes=texto.split(/(\s+|[,;:()\[\]"“”«»])/);
+  let restante=0,iniciou=false;
+  for(let i=0;i<partes.length;i++){
+    const tk=partes[i];
+    if(!tk||/^\s+$/.test(tk)) continue;
+    if(/^[,;:()\[\]"“”«»]$/.test(tk)){restante=0;iniciou=false;continue;}
+    const limpo=tk.toLowerCase().replace(/[^a-zà-ÿ]/g,'');
+    if(!limpo) continue;
+    if(GATILHOS_NOME.has(limpo)){restante=3;iniciou=false;continue;}
+    if(restante<=0) continue;
+    if(LIGACOES_NOME.has(limpo)){
+      // preposição antes de qualquer nome ("professor de direito") → não é pessoa
+      if(!iniciou&&limpo!=='a'&&limpo!=='ao'&&limpo!=='à'&&limpo!=='aos'&&limpo!=='às'&&limpo!=='o'&&limpo!=='os'&&limpo!=='as'){
+        restante=0;
+      }
+      continue;
+    }
+    if(NAO_E_NOME.has(limpo)||limpo.length<3){restante=0;iniciou=false;continue;}
+    partes[i]=tk.charAt(0).toUpperCase()+tk.slice(1);
+    iniciou=true;restante--;
+    if(restante<=0) iniciou=false;
+  }
+  return partes.join('');
+}
+
 // Junta o dicionário fixo com as palavras do nome do autor do próprio registro
 function palavrasProprias(extra){
   const set=new Set(PROPRIOS_TITULO);
@@ -3647,6 +3687,7 @@ function normCaixa(t,extra,primeiraMinuscula){
       return SIGLAS_TITULO.has(limpo)?limpo.toUpperCase():w;
     });
     out=aplicarFrasesProprias(out);
+    out=capitalizarNomesProprios(out);
   }else{
     const tudoMaiusculo=base===base.toUpperCase();
     out=base.toLowerCase().replace(/[^\s:–—]+/g,(w,i)=>{
@@ -3659,6 +3700,7 @@ function normCaixa(t,extra,primeiraMinuscula){
       return w;
     });
     out=aplicarFrasesProprias(out);
+    out=capitalizarNomesProprios(out);
   }
   // Primeira letra: maiúscula no título, minúscula no subtítulo
   const idx=out.search(/[A-Za-zÀ-ÿ]/);
@@ -4305,7 +4347,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-j</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-k</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
