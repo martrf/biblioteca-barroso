@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Biblioteca Ministro Luís Roberto Barroso</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="preconnect" href="https://jctlmsqmacgrygdjhefr.supabase.co">
@@ -63,10 +66,11 @@
   .adv-toggle:hover{color:var(--gold-light)}
   .adv-panel{max-width:860px;width:100%;margin:14px auto 0;display:none;background:rgba(255,255,255,.06);border:1px solid rgba(201,168,76,.2);border-radius:var(--rl);padding:18px 22px;box-sizing:border-box}
   .adv-panel.open{display:block}
-  .adv-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 16px}
-  .af{display:flex;flex-direction:column;gap:4px}
+  .adv-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px;width:100%}
+  .af{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .af>div{min-width:0}
   .af label{font-size:11px;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.02em}
-  .af input,.af select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r);padding:8px 12px;font-family:var(--font-b);font-size:13px;color:#fff;outline:none;transition:border-color .18s}
+  .af input,.af select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r);padding:8px 12px;font-family:var(--font-b);font-size:13px;color:#fff;outline:none;transition:border-color .18s;width:100%;max-width:100%;min-width:0;box-sizing:border-box;text-overflow:ellipsis}
   .af input::placeholder{color:rgba(255,255,255,.3)}
   .af input:focus,.af select:focus{border-color:var(--gold);background:rgba(255,255,255,.15)}
   .af select option{background:var(--navy);color:#fff}
@@ -389,6 +393,7 @@ window.dispatchEvent(new Event('fb-ready'));
   <i class="ti ti-shield-lock"></i> Modo administrador ativo
   <button onclick="sw('inicio')"><i class="ti ti-home"></i> Página inicial</button>
   <button id="btn-migrar-capas" onclick="migrarCapasParaStorage()"><i class="ti ti-cloud-upload"></i> Migrar capas</button>
+  <button id="btn-dir-fund" onclick="classificarDireitosFundamentais()"><i class="ti ti-scale"></i> Direitos fundamentais</button>
   <button onclick="logoutAdmin()"><i class="ti ti-logout"></i> Sair</button>
 </div>
 
@@ -548,40 +553,9 @@ window.dispatchEvent(new Event('fb-ready'));
           </select>
         </div>
         <!-- Assuntos — linha completa -->
-        <div class="af"><label>Assunto 1 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--gray-400)">(lista controlada)</span></label>
-          <select id="a-assunto" data-placeholder="Todos os assuntos">
-            <option value="">Todos os assuntos</option>
-            <option>Administração Pública</option>
-            <option>Comunicação, internet e democracia digital</option>
-            <option>Constituição e Direito Internacional</option>
-            <option>Controle de constitucionalidade</option>
-            <option>Direito comparado e constituições estrangeiras</option>
-            <option>Direito constitucional geral</option>
-            <option>Direito penal e processual penal na Constituição</option>
-            <option>Direitos e garantias fundamentais</option>
-            <option>Direitos políticos, partidos e eleições</option>
-            <option>Funções essenciais à Justiça</option>
-            <option>História constitucional e constitucionalismo</option>
-            <option>Meio ambiente e direitos intergeracionais</option>
-            <option>Nacionalidade</option>
-            <option>Ordem econômica</option>
-            <option>Ordem social e direitos sociais</option>
-            <option>Ordem tributária, financeira e orçamentária</option>
-            <option>Organização do Estado e federalismo</option>
-            <option>Poder Executivo</option>
-            <option>Poder Judiciário e jurisdição constitucional</option>
-            <option>Poder Legislativo e processo legislativo</option>
-            <option>Povos indígenas, comunidades tradicionais e direitos coletivos</option>
-            <option>Processo civil e Constituição</option>
-            <option>Remédios constitucionais</option>
-            <option>Segurança pública, defesa do Estado e instituições militares</option>
-            <option>Separação dos Poderes e relações institucionais</option>
-            <option>Teoria da Constituição, poder constituinte e hermenêutica constitucional</option>
-            <option>Teoria e filosofia do Direito</option>
-          </select>
-        </div>
+        <div class="af"><label>Assunto 1</label><input type="text" id="a-assunto" placeholder="Primeiro assunto ou palavra-chave"></div>
         <div class="af">
-          <label>Assunto 2 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--gray-400)">(texto livre)</span></label>
+          <label>Assunto 2</label>
           <div style="display:flex;gap:6px;align-items:center">
             <select id="a-op2" style="flex:0 0 58px;font-size:11px;padding:8px 4px;font-weight:700;color:var(--navy);background:var(--gold-pale);border:1px solid rgba(201,168,76,.4)">
               <option value="e">E</option>
@@ -591,7 +565,7 @@ window.dispatchEvent(new Event('fb-ready'));
           </div>
         </div>
         <div class="af">
-          <label>Assunto 3 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--gray-400)">(texto livre)</span></label>
+          <label>Assunto 3</label>
           <div style="display:flex;gap:6px;align-items:center">
             <select id="a-op3" style="flex:0 0 58px;font-size:11px;padding:8px 4px;font-weight:700;color:var(--navy);background:var(--gold-pale);border:1px solid rgba(201,168,76,.4)">
               <option value="e">E</option>
@@ -1789,7 +1763,7 @@ function buscar(){
 }
 function buscarAdv(){
   const ft=gv('a-titulo').toLowerCase(),fa=gv('a-autor').toLowerCase(),fano=gv('a-ano'),fed=gv('a-editora').toLowerCase();
-  const fass=gv('a-assunto'),fass2=gv('a-assunto2').toLowerCase(),fass3=gv('a-assunto3').toLowerCase();
+  const fass=gv('a-assunto').trim(),fass2=gv('a-assunto2').toLowerCase(),fass3=gv('a-assunto3').toLowerCase();
   const op2=document.getElementById('a-op2')?.value||'e';
   const op3=document.getElementById('a-op3')?.value||'e';
   const ftmb=gv('a-tombo').toLowerCase(),farea=gv('a-area'),ftipo=gv('a-tipo'),fest=gv('a-estante').toLowerCase();
@@ -2276,7 +2250,7 @@ function garantirOpcao(sel,valor){
 function popularSelectsAssuntos(){
   // As opções já vêm no HTML; aqui apenas garantimos que nenhuma falte
   // (a constante ASSUNTOS_ESCRITORIO continua sendo a fonte única).
-  ['f-assuntos','etq-assuntos','a-assunto'].forEach(id=>{
+  ['f-assuntos','etq-assuntos'].forEach(id=>{
     const sel=document.getElementById(id);
     if(!sel) return;
     const atual=sel.value;
@@ -2651,7 +2625,7 @@ function salvar(e,opts){if(e&&e.preventDefault)e.preventDefault();
     titulo:normTitulo(gv('f-titulo')),subtitulo:normTitulo(gv('f-subtitulo')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
     editora:gv('f-editora'),local_pub:gv('f-local'),ano:gv('f-ano'),volume:gv('f-volume'),edicao:gv('f-edicao'),
     paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
-    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[A-Za-z\d.()=/:\s-]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
+    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
     notas:gv('f-notas'),observacoes:gv('f-observacoes'),lingua:gv('f-lingua'),assuntos:gv('f-assuntos'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
     dataCad:curId?acervo.find(x=>x.id===curId).dataCad:new Date().toISOString()};
   if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
@@ -2766,7 +2740,7 @@ function ver(id,lista){
       const sob=(o.sobrenomeClass||sobrenome(o.autor||'')).toUpperCase();
       if(o.colecao==='escritorio'){
         const locRaw=(o.localizacao||'').trim();
-        const cdd=locRaw.match(/^[A-Za-z\d.()=/:\s-]+/)?.[0]||o.cdd||'';
+        const cdd=locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||o.cdd||'';
         const assunto=(o.assuntoEspecifico||'').trim().toUpperCase();
         // Ordem: CDD + SOBRENOME + ASSUNTO
         const linhas=[cdd,sob,assunto].filter(x=>x);
@@ -3083,7 +3057,7 @@ function parsearMARC(){
   if(l084){
     const rawClassif=sub(l084,'a').trim();
     // Extrai só o número CDD (sem cutter/sobrenome)
-    const m=rawClassif.match(/^([A-Za-z\d.()=/:\s-]+)/);
+    const m=rawClassif.match(/^([A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+)/);
     cddPuro=m?m[1]:'';
     classif=rawClassif;
   }
@@ -3093,7 +3067,7 @@ function parsearMARC(){
   if(l092){
     const rawLoc=sub(l092,'a').trim()||l092.replace(/^=\d+\s+\S+\s+/,'').trim();
     // Extrai só o CDD
-    const m=rawLoc.match(/^([A-Za-z\d.()=/:\s-]+)/);
+    const m=rawLoc.match(/^([A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+)/);
     if(m) localizacao=m[1];
   }
   if(!localizacao&&cddPuro) localizacao=cddPuro;
@@ -3523,7 +3497,7 @@ const AREA_LABEL = {
 function cdd_para_area(cdd){
     cdd=(cdd||'').trim().split('\n')[0].trim();
     if(!cdd||!cdd[0].match(/\d/)) return '';
-    const n=cdd.match(/^[A-Za-z\d.()=/:\s-]+/);
+    const n=cdd.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/);
     if(!n) return '';
     const c=n[0];
     if(c.startsWith('341.28')) return 'Direito Eleitoral';
@@ -3642,7 +3616,7 @@ function atualizarClassPreview(){
   }
   if(colecao==='escritorio'){
     // Escritório: CDD do campo localização
-    const cdd=loc.match(/^[A-Za-z\d.()=/:\s-]+/)?.[0]||'';
+    const cdd=loc.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'';
     if(el1) el1.textContent=cdd||'—';
     if(el3){if(esp){el3.textContent=esp.toUpperCase();el3.style.display='block';}else{el3.textContent='';el3.style.display='none';}}
     if(el2) el2.textContent=sob.toUpperCase();
@@ -3666,7 +3640,7 @@ function normClassificacao(o){
   const c=(o.classificacao||'').trim();
   if(!c) return '';
   if(!/^\d/.test(c)) return c; // já é texto
-  const codigo=c.match(/^[A-Za-z\d.()=/:\s-]+/)?.[0]||'';
+  const codigo=c.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'';
   return cdd_para_area(codigo)||c;
 }
 
@@ -3677,7 +3651,7 @@ function normalizarRegistro(o){
   o.autor=normAutor(o.autor||'');
   // Guarda CDD original antes de normalizar (para etiqueta do Escritório)
   const cddOriginal=(o.classificacao||'').trim();
-  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[A-Za-z\d.()=/:\s-]+/)?.[0]||'';
+  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'';
   o.classificacao=normClassificacao(o);
   // Garante sobrenome para etiqueta
   if(!o.sobrenomeClass&&o.autor) o.sobrenomeClass=sobrenome(o.autor);
@@ -3779,6 +3753,57 @@ const LINGUA_INFO={
   'Francês':{cor:'#0055A4',sigla:'FR'},
   'Alemão':{cor:'#1a1a1a',sigla:'DE'}
 };
+// ══ Classificação em lote: Direitos e garantias fundamentais ══
+// Alcança as obras cujas etiquetas trazem os assuntos da faixa 341.27
+// (e a Proteção Vulnerável, 341.12192).
+const DF_CDD=['341.27','341.12192'];
+const DF_TERMOS=[
+  'direitos e garantias fundamentais','dignidade humana','igualdade constitucional',
+  'liberdades fundamentais','direitos pessoais','direitos coletivos','direitos sociais',
+  'protecao vulneravel','direitos patrimoniais','biodireito',
+  'direito a vida','dignidade da pessoa humana'
+];
+function cddDaObra(o){
+  const fontes=[o.localizacao,o.cdd,o.classificacao];
+  for(const f of fontes){
+    const m=String(f||'').trim().match(/^\d[\d.]*/);
+    if(m) return m[0];
+  }
+  return '';
+}
+function obraEhDireitoFundamental(o){
+  const cdd=cddDaObra(o);
+  if(cdd&&DF_CDD.some(pre=>cdd===pre||cdd.startsWith(pre))) return true;
+  const txt=normBusca([o.assuntoEspecifico,o.assunto,o.localizacao,o.classificacao].join(' | '));
+  return DF_TERMOS.some(t=>txt.includes(t));
+}
+async function classificarDireitosFundamentais(){
+  if(typeof isAdmin==='function'&&!isAdmin()){toast('Disponível apenas no modo administrador.','error');return;}
+  const alvo='Direitos e garantias fundamentais';
+  const pendentes=acervo.filter(o=>obraEhDireitoFundamental(o)&&assuntoCanonico(o.assuntos)!==alvo);
+  const jaOk=acervo.filter(o=>assuntoCanonico(o.assuntos)===alvo).length;
+  if(!pendentes.length){toast('Nenhuma obra pendente — '+jaOk+' já estão classificadas.','success');return;}
+  const amostra=pendentes.slice(0,15).map(o=>'• '+o.tombo+'  '+cddDaObra(o)+'  '+String(o.titulo||'').slice(0,50)).join('\n');
+  const msg=pendentes.length+' obra(s) receberão o assunto "'+alvo+'".\n\n'
+    +amostra+(pendentes.length>15?'\n… e mais '+(pendentes.length-15)+' obra(s)':'')
+    +'\n\nConfirmar a alteração?';
+  if(!confirm(msg)) return;
+  pendentes.forEach(o=>{
+    o.assuntos=alvo;
+    if(!o.area) o.area='Direito Constitucional';
+  });
+  save();updStats();
+  toast('Gravando '+pendentes.length+' registro(s) na nuvem…','');
+  let erros=0;
+  for(const o of pendentes){
+    try{ await sbSalvarObra(o); }catch(e){ erros++; }
+  }
+  try{ renderEtiquetas(); }catch(e){}
+  toast(erros
+    ? (pendentes.length-erros)+' gravadas, '+erros+' com erro de sincronização.'
+    : pendentes.length+' obra(s) classificadas em "'+alvo+'".','success');
+}
+
 function linguaStripe(o,tamanho){
   const info=LINGUA_INFO[linguaCanonica(o.lingua)];
   if(!info) return '';
@@ -3850,7 +3875,7 @@ function renderEtiquetas(){
   grid.innerHTML=lista.map(o=>{
     const isEsc=o.colecao==='escritorio';
     const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[A-Za-z\d.()=/:\s-]+/)?.[0]||o.cdd||''):'';
+    const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
@@ -3897,7 +3922,7 @@ function imprimirEtiquetas(modo){
   const etqHTML=obras.map(o=>{
     const isEsc=o.colecao==='escritorio';
     const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[A-Za-z\d.()=/:\s-]+/)?.[0]||o.cdd||''):'';
+    const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
@@ -4201,6 +4226,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-b</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
