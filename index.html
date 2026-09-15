@@ -393,7 +393,6 @@ window.dispatchEvent(new Event('fb-ready'));
   <i class="ti ti-shield-lock"></i> Modo administrador ativo
   <button onclick="sw('inicio')"><i class="ti ti-home"></i> Página inicial</button>
   <button id="btn-migrar-capas" onclick="migrarCapasParaStorage()"><i class="ti ti-cloud-upload"></i> Migrar capas</button>
-  <button id="btn-dir-fund" onclick="classificarDireitosFundamentais()"><i class="ti ti-scale"></i> Direitos fundamentais</button>
   <button onclick="logoutAdmin()"><i class="ti ti-logout"></i> Sair</button>
 </div>
 
@@ -2622,7 +2621,7 @@ function salvar(e,opts){if(e&&e.preventDefault)e.preventDefault();
   const irProximo=!!(opts&&opts.proximo);
   const capaUrl=document.getElementById('f-capa-url').value.trim();
   const o={id:curId||(Date.now()+'_'+Math.random()),tombo:curId?acervo.find(x=>x.id===curId).tombo:gtombo(),
-    titulo:normTitulo(gv('f-titulo')),subtitulo:normTitulo(gv('f-subtitulo')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
+    titulo:normTitulo(gv('f-titulo'),gv('f-autor')),subtitulo:normSubtitulo(gv('f-subtitulo'),gv('f-autor')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
     editora:gv('f-editora'),local_pub:gv('f-local'),ano:gv('f-ano'),volume:gv('f-volume'),edicao:gv('f-edicao'),
     paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
     localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
@@ -3546,31 +3545,159 @@ function sobrenome(autor){
 
 // Normalização de títulos — caixa baixa exceto primeira letra
 // Nomes próprios/siglas comuns que devem manter a inicial maiúscula mesmo em título/subtítulo
-const PROPRIOS_TITULO=['brasil','brasileiro','brasileira','brasileiros','brasileiras','brasília','são','paulo','rio','janeiro','minas','gerais','stf','stj','tst','tse','cnj','cpc','cf','adi','adpf','adc','onu','oea','oab','ue','portugal','espanha','frança','itália','alemanha','inglaterra','união','europeia','europeu','américa','latina'];
-function normTitulo(t){
-  if(!t) return t;
-  const excecoes=['do','da','de','dos','das','e','o','a','os','as','em','com','por','para','pelo','pela','um','uma','no','na','nos','nas'];
-  return t.toLowerCase().replace(/[^\s:–—-]+/g,(w,i)=>{
-    // Preserva siglas que já estavam totalmente em maiúsculas no texto original
-    const original=t.slice(i,i+w.length);
-    if(/^[A-ZÀ-Ú]{2,}$/.test(original)) return original;
-    if(i===0) return w.charAt(0).toUpperCase()+w.slice(1);
-    if(PROPRIOS_TITULO.includes(w)) return w.charAt(0).toUpperCase()+w.slice(1);
-    if(excecoes.includes(w)) return w;
-    // After colon or dash, capitalize
-    const before=t.toLowerCase().slice(0,i).trimEnd();
-    if(before.endsWith(':')||before.endsWith('–')||before.endsWith('—')) return w.charAt(0).toUpperCase()+w.slice(1);
-    return w;
-  });
+// ══════════════════════════════════════════════════════════
+// NORMALIZAÇÃO DE CAIXA — títulos, subtítulos e autores
+// Convenção adotada: título com inicial maiúscula, subtítulo com
+// inicial MINÚSCULA (ISBD/AACR2), nomes próprios sempre capitalizados.
+// ══════════════════════════════════════════════════════════
+
+// Palavras que permanecem em minúscula no meio do texto
+const EXCECOES_TITULO=['do','da','de','dos','das','e','o','a','os','as','em','com','por','para','pelo','pela','pelos','pelas','um','uma','uns','umas','no','na','nos','nas','ao','aos','à','às','ou','entre','sobre','sob','até','após','desde','contra','perante','num','numa','del','della','di','du','van','von','der','den','la','le','y'];
+
+// Nomes próprios de uma palavra (lugares, siglas, gentílicos, instituições)
+const PROPRIOS_TITULO=[
+  'brasil','brasília','brasilia','paulo','bahia','pernambuco','ceará','paraná',
+  'amazonas','pará','goiás','maranhão','paraíba','piauí','sergipe','alagoas','tocantins',
+  'roraima','rondônia','amapá','portugal','espanha','frança','itália','alemanha','inglaterra',
+  'argentina','chile','colômbia','méxico','uruguai','paraguai','bolívia','peru','venezuela',
+  'equador','cuba','canadá','japão','china','índia','rússia','israel','grécia','roma',
+  'europa','áfrica','ásia','américa','mercosul','weimar','bonn','nuremberg','haia','genebra','viena',
+  'constituição',
+  'kelsen','dworkin','alexy','hart','habermas','rawls','bobbio','ferrajoli','canotilho','häberle',
+  'schmitt','luhmann','foucault','kant','hegel','aristóteles','platão','rousseau','montesquieu',
+  'locke','hobbes','marx','weber','durkheim','tocqueville','marshall','holmes','scalia',
+  'barroso','mendes','moraes','silva','bonavides','miranda','maximiliano','mello',
+  'nunes','grinover','dinamarco','reale','ferraz','comparato','sarlet',
+  'streck','lenio','gadamer','radbruch','jellinek','laband','duguit','hauriou','hesse'
+];
+
+// Expressões compostas — instituições, cortes, tratados
+const PROPRIOS_FRASES=[
+  'supremo tribunal federal','superior tribunal de justiça','tribunal superior do trabalho',
+  'tribunal superior eleitoral','superior tribunal militar','tribunal de contas da união',
+  'tribunal de justiça','tribunal regional federal','tribunal constitucional federal',
+  'conselho nacional de justiça','conselho nacional do ministério público',
+  'ministério público federal','ministério público estadual','ministério público',
+  'defensoria pública','advocacia-geral da união','procuradoria-geral da república',
+  'ordem dos advogados do brasil','câmara dos deputados','senado federal','congresso nacional',
+  'assembleia nacional constituinte','assembleia geral','poder constituinte originário',
+  'constituição federal','constituição da república','carta magna','código civil','código penal',
+  'código de processo civil','código de processo penal','código tributário nacional',
+  'consolidação das leis do trabalho','estatuto da criança e do adolescente',
+  'união europeia','nações unidas','organização das nações unidas',
+  'organização internacional do trabalho','organização mundial do comércio',
+  'organização dos estados americanos','fundo monetário internacional','banco mundial',
+  'banco central','receita federal','polícia federal','controladoria-geral da união',
+  'corte interamericana de direitos humanos','comissão interamericana de direitos humanos',
+  'corte europeia de direitos humanos','tribunal europeu de direitos humanos',
+  'corte internacional de justiça','tribunal penal internacional',
+  'declaração universal dos direitos humanos','pacto de são josé da costa rica',
+  'convenção americana de direitos humanos','suprema corte','corte suprema',
+  'estados unidos da américa','estados unidos','américa latina','reino unido','união soviética',
+  'república federativa do brasil','distrito federal','rio de janeiro','rio grande do sul',
+  'rio grande do norte','são paulo','minas gerais','mato grosso do sul','mato grosso',
+  'espírito santo','santa catarina','fundação getulio vargas','universidade de são paulo'
+];
+
+// Siglas que devem sair sempre em caixa alta
+const SIGLAS_TITULO=new Set(['stf','stj','tst','tse','tcu','stm','cnj','cnmp','agu','pgr','mpf','mp','oab','cpc','cpp','clt','cf','cdc','ctn','adi','adpf','adc','adin','rext','hc','ms','onu','oea','oit','omc','fmi','ue','eua','unesco','unicef','otan','cidh','ibge','ipea','fgv','usp','ufmg','ufrj','unb','puc','ong','ongs','pec','mpv','lc','ec']);
+
+function capitalizar(w){return w.charAt(0).toUpperCase()+w.slice(1);}
+
+// Junta o dicionário fixo com as palavras do nome do autor do próprio registro
+function palavrasProprias(extra){
+  const set=new Set(PROPRIOS_TITULO);
+  String(extra||'').split(/[^A-Za-zÀ-ÿ]+/).forEach(w=>{if(w.length>2)set.add(w.toLowerCase());});
+  return set;
 }
 
-// Normalização de autores — "Sobrenome, Nome Outro" → "Sobrenome, Nome Outro"
+// Detecta se o texto já foi digitado em caixa de sentença (usuário acertou).
+// Nesse caso nada é rebaixado — só a primeira letra é ajustada.
+function jaEmCaixaDeSentenca(t){
+  const pal=t.trim().split(/\s+/).filter(w=>/[A-Za-zÀ-ÿ]/.test(w));
+  if(pal.length<3) return false;
+  const sig=pal.slice(1).filter(w=>w.length>3&&!(w===w.toUpperCase()));
+  if(sig.length<2) return false;
+  const min=sig.filter(w=>/^[a-zà-ÿ]/.test(w)).length;
+  // Basta uma parte já estar em minúscula para concluir que não é CAIXA ALTA
+  // nem Title Case — nesse caso a capitalização digitada é preservada.
+  return min/sig.length>=0.25;
+}
+
+function aplicarFrasesProprias(texto){
+  PROPRIOS_FRASES.forEach(f=>{
+    const re=new RegExp('\\b'+f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s+')+'\\b','gi');
+    const certo=f.split(' ').map((p,i)=>(i>0&&EXCECOES_TITULO.includes(p))?p:capitalizar(p)).join(' ');
+    texto=texto.replace(re,certo);
+  });
+  return texto;
+}
+
+// primeiraMinuscula=true → subtítulo
+function normCaixa(t,extra,primeiraMinuscula){
+  if(!t) return t;
+  const base=String(t).trim();
+  if(!base) return base;
+  const proprios=palavrasProprias(extra);
+  let out;
+  if(jaEmCaixaDeSentenca(base)){
+    // Respeita o que foi digitado, mas ainda ajusta siglas e nomes de instituições
+    out=base.replace(/[A-Za-zÀ-ÿ]+/g,w=>{
+      const limpo=w.toLowerCase();
+      return SIGLAS_TITULO.has(limpo)?limpo.toUpperCase():w;
+    });
+    out=aplicarFrasesProprias(out);
+  }else{
+    const tudoMaiusculo=base===base.toUpperCase();
+    out=base.toLowerCase().replace(/[^\s:–—]+/g,(w,i)=>{
+      const original=base.slice(i,i+w.length);
+      // Preserva siglas que já vieram em caixa alta (exceto se TUDO está em caixa alta)
+      if(!tudoMaiusculo&&/^[A-ZÀ-Ú][A-ZÀ-Ú0-9.]+$/.test(original)) return original;
+      const limpo=w.replace(/[^a-zà-ÿ]/g,'');
+      if(limpo&&SIGLAS_TITULO.has(limpo)) return w.replace(limpo,limpo.toUpperCase());
+      if(limpo&&proprios.has(limpo)) return w.replace(limpo,capitalizar(limpo));
+      return w;
+    });
+    out=aplicarFrasesProprias(out);
+  }
+  // Primeira letra: maiúscula no título, minúscula no subtítulo
+  const idx=out.search(/[A-Za-zÀ-ÿ]/);
+  if(idx>=0){
+    const palavra=(out.slice(idx).match(/^[A-Za-zÀ-ÿ'’-]+/)||[''])[0];
+    const limpo=palavra.toLowerCase().replace(/[^a-zà-ÿ]/g,'');
+    const ehProprio=proprios.has(limpo)||SIGLAS_TITULO.has(limpo)||palavra===palavra.toUpperCase();
+    if(primeiraMinuscula){
+      if(!ehProprio) out=out.slice(0,idx)+palavra.charAt(0).toLowerCase()+out.slice(idx+1);
+    }else{
+      out=out.slice(0,idx)+palavra.charAt(0).toUpperCase()+out.slice(idx+1);
+    }
+  }
+  return out;
+}
+function normTitulo(t,extra){return normCaixa(t,extra,false);}
+function normSubtitulo(t,extra){return normCaixa(t,extra,true);}
+
+// Normalização de autores — respeita partículas, hífens e apóstrofos
+const PARTICULAS_AUTOR=['de','da','do','dos','das','e','del','della','di','du','van','von','der','den','ter','la','le','y','bin','ibn'];
+function capNomeSimples(w){
+  if(!w) return w;
+  if(/^[A-ZÀ-Ú]\.$/.test(w)) return w;                  // inicial: J.
+  if(w.length<=3&&w===w.toUpperCase()&&/[A-ZÀ-Ú]/.test(w)&&!/[a-zà-ÿ]/.test(w)) return w; // sigla
+  return w.split('-').map(seg=>seg.split("'").map((x,i)=>
+    i===0?capitalizar(x.toLowerCase()):capitalizar(x.toLowerCase())
+  ).join("'")).join('-');
+}
 function normAutor(a){
   if(!a) return a;
   return a.split(';').map(parte=>{
     const p=parte.trim();
-    return p.split(/\s+/).map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
-  }).join('; ');
+    if(!p) return '';
+    return p.split(/\s+/).map((w,i)=>{
+      const limpo=w.toLowerCase().replace(/[^a-zà-ÿ]/g,'');
+      if(i>0&&PARTICULAS_AUTOR.includes(limpo)) return w.toLowerCase();
+      return capNomeSimples(w);
+    }).join(' ');
+  }).filter(Boolean).join('; ');
 }
 
 function toggleClassEdit(){
@@ -3646,8 +3773,8 @@ function normClassificacao(o){
 
 function normalizarRegistro(o){
   o.colecao=o.colecao||'gabinete';
-  o.titulo=normTitulo(o.titulo||'');
-  o.subtitulo=normTitulo(o.subtitulo||'');
+  o.titulo=normTitulo(o.titulo||'',o.autor||'');
+  o.subtitulo=normSubtitulo(o.subtitulo||'',o.autor||'');
   o.autor=normAutor(o.autor||'');
   // Guarda CDD original antes de normalizar (para etiqueta do Escritório)
   const cddOriginal=(o.classificacao||'').trim();
@@ -3753,76 +3880,6 @@ const LINGUA_INFO={
   'Francês':{cor:'#0055A4',sigla:'FR'},
   'Alemão':{cor:'#1a1a1a',sigla:'DE'}
 };
-// ══ Classificação em lote: Direitos e garantias fundamentais ══
-// Alcança as obras cujas etiquetas trazem os assuntos da faixa 341.27
-// (e a Proteção Vulnerável, 341.12192).
-const DF_CDD=['341.27','341.12192'];
-const DF_TERMOS=[
-  'direitos e garantias fundamentais','dignidade humana','igualdade constitucional',
-  'liberdades fundamentais','direitos pessoais','direitos coletivos','direitos sociais',
-  'protecao vulneravel','direitos patrimoniais','biodireito',
-  'direito a vida','dignidade da pessoa humana'
-];
-function cddDaObra(o){
-  const fontes=[o.localizacao,o.cdd,o.classificacao];
-  for(const f of fontes){
-    const m=String(f||'').trim().match(/^\d[\d.]*/);
-    if(m) return m[0];
-  }
-  return '';
-}
-function obraEhDireitoFundamental(o){
-  const cdd=cddDaObra(o);
-  if(cdd&&DF_CDD.some(pre=>cdd===pre||cdd.startsWith(pre))) return true;
-  const txt=normBusca([o.assuntoEspecifico,o.assunto,o.localizacao,o.classificacao].join(' | '));
-  return DF_TERMOS.some(t=>txt.includes(t));
-}
-async function classificarDireitosFundamentais(){
-  if(typeof isAdmin==='function'&&!isAdmin()){toast('Disponível apenas no modo administrador.','error');return;}
-  const alvo='Direitos Fundamentais';           // valor do campo "Área do Direito"
-  const escritorio=acervo.filter(o=>(o.colecao||'')==='escritorio');   // só o perfil Escritório
-  const pendentes=escritorio.filter(o=>obraEhDireitoFundamental(o)&&(o.area||'')!==alvo);
-  const jaOk=escritorio.filter(o=>(o.area||'')===alvo).length;
-  if(!pendentes.length){toast('Nenhuma obra pendente no Escritório — '+jaOk+' já estão em "'+alvo+'".','success');return;}
-
-  // Separa por critério: faixa de CDD (seguro) x nome do assunto (pode trazer falso positivo)
-  const porCdd=pendentes.filter(o=>{const c=cddDaObra(o);return c&&DF_CDD.some(pre=>c===pre||c.startsWith(pre));});
-  const porNome=pendentes.filter(o=>!porCdd.includes(o));
-
-  const linha=o=>'• '+o.tombo+'  '+(cddDaObra(o)||'—')+'  '+String(o.titulo||'').slice(0,50);
-  let selecionadas=porCdd;
-
-  if(porCdd.length){
-    const amostra=porCdd.slice(0,15).map(linha).join('\n');
-    const msg=porCdd.length+' obra(s) do perfil ESCRITÓRIO na faixa 341.27 / 341.12192 receberão a Área do Direito "'+alvo+'".\n\n'
-      +amostra+(porCdd.length>15?'\n… e mais '+(porCdd.length-15)+' obra(s)':'')+'\n\nConfirmar?';
-    if(!confirm(msg)) return;
-  }
-
-  if(porNome.length){
-    const amostra=porNome.slice(0,15).map(linha).join('\n');
-    const msg='Mais '+porNome.length+' obra(s) foram identificadas apenas pelo NOME do assunto, sem CDD na faixa.\n'
-      +'Confira — pode haver obra fora do tema:\n\n'
-      +amostra+(porNome.length>15?'\n… e mais '+(porNome.length-15)+' obra(s)':'')
-      +'\n\nOK = incluir também estas.   Cancelar = gravar só as da faixa de CDD.';
-    if(confirm(msg)) selecionadas=porCdd.concat(porNome);
-  }
-
-  if(!selecionadas.length){toast('Nenhuma obra alterada.','');return;}
-  selecionadas.forEach(o=>{o.area=alvo;});
-  save();updStats();
-  toast('Gravando '+selecionadas.length+' registro(s) na nuvem…','');
-  let erros=0;
-  for(const o of selecionadas){
-    try{ await sbSalvarObra(o); }catch(e){ erros++; }
-  }
-  try{ renderEtiquetas(); }catch(e){}
-  try{ renderCarousel(); }catch(e){}
-  toast(erros
-    ? (selecionadas.length-erros)+' gravadas, '+erros+' com erro de sincronização.'
-    : selecionadas.length+' obra(s) com Área do Direito "'+alvo+'".','success');
-}
-
 function linguaStripe(o,tamanho){
   const info=LINGUA_INFO[linguaCanonica(o.lingua)];
   if(!info) return '';
@@ -4245,7 +4302,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-d</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-i</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
