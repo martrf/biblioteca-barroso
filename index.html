@@ -3779,29 +3779,47 @@ function obraEhDireitoFundamental(o){
 }
 async function classificarDireitosFundamentais(){
   if(typeof isAdmin==='function'&&!isAdmin()){toast('Disponível apenas no modo administrador.','error');return;}
-  const alvo='Direitos e garantias fundamentais';
-  const pendentes=acervo.filter(o=>obraEhDireitoFundamental(o)&&assuntoCanonico(o.assuntos)!==alvo);
-  const jaOk=acervo.filter(o=>assuntoCanonico(o.assuntos)===alvo).length;
-  if(!pendentes.length){toast('Nenhuma obra pendente — '+jaOk+' já estão classificadas.','success');return;}
-  const amostra=pendentes.slice(0,15).map(o=>'• '+o.tombo+'  '+cddDaObra(o)+'  '+String(o.titulo||'').slice(0,50)).join('\n');
-  const msg=pendentes.length+' obra(s) receberão o assunto "'+alvo+'".\n\n'
-    +amostra+(pendentes.length>15?'\n… e mais '+(pendentes.length-15)+' obra(s)':'')
-    +'\n\nConfirmar a alteração?';
-  if(!confirm(msg)) return;
-  pendentes.forEach(o=>{
-    o.assuntos=alvo;
-    if(!o.area) o.area='Direito Constitucional';
-  });
+  const alvo='Direitos Fundamentais';           // valor do campo "Área do Direito"
+  const pendentes=acervo.filter(o=>obraEhDireitoFundamental(o)&&(o.area||'')!==alvo);
+  const jaOk=acervo.filter(o=>(o.area||'')===alvo).length;
+  if(!pendentes.length){toast('Nenhuma obra pendente — '+jaOk+' já estão em "'+alvo+'".','success');return;}
+
+  // Separa por critério: faixa de CDD (seguro) x nome do assunto (pode trazer falso positivo)
+  const porCdd=pendentes.filter(o=>{const c=cddDaObra(o);return c&&DF_CDD.some(pre=>c===pre||c.startsWith(pre));});
+  const porNome=pendentes.filter(o=>!porCdd.includes(o));
+
+  const linha=o=>'• '+o.tombo+'  '+(cddDaObra(o)||'—')+'  '+String(o.titulo||'').slice(0,50);
+  let selecionadas=porCdd;
+
+  if(porCdd.length){
+    const amostra=porCdd.slice(0,15).map(linha).join('\n');
+    const msg=porCdd.length+' obra(s) na faixa 341.27 / 341.12192 receberão a Área do Direito "'+alvo+'".\n\n'
+      +amostra+(porCdd.length>15?'\n… e mais '+(porCdd.length-15)+' obra(s)':'')+'\n\nConfirmar?';
+    if(!confirm(msg)) return;
+  }
+
+  if(porNome.length){
+    const amostra=porNome.slice(0,15).map(linha).join('\n');
+    const msg='Mais '+porNome.length+' obra(s) foram identificadas apenas pelo NOME do assunto, sem CDD na faixa.\n'
+      +'Confira — pode haver obra fora do tema:\n\n'
+      +amostra+(porNome.length>15?'\n… e mais '+(porNome.length-15)+' obra(s)':'')
+      +'\n\nOK = incluir também estas.   Cancelar = gravar só as da faixa de CDD.';
+    if(confirm(msg)) selecionadas=porCdd.concat(porNome);
+  }
+
+  if(!selecionadas.length){toast('Nenhuma obra alterada.','');return;}
+  selecionadas.forEach(o=>{o.area=alvo;});
   save();updStats();
-  toast('Gravando '+pendentes.length+' registro(s) na nuvem…','');
+  toast('Gravando '+selecionadas.length+' registro(s) na nuvem…','');
   let erros=0;
-  for(const o of pendentes){
+  for(const o of selecionadas){
     try{ await sbSalvarObra(o); }catch(e){ erros++; }
   }
   try{ renderEtiquetas(); }catch(e){}
+  try{ renderCarousel(); }catch(e){}
   toast(erros
-    ? (pendentes.length-erros)+' gravadas, '+erros+' com erro de sincronização.'
-    : pendentes.length+' obra(s) classificadas em "'+alvo+'".','success');
+    ? (selecionadas.length-erros)+' gravadas, '+erros+' com erro de sincronização.'
+    : selecionadas.length+' obra(s) com Área do Direito "'+alvo+'".','success');
 }
 
 function linguaStripe(o,tamanho){
@@ -4226,7 +4244,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-b</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-c</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
