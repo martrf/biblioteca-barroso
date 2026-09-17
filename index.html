@@ -716,7 +716,7 @@ window.dispatchEvent(new Event('fb-ready'));
           <div class="fld"><label>Editora</label><input type="text" id="f-editora" placeholder="Nome da editora"></div>
           <div class="fld"><label>Local de Publicação</label><input type="text" id="f-local" placeholder="Cidade, País"></div>
           <div class="fld"><label>Ano <span class="req">*</span></label><input type="number" id="f-ano" required placeholder="AAAA" min="1500" max="2099"></div>
-          <div class="fld"><label>Volume / Tomo</label><input type="text" id="f-volume" placeholder="Ex.: v. 1" oninput="atualizarClassPreview()"></div>
+          <div class="fld"><label>Volume / Tomo</label><input type="text" id="f-volume" placeholder="Ex.: v. 2, t. 1" oninput="atualizarClassPreview()" title="Volume e tomo podem vir juntos — saem em linhas separadas na etiqueta"></div>
           <div class="fld"><label>Edição</label><input type="text" id="f-edicao" placeholder="Ex.: 3. ed." oninput="atualizarClassPreview()"></div>
           <div class="fld"><label>Páginas</label><input type="text" id="f-pag" placeholder="Ex.: 512 p."></div>
           <div class="fld"><label>ISBN / ISSN</label><input type="text" id="f-isbn" placeholder="ISBN ou ISSN"></div>
@@ -3964,16 +3964,31 @@ function limparFiltrosEtq(){
   renderEtiquetas();
 }
 
+// Separa "v. 2, t. 1" em duas indicações distintas.
+// Aceita v / vol / volume e t / tomo, em qualquer ordem, com número árabe ou romano.
+function partesVolumeTomo(raw){
+  const txt=String(raw||'').trim();
+  if(!txt) return [];
+  const num='([\\dIVXLCDM]+(?:\\s*[-–/]\\s*[\\dIVXLCDM]+)?[A-Za-z]?)';
+  const reVol=new RegExp('(?:^|[\\s,;./(])(?:volumes?|vols?|v)\\s*\\.?\\s*'+num,'ig');
+  const reTomo=new RegExp('(?:^|[\\s,;./(])(?:tomos?|t)\\s*\\.?\\s*'+num,'ig');
+  const vols=[],tomos=[];
+  let m;
+  while((m=reVol.exec(txt))) vols.push(m[1].replace(/\s+/g,''));
+  while((m=reTomo.exec(txt))) tomos.push(m[1].replace(/\s+/g,''));
+  const linhas=[];
+  if(vols.length) linhas.push('v. '+vols.join(', '));
+  if(tomos.length) linhas.push('t. '+tomos.join(', '));
+  if(!linhas.length) linhas.push('v. '+txt.replace(/^v\s*\.?\s*/i,''));
+  return linhas;
+}
+
 function etqLinhas(o){
   const linhas=[];
   // Assunto específico — aparece entre área e autor
   if(o.assuntoEspecifico&&o.assuntoEspecifico.trim()) linhas.push({txt:o.assuntoEspecifico.trim(),tipo:'esp'});
-  // Volume
-  if(o.volume&&o.volume.trim()){
-    let v=o.volume.trim();
-    if(!/^v\./i.test(v)) v='v. '+v.replace(/^v\.?\s*/i,'');
-    linhas.push({txt:v,tipo:'extra'});
-  }
+  // Volume e tomo — cada um na sua linha
+  partesVolumeTomo(o.volume).forEach(t=>linhas.push({txt:t,tipo:'extra'}));
   // Edição
   if(o.edicao&&o.edicao.trim()){
     let e=o.edicao.trim();
@@ -4398,7 +4413,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-e</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-f</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
