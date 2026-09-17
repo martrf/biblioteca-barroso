@@ -1150,6 +1150,20 @@ window.dispatchEvent(new Event('fb-ready'));
           </select>
         </div>
         <div class="fld" style="min-width:0">
+          <label>Língua</label>
+          <select id="etq-lingua" onchange="renderEtiquetas()">
+            <option value="">Todas as línguas</option>
+            <option value="Português (Brasil)">Português (Brasil)</option>
+            <option value="Português (Portugal)">Português (Portugal)</option>
+            <option value="Inglês">Inglês</option>
+            <option value="Espanhol">Espanhol</option>
+            <option value="Francês">Francês</option>
+            <option value="Italiano">Italiano</option>
+            <option value="Alemão">Alemão</option>
+            <option value="__estrangeiras">— Só as estrangeiras —</option>
+          </select>
+        </div>
+        <div class="fld" style="min-width:0">
           <label>Intervalo de tombo</label>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0">
             <input type="number" id="etq-tombo-ini" placeholder="De (ex: 1)" min="1" oninput="renderEtiquetas()" style="width:90px">
@@ -1158,9 +1172,21 @@ window.dispatchEvent(new Event('fb-ready'));
             <button class="btn btn-sm btn-o" onclick="limparFiltrosEtq()" title="Limpar filtros"><i class="ti ti-x"></i></button>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <button class="btn btn-sm btn-o" onclick="selecionarTodas()"><i class="ti ti-checkbox"></i> Selecionar todas</button>
-          <button class="btn btn-sm btn-o" onclick="deselecionarTodas()"><i class="ti ti-square"></i> Limpar seleção</button>
+      </div>
+
+      <!-- Seleção acumulada -->
+      <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--rl);padding:12px 16px;margin-bottom:16px">
+        <div id="etq-resumo" style="font-size:13px;color:var(--gray-800);margin-bottom:10px;line-height:1.6"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn btn-sm btn-p" onclick="selecionarTodas()"><i class="ti ti-plus"></i> Somar estes à seleção</button>
+          <button class="btn btn-sm btn-o" onclick="removerFiltradosDaSelecao()"><i class="ti ti-minus"></i> Tirar estes da seleção</button>
+          <button class="btn btn-sm btn-o" id="btn-ver-selecao" onclick="alternarVerSelecao()"><i class="ti ti-eye"></i> Ver só a seleção</button>
+          <button class="btn btn-sm btn-o" onclick="deselecionarTodas()"><i class="ti ti-square-off"></i> Zerar seleção</button>
+          <span style="font-size:12px;color:var(--gray-600);margin-left:auto;display:flex;align-items:center;gap:6px">
+            Etiquetas por folha:
+            <input type="number" id="etq-por-folha" value="27" min="1" max="99" oninput="renderEtiquetas()" style="width:58px;padding:5px 8px;font-size:12px">
+          </span>
+          <span id="etq-sel-count" style="font-size:12px;color:var(--gray-600);width:100%"></span>
         </div>
       </div>
 
@@ -1168,7 +1194,6 @@ window.dispatchEvent(new Event('fb-ready'));
       <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-g" onclick="imprimirEtiquetas('selecao')"><i class="ti ti-printer"></i> Imprimir selecionadas</button>
         <button class="btn btn-p" onclick="imprimirEtiquetas('intervalo')"><i class="ti ti-printer"></i> Imprimir por intervalo de tombo</button>
-        <span id="etq-sel-count" style="font-size:12px;color:var(--gray-600)"></span>
       </div>
 
       <!-- Normalizar metadados -->
@@ -3903,17 +3928,29 @@ function linguaStripe(o,tamanho){
 }
 function tomboNum(t){return parseInt((t||'').replace(/[^0-9]/g,''))||0;}
 
+// Quantas etiquetas cabem numa folha A4 — 3 colunas x 8 linhas de 31 mm
+const ETQ_POR_FOLHA_PADRAO=27;   // 3 colunas x 9 linhas de 31 mm numa folha A4
+function etqPorFolha(){
+  const v=parseInt(document.getElementById('etq-por-folha')?.value);
+  return (v&&v>0)?v:ETQ_POR_FOLHA_PADRAO;
+}
+let etqSomenteSel=false;
+
 function filtrarListaEtq(){
+  if(etqSomenteSel) return acervo.filter(o=>etqSelecionadas.has(o.tombo)).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
   const filtro=(document.getElementById('etq-filtro')?.value||'').toLowerCase();
   const area=document.getElementById('etq-area')?.value||'';
   const assuntos=document.getElementById('etq-assuntos')?.value||'';
   const colecao=document.getElementById('etq-colecao')?.value||'';
+  const lingua=document.getElementById('etq-lingua')?.value||'';
   const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
   const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
   return acervo.filter(o=>{
     if(area&&(o.area||'').toLowerCase()!==area.toLowerCase())return false;
     if(assuntos&&assuntoCanonico(o.assuntos)!==assuntoCanonico(assuntos))return false;
     if(colecao&&(o.colecao||'gabinete')!==colecao)return false;
+    if(lingua==='__estrangeiras'){ if(!LINGUA_INFO[linguaCanonica(o.lingua)])return false; }
+    else if(lingua&&linguaCanonica(o.lingua)!==linguaCanonica(lingua))return false;
     if(filtro&&![o.titulo,o.autor,o.tombo,o.area,o.classificacao].some(v=>(v||'').toLowerCase().includes(filtro)))return false;
     const n=tomboNum(o.tombo);
     if((ini||fim<999999)&&(n<ini||n>fim))return false;
@@ -3922,10 +3959,8 @@ function filtrarListaEtq(){
 }
 
 function limparFiltrosEtq(){
-  ['etq-filtro','etq-tombo-ini','etq-tombo-fim'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('etq-area').value='';
-  document.getElementById('etq-assuntos').value='';
-  document.getElementById('etq-colecao').value='';
+  ['etq-filtro','etq-tombo-ini','etq-tombo-fim','etq-area','etq-assuntos','etq-colecao','etq-lingua'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  etqSomenteSel=false;
   renderEtiquetas();
 }
 
@@ -3953,10 +3988,36 @@ function etqLinhas(o){
 
 function renderEtiquetas(){
   const lista=filtrarListaEtq();
-  document.getElementById('etq-count').textContent=`${lista.length} obra(s) — clique para selecionar`;
   const sel=etqSelecionadas.size;
+  document.getElementById('etq-count').textContent=etqSomenteSel
+    ? `Mostrando as ${lista.length} etiqueta(s) da seleção — clique para tirar alguma`
+    : `${lista.length} obra(s) no filtro — clique para selecionar uma a uma`;
+
   const sc=document.getElementById('etq-sel-count');
-  if(sc) sc.textContent=sel?`${sel} etiqueta(s) selecionada(s)`:'';
+  const naSelecao=lista.filter(o=>etqSelecionadas.has(o.tombo)).length;
+  if(sc) sc.textContent=lista.length?`${naSelecao} de ${lista.length} deste filtro já estão na seleção`:'';
+
+  const bv=document.getElementById('btn-ver-selecao');
+  if(bv){
+    bv.innerHTML=etqSomenteSel?'<i class="ti ti-filter"></i> Voltar aos filtros':'<i class="ti ti-eye"></i> Ver só a seleção';
+    bv.classList.toggle('btn-p',etqSomenteSel);
+  }
+
+  const res=document.getElementById('etq-resumo');
+  if(res){
+    if(!sel){
+      res.innerHTML='<strong>Seleção vazia.</strong> Filtre por tombo, assunto, língua ou perfil e clique em "Somar estes à seleção". Pode repetir com filtros diferentes — a seleção vai se acumulando até fechar a folha.';
+    }else{
+      const porFolha=etqPorFolha();
+      const folhas=Math.ceil(sel/porFolha);
+      const sobra=sel%porFolha;
+      const faltam=sobra?porFolha-sobra:0;
+      res.innerHTML='<strong>'+sel+' etiqueta(s) na seleção</strong> — '+porFolha+' por folha A4.<br>'
+        +(faltam
+          ? '<span style="color:#b35c00">'+folhas+' folha(s): a última sai com '+sobra+' etiqueta(s). Faltam <strong>'+faltam+'</strong> para completá-la.</span>'
+          : '<span style="color:#1a5c32">'+folhas+' folha(s) exata(s) — nenhum espaço desperdiçado.</span>');
+    }
+  }
 
   const grid=document.getElementById('etq-grid');
   if(!lista.length){grid.innerHTML='<div class="empty"><i class="ti ti-tag-off"></i><p>Nenhuma obra encontrada.</p></div>';return;}
@@ -3992,8 +4053,27 @@ function toggleEtq(tombo){
   renderEtiquetas();
 }
 
-function selecionarTodas(){filtrarListaEtq().forEach(o=>etqSelecionadas.add(o.tombo));renderEtiquetas();}
-function deselecionarTodas(){etqSelecionadas.clear();renderEtiquetas();}
+function selecionarTodas(){
+  const antes=etqSelecionadas.size;
+  filtrarListaEtq().forEach(o=>etqSelecionadas.add(o.tombo));
+  const add=etqSelecionadas.size-antes;
+  renderEtiquetas();
+  toast(add?add+' etiqueta(s) somada(s) à seleção.':'Estas já estavam na seleção.','success');
+}
+function removerFiltradosDaSelecao(){
+  const antes=etqSelecionadas.size;
+  filtrarListaEtq().forEach(o=>etqSelecionadas.delete(o.tombo));
+  const rem=antes-etqSelecionadas.size;
+  if(etqSomenteSel&&!etqSelecionadas.size) etqSomenteSel=false;
+  renderEtiquetas();
+  toast(rem?rem+' etiqueta(s) retirada(s).':'Nenhuma destas estava na seleção.','');
+}
+function alternarVerSelecao(){
+  if(!etqSomenteSel&&!etqSelecionadas.size){toast('A seleção está vazia.','');return;}
+  etqSomenteSel=!etqSomenteSel;
+  renderEtiquetas();
+}
+function deselecionarTodas(){etqSelecionadas.clear();etqSomenteSel=false;renderEtiquetas();}
 
 function imprimirEtiquetas(modo){
   let obras=[];
@@ -4315,7 +4395,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-a</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-c</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
