@@ -126,7 +126,7 @@
   .fld{display:flex;flex-direction:column;gap:5px}
   .fld label{font-size:11px;font-weight:700;color:var(--gray-600);letter-spacing:.02em}
   .fld label .req{color:var(--gold);margin-left:2px}
-  .fld input,.fld select,.fld textarea{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r);padding:9px 12px;font-family:var(--font-b);font-size:14px;color:var(--gray-800);outline:none;transition:border-color .18s}
+  .fld input,.fld select,.fld textarea{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--r);padding:9px 12px;font-family:var(--font-b);font-size:14px;color:var(--gray-800);outline:none;transition:border-color .18s;width:100%;max-width:100%;min-width:0;box-sizing:border-box;text-overflow:ellipsis}
   .fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(201,168,76,.12)}
   .fld textarea{resize:vertical;min-height:72px}
   .fld select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239e9587' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
@@ -1047,12 +1047,21 @@ window.dispatchEvent(new Event('fb-ready'));
       <div class="fct"><i class="ti ti-tag"></i> Impressão de etiquetas <small style="font-size:13px;font-weight:400;color:var(--gray-400);margin-left:8px">70 × 31 mm — folha A4</small></div>
 
       <!-- Filtros -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px 16px;margin-bottom:16px;align-items:flex-end">
-        <div class="fld">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 16px;margin-bottom:16px;align-items:flex-end;width:100%">
+        <div class="fld" style="min-width:0">
           <label>Filtrar por texto</label>
-          <input type="text" id="etq-filtro" placeholder="Título, autor, tombo ou área..." oninput="renderEtiquetas()">
+          <input type="text" id="etq-filtro" placeholder="Título, autor, tombo ou área..." oninput="renderEtiquetas()" style="min-width:0">
         </div>
-        <div class="fld">
+        <div class="fld" style="min-width:0">
+          <label>Perfil / Coleção</label>
+          <select id="etq-colecao" onchange="renderEtiquetas()">
+            <option value="">Todos os perfis</option>
+            <option value="gabinete">Gabinete</option>
+            <option value="escritorio">Escritório</option>
+            <option value="biblioteca">Biblioteca</option>
+          </select>
+        </div>
+        <div class="fld" style="min-width:0">
           <label>Área do direito</label>
           <select id="etq-area" onchange="renderEtiquetas()">
             <option value="">Todas as áreas</option>
@@ -1107,7 +1116,7 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Tecnologia / Saúde</option>
           </select>
         </div>
-        <div class="fld">
+        <div class="fld" style="min-width:0">
           <label>Assuntos</label>
           <select id="etq-assuntos" onchange="renderEtiquetas()" data-placeholder="Todos os assuntos">
             <option value="">Todos os assuntos</option>
@@ -1140,9 +1149,9 @@ window.dispatchEvent(new Event('fb-ready'));
             <option>Teoria e filosofia do Direito</option>
           </select>
         </div>
-        <div class="fld">
+        <div class="fld" style="min-width:0">
           <label>Intervalo de tombo</label>
-          <div style="display:flex;gap:6px;align-items:center">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0">
             <input type="number" id="etq-tombo-ini" placeholder="De (ex: 1)" min="1" oninput="renderEtiquetas()" style="width:90px">
             <span style="color:var(--gray-400);font-size:13px">até</span>
             <input type="number" id="etq-tombo-fim" placeholder="Até (ex: 100)" min="1" oninput="renderEtiquetas()" style="width:90px">
@@ -1170,16 +1179,6 @@ window.dispatchEvent(new Event('fb-ready'));
           <span style="font-size:12px">Converte títulos para caixa baixa e autores com iniciais maiúsculas em todos os registros.</span>
         </div>
         <button class="btn btn-sm btn-p" onclick="normalizarTodos()"><i class="ti ti-refresh"></i> Normalizar todos os registros</button>
-      </div>
-
-      <!-- Padronizar CDD Direitos Humanos / Direitos Fundamentais -->
-      <div class="callout" style="margin-bottom:18px;display:flex;align-items:center;gap:12px">
-        <i class="ti ti-wand" style="font-size:20px;color:var(--gold-dim)"></i>
-        <div style="flex:1">
-          <strong>Padronizar classificação — Direitos Humanos / Direitos Fundamentais</strong><br>
-          <span style="font-size:12px">Ajusta a classificação (CDD) para 341.272 nas obras de Direitos Humanos e para 341.27 nas de Direitos Fundamentais, verificando assunto geral, assunto específico e título.</span>
-        </div>
-        <button class="btn btn-sm btn-p" onclick="padronizarDireitosHumanosFundamentais()"><i class="ti ti-refresh"></i> Padronizar agora</button>
       </div>
 
       <!-- Preview -->
@@ -1785,7 +1784,7 @@ function buscarAdv(){
   if(fed)res=res.filter(o=>(o.editora||'').toLowerCase().includes(fed));
   if(fass||fass2||fass3){
     res=res.filter(o=>{
-      const campo=normBusca([o.assunto,o.titulo,o.assuntoEspecifico,o.assuntos].join(' '));
+      const campo=textoAssuntoObra(o);
       const m1=!fass||obraTemAssunto(o,fass);
       const m2=!fass2||campo.includes(normBusca(fass2));
       const m3=!fass3||campo.includes(normBusca(fass3));
@@ -2231,12 +2230,15 @@ function assuntoCanonico(v){
   return t;
 }
 // Verdadeiro se a obra pertence ao assunto do vocabulário controlado
+// Texto varrido pelos campos Assunto 1/2/3 da busca avançada
+function textoAssuntoObra(o){
+  return normBusca([o.assunto,o.assuntos,o.assuntoEspecifico,o.titulo,o.subtitulo,o.area,o.classificacao,o.notas].join(' '));
+}
 function obraTemAssunto(o,termo){
   const alvo=assuntoCanonico(termo);
   if(!alvo) return true;
   if(assuntoCanonico(o.assuntos)===alvo) return true;
-  const txt=normBusca([o.assunto,o.titulo,o.assuntoEspecifico,o.assuntos].join(' '));
-  return txt.includes(normBusca(alvo));
+  return textoAssuntoObra(o).includes(normBusca(alvo));
 }
 // Garante que um valor gravado fora do vocabulário atual não se perca ao editar
 function garantirOpcao(sel,valor){
@@ -3878,40 +3880,6 @@ function normalizarTodos(){
   }
 }
 
-function padronizarDireitosHumanosFundamentais(){
-  if(!acervo.length){toast('Nenhum registro para padronizar.','');return;}
-  const alvo=acervo.filter(o=>{
-    const txt=normBusca([o.assunto,o.assuntoEspecifico,o.titulo,o.subtitulo].join(' '));
-    return txt.includes('direitos humanos')||txt.includes('direitos fundamentais');
-  });
-  if(!alvo.length){toast('Nenhuma obra de Direitos Humanos ou Direitos Fundamentais encontrada.','');return;}
-  if(!confirm('Padronizar a classificação (CDD) de '+alvo.length+' obra(s) — Direitos Humanos → 341.272, Direitos Fundamentais → 341.27?')) return;
-  let mod=0;
-  acervo.forEach(o=>{
-    const txt=normBusca([o.assunto,o.assuntoEspecifico,o.titulo,o.subtitulo].join(' '));
-    let novoCdd=null;
-    if(txt.includes('direitos humanos')) novoCdd='341.272';
-    else if(txt.includes('direitos fundamentais')) novoCdd='341.27';
-    if(novoCdd && o.classificacao!==novoCdd){o.classificacao=novoCdd;mod++;}
-  });
-   save();
-  renderAcervo();
-  renderEtiquetas();
-
-  if(mod>0){
-    toast('Sincronizando alterações com a nuvem...','');
-
-    sbSalvarAcervo().then(()=>{
-      toast(
-        mod+' registro(s) padronizados e sincronizados!',
-        'success'
-      );
-    });
-  }else{
-    toast('Nenhum registro precisava ser alterado.','');
-  }
-}
-
 // ── ETIQUETAS ──
 let etqSelecionadas=new Set();
 
@@ -3943,7 +3911,7 @@ function filtrarListaEtq(){
   const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
   const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
   return acervo.filter(o=>{
-    if(area&&!(o.area||'').includes(area))return false;
+    if(area&&(o.area||'').toLowerCase()!==area.toLowerCase())return false;
     if(assuntos&&assuntoCanonico(o.assuntos)!==assuntoCanonico(assuntos))return false;
     if(colecao&&(o.colecao||'gabinete')!==colecao)return false;
     if(filtro&&![o.titulo,o.autor,o.tombo,o.area,o.classificacao].some(v=>(v||'').toLowerCase().includes(filtro)))return false;
@@ -4347,7 +4315,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.15-k</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-a</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
