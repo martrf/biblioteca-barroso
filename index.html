@@ -1193,7 +1193,7 @@ window.dispatchEvent(new Event('fb-ready'));
       <!-- Ações de impressão -->
       <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-g" onclick="imprimirEtiquetas('selecao')"><i class="ti ti-printer"></i> Imprimir selecionadas</button>
-        <button class="btn btn-p" onclick="imprimirEtiquetas('intervalo')"><i class="ti ti-printer"></i> Imprimir por intervalo de tombo</button>
+        <button class="btn btn-p" onclick="imprimirEtiquetas('intervalo')" title="Imprime o intervalo de tombo aplicando também os filtros de perfil, área, assunto e língua"><i class="ti ti-printer"></i> Imprimir por intervalo de tombo</button>
       </div>
 
       <!-- Normalizar metadados -->
@@ -4081,8 +4081,11 @@ function imprimirEtiquetas(modo){
     const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
     const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
     if(!ini&&fim===999999){toast('Defina ao menos o tombo inicial para imprimir por intervalo.','error');return;}
-    obras=acervo.filter(o=>{const n=tomboNum(o.tombo);return n>=ini&&n<=fim;}).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
-    if(!obras.length){toast('Nenhuma obra encontrada no intervalo de tombo informado.','error');return;}
+    // Respeita os demais filtros da tela (perfil, área, assunto, língua, texto).
+    const modoSel=etqSomenteSel; etqSomenteSel=false;
+    obras=filtrarListaEtq().sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
+    etqSomenteSel=modoSel;
+    if(!obras.length){toast('Nenhuma obra encontrada nesse intervalo com os filtros atuais.','error');return;}
   } else {
     if(!etqSelecionadas.size){toast('Selecione ao menos uma etiqueta para imprimir.','error');return;}
     obras=acervo.filter(o=>etqSelecionadas.has(o.tombo)).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
@@ -4395,7 +4398,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-d</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-e</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
