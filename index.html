@@ -1178,8 +1178,8 @@ window.dispatchEvent(new Event('fb-ready'));
       <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--rl);padding:12px 16px;margin-bottom:16px">
         <div id="etq-resumo" style="font-size:13px;color:var(--gray-800);margin-bottom:10px;line-height:1.6"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <button class="btn btn-sm btn-p" onclick="selecionarTodas()"><i class="ti ti-plus"></i> Somar estes à seleção</button>
-          <button class="btn btn-sm btn-o" onclick="removerFiltradosDaSelecao()"><i class="ti ti-minus"></i> Tirar estes da seleção</button>
+          <button class="btn btn-sm btn-p" onclick="selecionarTodas()"><i class="ti ti-checkbox"></i> Selecionar todas as filtradas</button>
+          <button class="btn btn-sm btn-o" onclick="removerFiltradosDaSelecao()"><i class="ti ti-minus"></i> Tirar estas da seleção</button>
           <button class="btn btn-sm btn-o" id="btn-ver-selecao" onclick="alternarVerSelecao()"><i class="ti ti-eye"></i> Ver só a seleção</button>
           <button class="btn btn-sm btn-o" onclick="deselecionarTodas()"><i class="ti ti-square-off"></i> Zerar seleção</button>
           <span style="font-size:12px;color:var(--gray-600);margin-left:auto;display:flex;align-items:center;gap:6px">
@@ -4395,7 +4395,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-c</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-d</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
