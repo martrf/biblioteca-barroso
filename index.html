@@ -2651,7 +2651,7 @@ function salvar(e,opts){if(e&&e.preventDefault)e.preventDefault();
     titulo:normTitulo(gv('f-titulo'),gv('f-autor')),subtitulo:normSubtitulo(gv('f-subtitulo'),gv('f-autor')),autor:normAutor(gv('f-autor')),organizador:gv('f-org'),
     editora:gv('f-editora'),local_pub:gv('f-local'),ano:gv('f-ano'),volume:gv('f-volume'),edicao:gv('f-edicao'),
     paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
-    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
+    localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
     notas:gv('f-notas'),observacoes:gv('f-observacoes'),lingua:gv('f-lingua'),assuntos:gv('f-assuntos'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
     dataCad:curId?acervo.find(x=>x.id===curId).dataCad:new Date().toISOString()};
   if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
@@ -2766,7 +2766,7 @@ function ver(id,lista){
       const sob=(o.sobrenomeClass||sobrenome(o.autor||'')).toUpperCase();
       if(o.colecao==='escritorio'){
         const locRaw=(o.localizacao||'').trim();
-        const cdd=locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||o.cdd||'';
+        const cdd=locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||o.cdd||'';
         const assunto=(o.assuntoEspecifico||'').trim().toUpperCase();
         // Ordem: CDD + SOBRENOME + ASSUNTO
         const linhas=[cdd,sob,assunto].filter(x=>x);
@@ -3083,7 +3083,7 @@ function parsearMARC(){
   if(l084){
     const rawClassif=sub(l084,'a').trim();
     // Extrai só o número CDD (sem cutter/sobrenome)
-    const m=rawClassif.match(/^([A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+)/);
+    const m=rawClassif.match(/^([A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+)/);
     cddPuro=m?m[1]:'';
     classif=rawClassif;
   }
@@ -3093,7 +3093,7 @@ function parsearMARC(){
   if(l092){
     const rawLoc=sub(l092,'a').trim()||l092.replace(/^=\d+\s+\S+\s+/,'').trim();
     // Extrai só o CDD
-    const m=rawLoc.match(/^([A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+)/);
+    const m=rawLoc.match(/^([A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+)/);
     if(m) localizacao=m[1];
   }
   if(!localizacao&&cddPuro) localizacao=cddPuro;
@@ -3523,7 +3523,7 @@ const AREA_LABEL = {
 function cdd_para_area(cdd){
     cdd=(cdd||'').trim().split('\n')[0].trim();
     if(!cdd||!cdd[0].match(/\d/)) return '';
-    const n=cdd.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/);
+    const n=cdd.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/);
     if(!n) return '';
     const c=n[0];
     if(c.startsWith('341.28')) return 'Direito Eleitoral';
@@ -3812,7 +3812,7 @@ function atualizarClassPreview(){
   }
   if(colecao==='escritorio'){
     // Escritório: CDD do campo localização
-    const cdd=loc.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'';
+    const cdd=loc.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||'';
     if(el1) el1.textContent=cdd||'—';
     if(el3){if(esp){el3.textContent=esp.toUpperCase();el3.style.display='block';}else{el3.textContent='';el3.style.display='none';}}
     if(el2) el2.textContent=sob.toUpperCase();
@@ -3836,7 +3836,7 @@ function normClassificacao(o){
   const c=(o.classificacao||'').trim();
   if(!c) return '';
   if(!/^\d/.test(c)) return c; // já é texto
-  const codigo=c.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'';
+  const codigo=c.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||'';
   return cdd_para_area(codigo)||c;
 }
 
@@ -3847,7 +3847,7 @@ function normalizarRegistro(o){
   o.autor=normAutor(o.autor||'');
   // Guarda CDD original antes de normalizar (para etiqueta do Escritório)
   const cddOriginal=(o.classificacao||'').trim();
-  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||'';
+  if(/^\d/.test(cddOriginal)&&!o.cdd) o.cdd=cddOriginal.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||'';
   o.classificacao=normClassificacao(o);
   // Garante sobrenome para etiqueta
   if(!o.sobrenomeClass&&o.autor) o.sobrenomeClass=sobrenome(o.autor);
@@ -4040,11 +4040,12 @@ function renderEtiquetas(){
   grid.innerHTML=lista.map(o=>{
     const isEsc=o.colecao==='escritorio';
     const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||o.cdd||''):'';
+    const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
-    const extras=isEsc?[]:etqLinhas(o);
+    // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
+    const extras=isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o);
     const selecionado=etqSelecionadas.has(o.tombo);
     const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
     return `<div onclick="toggleEtq('${o.tombo}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
@@ -4109,11 +4110,12 @@ function imprimirEtiquetas(modo){
   const etqHTML=obras.map(o=>{
     const isEsc=o.colecao==='escritorio';
     const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;()=/:'’&\s-]+/)?.[0]||o.cdd||''):'';
+    const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
-    const extras=isEsc?[]:etqLinhas(o);
+    // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
+    const extras=isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o);
     const dotStyle=o.colecao==='escritorio'?'background:#e8c84c;border:1px solid #c9a84c':o.colecao==='mezanino'||o.colecao==='biblioteca'?'background:#1a2744;border:1.5px solid #7090c0':'background:#ddd;border:1px solid #bbb';
     const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
     return `<div class="etq" style="position:relative${temFaixa?';padding-bottom:6mm':''}">
@@ -4413,7 +4415,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-f</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-g</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
