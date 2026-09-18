@@ -4049,13 +4049,14 @@ function renderEtiquetas(){
     const selecionado=etqSelecionadas.has(o.tombo);
     const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
     return `<div onclick="toggleEtq('${o.tombo}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
-      <div style="position:relative;background:#fff;border:1.5px solid #1a2744;border-radius:5px;padding:8px 6px ${temFaixa?'14px':'8px'};text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:64px">
-        <div style="font-size:9px;font-weight:700;color:#1a2744;letter-spacing:.07em;line-height:1.3">${areaLabel}</div>
-        ${assunto?`<div style="font-size:8px;color:#333;font-style:italic;letter-spacing:.02em">${assunto}</div>`:''}
+      <div style="position:relative;background:#fff;border:1.5px solid #1a2744;border-radius:5px;padding:8px 6px ${temFaixa?'14px':'8px'} 16px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:64px">
+        <div style="position:absolute;left:3px;top:5px;bottom:5px;width:12px;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:600;letter-spacing:.03em;color:#8a8a8a;white-space:nowrap">${o.tombo||''}</div>
+        <div style="font-size:11px;font-weight:700;color:#1a2744;letter-spacing:.06em;line-height:1.25">${areaLabel}</div>
+        ${assunto?`<div style="font-size:10px;color:#1f1f1f;font-style:italic;letter-spacing:.01em">${assunto}</div>`:''}
         ${extras.map(l=>l.tipo==='esp'
-          ?`<div style="font-size:8px;color:#333;font-style:italic;letter-spacing:.02em">${l.txt}</div>`
-          :`<div style="font-size:8px;color:#555;letter-spacing:.04em">${l.txt}</div>`).join('')}
-        <div style="font-size:11px;font-weight:700;color:#1a2744;letter-spacing:.06em">${sob}</div>
+          ?`<div style="font-size:10px;color:#1f1f1f;font-style:italic;letter-spacing:.01em">${l.txt}</div>`
+          :`<div style="font-size:10px;color:#3a3a3a;letter-spacing:.04em">${l.txt}</div>`).join('')}
+        <div style="font-size:14px;font-weight:700;color:#1a2744;letter-spacing:.08em">${sob}</div>
         ${linguaStripe(o,'px')}
       </div>
       <div style="display:flex;align-items:center;gap:5px;margin-top:5px">`+colDot(o.colecao||'gabinete',9)+`<span style="font-size:10px;color:var(--gray-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.titulo}">${o.tombo}</span></div>
@@ -4118,7 +4119,9 @@ function imprimirEtiquetas(modo){
     const extras=isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o);
     const dotStyle=o.colecao==='escritorio'?'background:#e8c84c;border:1px solid #c9a84c':o.colecao==='mezanino'||o.colecao==='biblioteca'?'background:#1a2744;border:1.5px solid #7090c0':'background:#ddd;border:1px solid #bbb';
     const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
-    return `<div class="etq" style="position:relative${temFaixa?';padding-bottom:6mm':''}">
+    const nLinhas=extras.length+(assunto?1:0)+(temFaixa?1:0);
+    return `<div class="etq${nLinhas>=3?' compacta':''}" style="position:relative${temFaixa?';padding-bottom:6mm':''}">
+      <div class="etq-tombo">${o.tombo||''}</div>
       <div style="position:absolute;top:3mm;right:3mm;width:5mm;height:5mm;border-radius:50%;${dotStyle}"></div>
       <div class="etq-area">${areaLabel}</div>
       ${assunto?`<div class="etq-esp">${assunto}</div>`:''}
@@ -4148,42 +4151,65 @@ function imprimirEtiquetas(modo){
     column-gap:0;
     row-gap:0;
   }
+  .etq-tombo{
+    position:absolute;
+    left:1mm;top:2mm;bottom:2mm;
+    width:3.5mm;
+    display:flex;align-items:center;justify-content:center;
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    font-size:6pt;
+    font-weight:600;
+    letter-spacing:.03em;
+    color:#8a8a8a;
+    white-space:nowrap;
+    pointer-events:none;
+  }
   .etq{
     width:70mm;height:31mm;
     border:0.3mm solid #bbb;
     display:flex;flex-direction:column;
     align-items:center;justify-content:center;
-    padding:2.5mm 3mm;
+    padding:2.5mm 3mm 2.5mm 5.5mm;
     background:#ffffff;
     page-break-inside:avoid;
-    gap:1.2mm;
+    overflow:hidden;
+    gap:1mm;
   }
   .etq-area{
-    font-size:7pt;font-weight:700;
+    font-size:8.5pt;font-weight:700;
     color:#1a2744;
     text-align:center;
-    letter-spacing:.07em;
-    line-height:1.3;
+    letter-spacing:.06em;
+    line-height:1.25;
   }
   .etq-autor{
-    font-size:10pt;font-weight:700;
+    font-size:11pt;font-weight:700;
     color:#1a2744;
     text-align:center;
     letter-spacing:.08em;
+    line-height:1.2;
   }
   .etq-extra{
-    font-size:7pt;font-weight:600;
-    color:#444444;
+    font-size:8pt;font-weight:600;
+    color:#3a3a3a;
     text-align:center;
-    letter-spacing:.05em;
+    letter-spacing:.04em;
+    line-height:1.2;
   }
   .etq-esp{
-    font-size:7pt;font-weight:500;
-    color:#222222;
+    font-size:8pt;font-weight:500;
+    color:#1f1f1f;
     text-align:center;
     font-style:italic;
-    letter-spacing:.02em;
+    letter-spacing:.01em;
+    line-height:1.2;
   }
+  /* Etiquetas com muitas linhas reduzem o corpo para não estourar os 31 mm */
+  .etq.compacta{gap:.6mm}
+  .etq.compacta .etq-area{font-size:7.5pt}
+  .etq.compacta .etq-autor{font-size:9.5pt}
+  .etq.compacta .etq-extra,.etq.compacta .etq-esp{font-size:6.8pt}
   @media print{
     body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .page{padding:10mm 5mm}
@@ -4415,7 +4441,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-g</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-i</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
