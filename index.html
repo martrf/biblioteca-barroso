@@ -3936,8 +3936,12 @@ function etqPorFolha(){
 }
 let etqSomenteSel=false;
 
+// Identifica o registro na seleção. Usa o id porque há obras sem tombo
+// preenchido — se a chave fosse o tombo, todas elas contariam como uma só.
+function chaveEtq(o){return String(o.id||o.tombo||'');}
+
 function filtrarListaEtq(){
-  if(etqSomenteSel) return acervo.filter(o=>etqSelecionadas.has(o.tombo)).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
+  if(etqSomenteSel) return acervo.filter(o=>etqSelecionadas.has(chaveEtq(o))).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
   const filtro=(document.getElementById('etq-filtro')?.value||'').toLowerCase();
   const area=document.getElementById('etq-area')?.value||'';
   const assuntos=document.getElementById('etq-assuntos')?.value||'';
@@ -4009,7 +4013,7 @@ function renderEtiquetas(){
     : `${lista.length} obra(s) no filtro — clique para selecionar uma a uma`;
 
   const sc=document.getElementById('etq-sel-count');
-  const naSelecao=lista.filter(o=>etqSelecionadas.has(o.tombo)).length;
+  const naSelecao=lista.filter(o=>etqSelecionadas.has(chaveEtq(o))).length;
   if(sc) sc.textContent=lista.length?`${naSelecao} de ${lista.length} deste filtro já estão na seleção`:'';
 
   const bv=document.getElementById('btn-ver-selecao');
@@ -4046,9 +4050,9 @@ function renderEtiquetas(){
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
     const extras=isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o);
-    const selecionado=etqSelecionadas.has(o.tombo);
+    const selecionado=etqSelecionadas.has(chaveEtq(o));
     const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
-    return `<div onclick="toggleEtq('${o.tombo}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
+    return `<div onclick="toggleEtq('${chaveEtq(o)}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
       <div style="position:relative;background:#fff;border:1.5px solid #1a2744;border-radius:5px;padding:8px 6px ${temFaixa?'14px':'8px'} 16px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:64px">
         <div style="position:absolute;left:3px;top:5px;bottom:5px;width:12px;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:600;letter-spacing:.03em;color:#8a8a8a;white-space:nowrap">${o.tombo||''}</div>
         <div style="font-size:11px;font-weight:700;color:#1a2744;letter-spacing:.06em;line-height:1.25">${areaLabel}</div>
@@ -4064,22 +4068,22 @@ function renderEtiquetas(){
   }).join('');
 }
 
-function toggleEtq(tombo){
-  if(etqSelecionadas.has(tombo))etqSelecionadas.delete(tombo);
-  else etqSelecionadas.add(tombo);
+function toggleEtq(chave){
+  if(etqSelecionadas.has(chave))etqSelecionadas.delete(chave);
+  else etqSelecionadas.add(chave);
   renderEtiquetas();
 }
 
 function selecionarTodas(){
   const antes=etqSelecionadas.size;
-  filtrarListaEtq().forEach(o=>etqSelecionadas.add(o.tombo));
+  filtrarListaEtq().forEach(o=>etqSelecionadas.add(chaveEtq(o)));
   const add=etqSelecionadas.size-antes;
   renderEtiquetas();
   toast(add?add+' etiqueta(s) somada(s) à seleção.':'Estas já estavam na seleção.','success');
 }
 function removerFiltradosDaSelecao(){
   const antes=etqSelecionadas.size;
-  filtrarListaEtq().forEach(o=>etqSelecionadas.delete(o.tombo));
+  filtrarListaEtq().forEach(o=>etqSelecionadas.delete(chaveEtq(o)));
   const rem=antes-etqSelecionadas.size;
   if(etqSomenteSel&&!etqSelecionadas.size) etqSomenteSel=false;
   renderEtiquetas();
@@ -4105,8 +4109,15 @@ function imprimirEtiquetas(modo){
     if(!obras.length){toast('Nenhuma obra encontrada nesse intervalo com os filtros atuais.','error');return;}
   } else {
     if(!etqSelecionadas.size){toast('Selecione ao menos uma etiqueta para imprimir.','error');return;}
-    obras=acervo.filter(o=>etqSelecionadas.has(o.tombo)).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
+    obras=acervo.filter(o=>etqSelecionadas.has(chaveEtq(o))).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
   }
+
+  // Confere o que vai sair antes de abrir a janela de impressão
+  const porFolha=etqPorFolha();
+  const folhas=Math.ceil(obras.length/porFolha);
+  if(!confirm('Vão ser impressas '+obras.length+' etiqueta(s), em '+folhas+' folha(s) de '+porFolha+'.\n\n'
+      +'Primeiro tombo: '+(obras[0]?.tombo||'—')+'\nÚltimo tombo: '+(obras[obras.length-1]?.tombo||'—')
+      +'\n\nContinuar?')) return;
 
   const etqHTML=obras.map(o=>{
     const isEsc=o.colecao==='escritorio';
@@ -4443,7 +4454,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-j</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-k</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
