@@ -4144,7 +4144,9 @@ function imprimirEtiquetas(modo){
   body{font-family:'Source Sans 3',Arial,sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .page{
     width:210mm;
-    padding:10mm 5mm;
+    /* 3 colunas x 70mm = 210mm (largura cheia do A4, sem margem lateral)
+       9 linhas x 31mm = 279mm + 9mm acima e abaixo = 297mm */
+    padding:9mm 0;
     display:grid;
     grid-template-columns:repeat(3,70mm);
     grid-auto-rows:31mm;
@@ -4212,7 +4214,7 @@ function imprimirEtiquetas(modo){
   .etq.compacta .etq-extra,.etq.compacta .etq-esp{font-size:6.8pt}
   @media print{
     body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .page{padding:10mm 5mm}
+    .page{padding:9mm 0}
     .etq{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     @page{size:A4;margin:0}
   }
@@ -4441,7 +4443,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-i</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-j</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
