@@ -4011,21 +4011,40 @@ function partesVolumeTomo(raw){
   return linhas;
 }
 
+// Reduz a indicação de edição ao essencial: "2.ed".
+// Primeira edição não vai para a etiqueta, e adjetivos (revista, atualizada,
+// ampliada, reformulada...) são descartados.
+const EDICAO_EXTENSO={primeira:1,segunda:2,terceira:3,quarta:4,quinta:5,sexta:6,setima:7,oitava:8,nona:9,decima:10,
+  undecima:11,duodecima:12,'decima primeira':11,'decima segunda':12};
+const ROMANOS_EDICAO={i:1,ii:2,iii:3,iv:4,v:5,vi:6,vii:7,viii:8,ix:9,x:10,xi:11,xii:12,xiii:13,xiv:14,xv:15,xvi:16,xvii:17,xviii:18,xix:19,xx:20};
+function formatarEdicao(raw){
+  const txt=String(raw||'').trim();
+  if(!txt) return '';
+  let n=null;
+  const mNum=txt.match(/\d+/);
+  if(mNum) n=parseInt(mNum[0]);
+  if(n===null){
+    const limpo=normBusca(txt).replace(/[^a-z\s]/g,' ').replace(/\s+/g,' ').trim();
+    for(const k in EDICAO_EXTENSO){ if(limpo.includes(k)){ n=EDICAO_EXTENSO[k]; break; } }
+    if(n===null){
+      const tok=limpo.split(' ').find(w=>ROMANOS_EDICAO[w]);
+      if(tok) n=ROMANOS_EDICAO[tok];
+    }
+  }
+  if(n===null) return '';   // só adjetivos, sem número — nada a exibir
+  if(n<=1) return '';       // 1ª edição não entra na etiqueta
+  return n+'.ed';
+}
+
 function etqLinhas(o){
   const linhas=[];
   // Assunto específico — aparece entre área e autor
   if(o.assuntoEspecifico&&o.assuntoEspecifico.trim()) linhas.push({txt:o.assuntoEspecifico.trim(),tipo:'esp'});
   // Volume e tomo — cada um na sua linha
   partesVolumeTomo(o.volume).forEach(t=>linhas.push({txt:t,tipo:'extra'}));
-  // Edição
-  if(o.edicao&&o.edicao.trim()){
-    let e=o.edicao.trim();
-    e=e.replace(/[ªa°º]/g,'').replace(/\.\s*ed\.?/i,'. ed.').replace(/\s+ed\.?$/i,' ed.');
-    if(/^\d+$/.test(e)) e=e+'. ed.';
-    if(!/ed\./i.test(e)) e=e+'. ed.';
-    e=e.charAt(0).toUpperCase()+e.slice(1);
-    linhas.push({txt:e,tipo:'extra'});
-  }
+  // Edição — só a partir da 2ª, no formato "2.ed", sem "revista/atualizada/ampliada"
+  const ed=formatarEdicao(o.edicao);
+  if(ed) linhas.push({txt:ed,tipo:'extra'});
   return linhas;
 }
 
@@ -4479,7 +4498,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-m</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-n</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
