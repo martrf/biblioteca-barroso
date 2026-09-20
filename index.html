@@ -392,7 +392,6 @@ window.dispatchEvent(new Event('fb-ready'));
 <div class="admin-bar" id="admin-bar">
   <i class="ti ti-shield-lock"></i> Modo administrador ativo
   <button onclick="sw('inicio')"><i class="ti ti-home"></i> Página inicial</button>
-  <button id="btn-migrar-capas" onclick="migrarCapasParaStorage()"><i class="ti ti-cloud-upload"></i> Migrar capas</button>
   <button onclick="logoutAdmin()"><i class="ti ti-logout"></i> Sair</button>
 </div>
 
@@ -1207,16 +1206,6 @@ window.dispatchEvent(new Event('fb-ready'));
       <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-g" onclick="imprimirEtiquetas('selecao')"><i class="ti ti-printer"></i> Imprimir selecionadas</button>
         <button class="btn btn-p" onclick="imprimirEtiquetas('intervalo')" title="Imprime o intervalo de tombo aplicando também os filtros de perfil, área, assunto e língua"><i class="ti ti-printer"></i> Imprimir por intervalo de tombo</button>
-      </div>
-
-      <!-- Normalizar metadados -->
-      <div class="callout" style="margin-bottom:18px;display:flex;align-items:center;gap:12px">
-        <i class="ti ti-wand" style="font-size:20px;color:var(--gold-dim)"></i>
-        <div style="flex:1">
-          <strong>Normalização de metadados</strong><br>
-          <span style="font-size:12px">Converte títulos para caixa baixa e autores com iniciais maiúsculas em todos os registros.</span>
-        </div>
-        <button class="btn btn-sm btn-p" onclick="normalizarTodos()"><i class="ti ti-refresh"></i> Normalizar todos os registros</button>
       </div>
 
       <!-- Preview -->
@@ -2564,7 +2553,7 @@ async function migrarCapasParaStorage(){
   const total=pendentes.length;
   criarPainelMigracaoCapas(total);
 
-  const botao=document.getElementById('btn-migrar-capas');
+  const botao=document.getElementById('btn-migrar-capas');  // botão removido da interface; função mantida para uso no console
   if(botao) botao.disabled=true;
 
   for(const obra of pendentes){
@@ -4541,7 +4530,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-q</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-r</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
