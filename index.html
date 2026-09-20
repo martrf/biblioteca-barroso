@@ -4047,6 +4047,18 @@ function formatarEdicao(raw){
   return n+'.ed';
 }
 
+// Evita repetir na etiqueta uma indicação que já está escrita na linha da
+// classificação ou do assunto — por exemplo "v. 2" digitado dentro da localização.
+function semRepetir(linhas,jaImpresso){
+  const chave=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+  const base=chave(jaImpresso);
+  return linhas.filter(l=>{
+    if(l.tipo!=='extra') return true;
+    const k=chave(l.txt);
+    return !(k&&base.includes(k));
+  });
+}
+
 function etqLinhas(o){
   const linhas=[];
   // Assunto específico — aparece entre área e autor
@@ -4103,7 +4115,7 @@ function renderEtiquetas(){
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
-    const extras=isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o);
+    const extras=semRepetir(isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o),areaLabel+' '+assunto);
     const selecionado=etqSelecionadas.has(chaveEtq(o));
     const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
     return `<div onclick="toggleEtq('${chaveEtq(o)}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
@@ -4202,7 +4214,7 @@ function imprimirEtiquetas(modo){
     const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
-    const extras=isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o);
+    const extras=semRepetir(isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o),areaLabel+' '+assunto);
     const ci=corColecao(o.colecao);
     const dotStyle='background:'+ci.cor+';border:0.3mm solid '+ci.borda+';';
     const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
@@ -4530,7 +4542,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-r</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-s</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
