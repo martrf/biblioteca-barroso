@@ -1188,6 +1188,7 @@ window.dispatchEvent(new Event('fb-ready'));
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
           <input type="text" id="etq-lista-tombos" placeholder="Cole aqui uma lista de tombos: BMLRB-00012, BMLRB-00034, 4970..." style="flex:1;min-width:240px;padding:8px 12px;font-size:13px;border:1.5px solid var(--gray-200);border-radius:var(--r);background:#fff">
           <button class="btn btn-sm btn-p" onclick="selecionarPorLista()"><i class="ti ti-clipboard-check"></i> Selecionar esta lista</button>
+          <button class="btn btn-sm btn-o" onclick="atualizarDoFirebase(true)" title="Recarrega os dados da nuvem e redesenha as etiquetas com as alterações de catalogação"><i class="ti ti-refresh"></i> Atualizar dados</button>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <button class="btn btn-sm btn-p" onclick="selecionarTodas()"><i class="ti ti-checkbox"></i> Selecionar todas as filtradas</button>
@@ -1593,7 +1594,18 @@ async function load(){
 }
 
 // Atualiza cache com dados frescos do Firebase em segundo plano
-async function atualizarDoFirebase(){
+// Redesenha a aba que está aberta — sem isso, dados atualizados na nuvem
+// não apareciam na tela de etiquetas nem na lista do acervo.
+function rerenderAbaAtual(){
+  try{
+    if(tabAtual==='etiquetas') renderEtiquetas();
+    else if(tabAtual==='acervo'){listaAc=getAcervoPerfil().slice();renderAcervo();}
+    else if(tabAtual==='projetos') renderProjetos();
+    else if(tabAtual==='circulacao') renderEmprestimos();
+  }catch(e){}
+}
+
+async function atualizarDoFirebase(manual){
   const sbStatus=document.getElementById('sb-status');
   try{
     const fbAcervo=await sbCarregarAcervo();
@@ -1604,10 +1616,15 @@ async function atualizarDoFirebase(){
       updStats();
       renderCarousel();
       renderPI();
+      rerenderAbaAtual();
+      if(manual) toast(acervo.length+' obras recarregadas da nuvem.','success');
       if(sbStatus){sbStatus.textContent='✅ '+acervo.length+' obras';sbStatus.style.color='#4caf81';
         setTimeout(()=>{sbStatus.textContent='';},2000);}
-    }
-  }catch(e){console.log('Atualização em segundo plano falhou:',e);}
+    }else if(manual) toast('A nuvem não devolveu registros.','error');
+  }catch(e){
+    console.log('Atualização em segundo plano falhou:',e);
+    if(manual) toast('Não foi possível recarregar da nuvem.','error');
+  }
 }
 
 function save(){
@@ -2687,6 +2704,7 @@ function salvar(e,opts){if(e&&e.preventDefault)e.preventDefault();
   save();updStats();renderCarousel();renderPI();
   sincronizarListas(o);
   if(document.getElementById('results-area')?.style.display!=='none') renderResGrid();
+  try{ if(document.getElementById('etq-grid')) renderEtiquetas(); }catch(e){}
   // Sincroniza somente este registro com o Firebase
   sbSalvarObra(o).then(()=>toast('Sincronizado com a nuvem ✅','success'));
   if(irProximo&&edicaoIdx>=0&&edicaoIdx<edicaoLista.length-1){
@@ -4523,7 +4541,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-p</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-q</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
