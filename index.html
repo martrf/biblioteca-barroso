@@ -1163,13 +1163,13 @@ window.dispatchEvent(new Event('fb-ready'));
             <option value="__estrangeiras">— Só as estrangeiras —</option>
           </select>
         </div>
-        <div class="fld" style="min-width:0">
+        <div class="fld" style="min-width:0;grid-column:span 2">
           <label>Intervalo de tombo</label>
-          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-width:0">
-            <input type="number" id="etq-tombo-ini" placeholder="De (ex: 1)" min="1" oninput="renderEtiquetas()" style="width:90px">
-            <span style="color:var(--gray-400);font-size:13px">até</span>
-            <input type="number" id="etq-tombo-fim" placeholder="Até (ex: 100)" min="1" oninput="renderEtiquetas()" style="width:90px">
-            <button class="btn btn-sm btn-o" onclick="limparFiltrosEtq()" title="Limpar filtros"><i class="ti ti-x"></i></button>
+          <div style="display:flex;gap:6px;align-items:center;min-width:0">
+            <input type="number" id="etq-tombo-ini" placeholder="De" min="1" oninput="renderEtiquetas()" style="flex:1;min-width:0">
+            <span style="color:var(--gray-400);font-size:13px;flex-shrink:0">até</span>
+            <input type="number" id="etq-tombo-fim" placeholder="Até" min="1" oninput="renderEtiquetas()" style="flex:1;min-width:0">
+            <button class="btn btn-sm btn-o" onclick="limparFiltrosEtq()" title="Limpar todos os filtros" style="flex-shrink:0"><i class="ti ti-x"></i></button>
           </div>
         </div>
       </div>
@@ -1185,6 +1185,10 @@ window.dispatchEvent(new Event('fb-ready'));
       <!-- Seleção acumulada -->
       <div style="background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--rl);padding:12px 16px;margin-bottom:16px">
         <div id="etq-resumo" style="font-size:13px;color:var(--gray-800);margin-bottom:10px;line-height:1.6"></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+          <input type="text" id="etq-lista-tombos" placeholder="Cole aqui uma lista de tombos: BMLRB-00012, BMLRB-00034, 4970..." style="flex:1;min-width:240px;padding:8px 12px;font-size:13px;border:1.5px solid var(--gray-200);border-radius:var(--r);background:#fff">
+          <button class="btn btn-sm btn-p" onclick="selecionarPorLista()"><i class="ti ti-clipboard-check"></i> Selecionar esta lista</button>
+        </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <button class="btn btn-sm btn-p" onclick="selecionarTodas()"><i class="ti ti-checkbox"></i> Selecionar todas as filtradas</button>
           <button class="btn btn-sm btn-o" onclick="removerFiltradosDaSelecao()"><i class="ti ti-minus"></i> Tirar estas da seleção</button>
@@ -4068,7 +4072,7 @@ function renderEtiquetas(){
   const res=document.getElementById('etq-resumo');
   if(res){
     if(!sel){
-      res.innerHTML='<strong>Seleção vazia.</strong> Filtre por tombo, assunto, língua ou perfil e clique em "Somar estes à seleção". Pode repetir com filtros diferentes — a seleção vai se acumulando até fechar a folha.';
+      res.innerHTML='<strong>Seleção vazia.</strong> Filtre por tombo, assunto, língua ou perfil e clique em "Selecionar todas as filtradas". Pode repetir com filtros diferentes — a seleção vai se acumulando até fechar a folha.';
     }else{
       const porFolha=etqPorFolha();
       const folhas=Math.ceil(sel/porFolha);
@@ -4131,6 +4135,27 @@ function removerFiltradosDaSelecao(){
   if(etqSomenteSel&&!etqSelecionadas.size) etqSomenteSel=false;
   renderEtiquetas();
   toast(rem?rem+' etiqueta(s) retirada(s).':'Nenhuma destas estava na seleção.','');
+}
+// Seleciona a partir de uma lista de tombos colada (vírgula, espaço ou quebra de linha).
+// Compara só a parte numérica, então "4970", "BMLRB-04970" e "bmlrb-4970" valem o mesmo.
+function chaveTombo(t){const m=String(t||'').match(/\d+/);return m?String(parseInt(m[0],10)):'';}
+function selecionarPorLista(){
+  const campo=document.getElementById('etq-lista-tombos');
+  const txt=(campo?.value||'').trim();
+  if(!txt){toast('Cole a lista de tombos no campo ao lado.','error');return;}
+  const pedidos=new Set(txt.split(/[^0-9A-Za-z\-]+/).map(chaveTombo).filter(Boolean));
+  if(!pedidos.size){toast('Não encontrei nenhum número de tombo na lista.','error');return;}
+  const achados=acervo.filter(o=>pedidos.has(chaveTombo(o.tombo)));
+  let novos=0;
+  achados.forEach(o=>{const k=chaveEtq(o);if(!etqSelecionadas.has(k))novos++;etqSelecionadas.add(k);});
+  const encontrados=new Set(achados.map(o=>chaveTombo(o.tombo)));
+  const faltando=[...pedidos].filter(x=>!encontrados.has(x));
+  etqSomenteSel=true;
+  renderEtiquetas();
+  let msg=novos+' de '+pedidos.size+' tombo(s) somado(s) à seleção.';
+  if(faltando.length) msg+=' Não localizados: '+faltando.slice(0,10).join(', ')+(faltando.length>10?' e mais '+(faltando.length-10):'')+'.';
+  toast(msg,faltando.length?'':'success');
+  if(faltando.length) console.warn('Tombos não localizados no acervo:',faltando);
 }
 function alternarVerSelecao(){
   if(!etqSomenteSel&&!etqSelecionadas.size){toast('A seleção está vazia.','');return;}
@@ -4498,7 +4523,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-n</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-p</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
