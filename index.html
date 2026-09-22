@@ -1194,12 +1194,34 @@ window.dispatchEvent(new Event('fb-ready'));
           <button class="btn btn-sm btn-o" onclick="removerFiltradosDaSelecao()"><i class="ti ti-minus"></i> Tirar estas da seleção</button>
           <button class="btn btn-sm btn-o" id="btn-ver-selecao" onclick="alternarVerSelecao()"><i class="ti ti-eye"></i> Ver só a seleção</button>
           <button class="btn btn-sm btn-o" onclick="deselecionarTodas()"><i class="ti ti-square-off"></i> Zerar seleção</button>
+          <button class="btn btn-sm" onclick="zerarTudoEtq()" style="background:#fff;border:1.5px solid #b84040;color:#b84040;font-weight:700" title="Limpa a seleção, todos os filtros e a lista colada — volta ao início"><i class="ti ti-refresh-alert"></i> Zerar tudo</button>
           <span style="font-size:12px;color:var(--gray-600);margin-left:auto;display:flex;align-items:center;gap:6px">
             Etiquetas por folha:
             <input type="number" id="etq-por-folha" value="27" min="1" max="99" oninput="renderEtiquetas()" style="width:58px;padding:5px 8px;font-size:12px">
           </span>
           <span id="etq-sel-count" style="font-size:12px;color:var(--gray-600);width:100%"></span>
         </div>
+      </div>
+
+      <!-- Ordem e margens de impressão -->
+      <div style="display:flex;gap:14px 18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;font-size:12px;color:var(--gray-600)">
+        <label style="display:flex;flex-direction:column;gap:4px;font-weight:600">Ordem de impressão
+          <select id="etq-ordem" style="padding:7px 10px;font-size:13px;border:1.5px solid var(--gray-200);border-radius:var(--r);background:#fff">
+            <option value="sobrenome">Sobrenome do autor (A–Z)</option>
+            <option value="tombo">Número de tombo</option>
+          </select>
+        </label>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-weight:600">Margens da folha (mm)</span>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            Superior <input type="number" id="etq-m-top" step="0.5" value="9" onchange="salvarMargensEtq()" style="width:60px;padding:6px 8px;font-size:12px">
+            Esquerda <input type="number" id="etq-m-esq" step="0.5" value="0" onchange="salvarMargensEtq()" style="width:60px;padding:6px 8px;font-size:12px">
+            Entre colunas <input type="number" id="etq-m-col" step="0.5" value="0" onchange="salvarMargensEtq()" style="width:60px;padding:6px 8px;font-size:12px">
+            Entre linhas <input type="number" id="etq-m-lin" step="0.5" value="0" onchange="salvarMargensEtq()" style="width:60px;padding:6px 8px;font-size:12px">
+          </div>
+        </div>
+        <button class="btn btn-sm btn-o" onclick="imprimirTesteEtiquetas()" title="Imprime só os contornos numerados, para conferir contra a folha de etiquetas"><i class="ti ti-ruler-measure"></i> Página de teste</button>
+        <button class="btn btn-sm btn-o" onclick="restaurarMargensEtq()" title="Volta às margens padrão"><i class="ti ti-arrow-back-up"></i></button>
       </div>
 
       <!-- Ações de impressão -->
@@ -4184,77 +4206,69 @@ function alternarVerSelecao(){
   etqSomenteSel=!etqSomenteSel;
   renderEtiquetas();
 }
+// Volta a aba de etiquetas ao estado inicial: seleção, filtros, lista colada e modo de visualização
+function zerarTudoEtq(){
+  if(etqSelecionadas.size&&!confirm('Zerar tudo? As '+etqSelecionadas.size+' etiqueta(s) selecionada(s) e todos os filtros serão limpos.')) return;
+  etqSelecionadas.clear();
+  etqSomenteSel=false;
+  ['etq-filtro','etq-tombo-ini','etq-tombo-fim','etq-area','etq-assuntos','etq-colecao','etq-lingua','etq-lista-tombos']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderEtiquetas();
+  toast('Tudo zerado — seleção e filtros limpos.','success');
+}
 function deselecionarTodas(){etqSelecionadas.clear();etqSomenteSel=false;renderEtiquetas();}
 
-function imprimirEtiquetas(modo){
-  let obras=[];
-  if(modo==='intervalo'){
-    const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
-    const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
-    if(!ini&&fim===999999){toast('Defina ao menos o tombo inicial para imprimir por intervalo.','error');return;}
-    // Respeita os demais filtros da tela (perfil, área, assunto, língua, texto).
-    const modoSel=etqSomenteSel; etqSomenteSel=false;
-    obras=filtrarListaEtq().sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
-    etqSomenteSel=modoSel;
-    if(!obras.length){toast('Nenhuma obra encontrada nesse intervalo com os filtros atuais.','error');return;}
-  } else {
-    if(!etqSelecionadas.size){toast('Selecione ao menos uma etiqueta para imprimir.','error');return;}
-    obras=acervo.filter(o=>etqSelecionadas.has(chaveEtq(o))).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
-  }
-
-  // Confere o que vai sair antes de abrir a janela de impressão
+// ══ Montagem da folha de etiquetas ══
+// Cada folha é uma página própria, com as mesmas margens — antes a grade
+// corria direto entre as páginas e da 2ª folha em diante tudo saía deslocado.
+const ETQ_MARGENS_PADRAO={top:9,esq:0,col:0,lin:0};
+function margensEtq(){
+  const v=id=>{const x=parseFloat(String(document.getElementById(id)?.value??'').replace(',','.'));return isNaN(x)?null:x;};
+  const M={top:v('etq-m-top'),esq:v('etq-m-esq'),col:v('etq-m-col'),lin:v('etq-m-lin')};
+  Object.keys(ETQ_MARGENS_PADRAO).forEach(k=>{if(M[k]===null)M[k]=ETQ_MARGENS_PADRAO[k];});
+  return M;
+}
+function salvarMargensEtq(){
+  try{localStorage.setItem('bmlrb_etq_margens',JSON.stringify(margensEtq()));}catch(e){}
+}
+function carregarMargensEtq(){
+  let M=ETQ_MARGENS_PADRAO;
+  try{const g=JSON.parse(localStorage.getItem('bmlrb_etq_margens')||'null');if(g)M=Object.assign({},ETQ_MARGENS_PADRAO,g);}catch(e){}
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  set('etq-m-top',M.top);set('etq-m-esq',M.esq);set('etq-m-col',M.col);set('etq-m-lin',M.lin);
+}
+function restaurarMargensEtq(){
+  try{localStorage.removeItem('bmlrb_etq_margens');}catch(e){}
+  carregarMargensEtq();
+  toast('Margens voltaram ao padrão.','');
+}
+function montarHtmlEtiquetas(itens,titulo){
+  const M=margensEtq();
   const porFolha=etqPorFolha();
-  const folhas=Math.ceil(obras.length/porFolha);
-  if(!confirm('Vão ser impressas '+obras.length+' etiqueta(s), em '+folhas+' folha(s) de '+porFolha+'.\n\n'
-      +'Primeiro tombo: '+(obras[0]?.tombo||'—')+'\nÚltimo tombo: '+(obras[obras.length-1]?.tombo||'—')
-      +'\n\nContinuar?')) return;
-
-  const etqHTML=obras.map(o=>{
-    const isEsc=o.colecao==='escritorio';
-    const locRaw=(o.localizacao||'').trim();
-    const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||o.cdd||''):'';
-    const areaLabel=isEsc?cdd:areaParaLabel(o);
-    const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
-    const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
-    // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
-    const extras=semRepetir(isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o),areaLabel+' '+assunto);
-    const ci=corColecao(o.colecao);
-    const dotStyle='background:'+ci.cor+';border:0.3mm solid '+ci.borda+';';
-    const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
-    const nLinhas=extras.length+(assunto?1:0)+(temFaixa?1:0);
-    return `<div class="etq${nLinhas>=3?' compacta':''}" style="position:relative${temFaixa?';padding-bottom:6mm':''}">
-      <div class="etq-tombo">${o.tombo||''}</div>
-      <div style="position:absolute;top:3mm;right:3mm;width:5mm;height:5mm;border-radius:50%;${dotStyle}"></div>
-      <div class="etq-area">${areaLabel}</div>
-      ${assunto?`<div class="etq-esp">${assunto}</div>`:''}
-      ${extras.map(l=>l.tipo==='esp'
-        ?`<div class="etq-esp">${l.txt}</div>`
-        :`<div class="etq-extra">${l.txt}</div>`).join('')}
-      <div class="etq-autor">${sob}</div>
-      ${linguaStripe(o,'mm')}
-    </div>`;
-  }).join('');
-
-  const html=`<!DOCTYPE html>
+  const paginas=[];
+  for(let i=0;i<itens.length;i+=porFolha) paginas.push('<div class="page">'+itens.slice(i,i+porFolha).join('')+'</div>');
+  return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Etiquetas — Biblioteca M. L. R. Barroso</title>
+<title>${titulo||'Etiquetas — Biblioteca M. L. R. Barroso'}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@600;700&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{font-family:'Source Sans 3',Arial,sans-serif;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .page{
-    width:210mm;
-    /* 3 colunas x 70mm = 210mm (largura cheia do A4, sem margem lateral)
-       9 linhas x 31mm = 279mm + 9mm acima e abaixo = 297mm */
-    padding:9mm 0;
+    width:210mm;height:297mm;
+    padding:${M.top}mm 0 0 ${M.esq}mm;
     display:grid;
     grid-template-columns:repeat(3,70mm);
     grid-auto-rows:31mm;
-    column-gap:0;
-    row-gap:0;
+    column-gap:${M.col}mm;
+    row-gap:${M.lin}mm;
+    align-content:start;
+    overflow:hidden;
+    page-break-after:always;break-after:page;
   }
+  .page:last-child{page-break-after:auto;break-after:auto}
   .etq-tombo{
     position:absolute;
     left:1mm;top:2mm;bottom:2mm;
@@ -4316,22 +4330,94 @@ function imprimirEtiquetas(modo){
   .etq.compacta .etq-extra,.etq.compacta .etq-esp{font-size:6.8pt}
   @media print{
     body{margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .page{padding:9mm 0}
     .etq{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     @page{size:A4;margin:0}
   }
 </style>
 </head>
 <body>
-<div class="page">${etqHTML}</div>
+${paginas.join('')}
 <script>window.onload=function(){window.print();}<\/script>
-<!-- ADMIN FOOTER -->
-<div class="admin-footer">
-  <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
-</div>
 </body>
 </html>`;
+}
 
+// Ordem de impressão: sobrenome do autor (padrão) ou tombo
+function ordenarEtqImpressao(arr){
+  const modo=document.getElementById('etq-ordem')?.value||'sobrenome';
+  if(modo==='tombo') return arr.sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
+  const chave=o=>{const k=normBusca(o.sobrenomeClass||sobrenome(o.autor||''));return k||'\uffff';};
+  return arr.sort((a,b)=>
+    chave(a).localeCompare(chave(b),'pt-BR')
+    ||normBusca(a.titulo||'').localeCompare(normBusca(b.titulo||''),'pt-BR')
+    ||tomboNum(a.tombo)-tomboNum(b.tombo));
+}
+
+// Folha de conferência: só os contornos numerados, para sobrepor à folha adesiva
+function imprimirTesteEtiquetas(){
+  salvarMargensEtq();
+  const porFolha=etqPorFolha();
+  const itens=[];
+  for(let i=1;i<=porFolha;i++) itens.push('<div class="etq" style="border:0.3mm solid #000"><div class="etq-autor">'+i+'</div></div>');
+  const w=window.open('','_blank','width=900,height=700');
+  if(!w){toast('Permita pop-ups para imprimir.','error');return;}
+  w.document.write(montarHtmlEtiquetas(itens,'Página de teste — etiquetas'));
+  w.document.close();
+}
+
+function imprimirEtiquetas(modo){
+  let obras=[];
+  if(modo==='intervalo'){
+    const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
+    const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
+    if(!ini&&fim===999999){toast('Defina ao menos o tombo inicial para imprimir por intervalo.','error');return;}
+    // Respeita os demais filtros da tela (perfil, área, assunto, língua, texto).
+    const modoSel=etqSomenteSel; etqSomenteSel=false;
+    obras=ordenarEtqImpressao(filtrarListaEtq());
+    etqSomenteSel=modoSel;
+    if(!obras.length){toast('Nenhuma obra encontrada nesse intervalo com os filtros atuais.','error');return;}
+  } else {
+    if(!etqSelecionadas.size){toast('Selecione ao menos uma etiqueta para imprimir.','error');return;}
+    obras=ordenarEtqImpressao(acervo.filter(o=>etqSelecionadas.has(chaveEtq(o))));
+  }
+
+  // Confere o que vai sair antes de abrir a janela de impressão
+  const porFolha=etqPorFolha();
+  const folhas=Math.ceil(obras.length/porFolha);
+  if(!confirm('Vão ser impressas '+obras.length+' etiqueta(s), em '+folhas+' folha(s) de '+porFolha+'.\n\n'
+      +'Ordem: '+((document.getElementById('etq-ordem')?.value||'sobrenome')==='tombo'?'número de tombo':'sobrenome do autor (A–Z)')
+      +'\nPrimeira: '+((obras[0]?.sobrenomeClass||sobrenome(obras[0]?.autor||''))||'—')+' ('+(obras[0]?.tombo||'—')+')'
+      +'\nÚltima: '+((obras[obras.length-1]?.sobrenomeClass||sobrenome(obras[obras.length-1]?.autor||''))||'—')+' ('+(obras[obras.length-1]?.tombo||'—')+')'
+      +'\n\nContinuar?')) return;
+
+  salvarMargensEtq();
+  const itensEtq=obras.map(o=>{
+    const isEsc=o.colecao==='escritorio';
+    const locRaw=(o.localizacao||'').trim();
+    const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||o.cdd||''):'';
+    const areaLabel=isEsc?cdd:areaParaLabel(o);
+    const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
+    const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
+    // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
+    const extras=semRepetir(isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o),areaLabel+' '+assunto);
+    const ci=corColecao(o.colecao);
+    const dotStyle='background:'+ci.cor+';border:0.3mm solid '+ci.borda+';';
+    const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
+    const nLinhas=extras.length+(assunto?1:0)+(temFaixa?1:0);
+    return `<div class="etq${nLinhas>=3?' compacta':''}" style="position:relative${temFaixa?';padding-bottom:6mm':''}">
+      <div class="etq-tombo">${o.tombo||''}</div>
+      <div style="position:absolute;top:3mm;right:3mm;width:5mm;height:5mm;border-radius:50%;${dotStyle}"></div>
+      <div class="etq-area">${areaLabel}</div>
+      ${assunto?`<div class="etq-esp">${assunto}</div>`:''}
+      ${extras.map(l=>l.tipo==='esp'
+        ?`<div class="etq-esp">${l.txt}</div>`
+        :`<div class="etq-extra">${l.txt}</div>`).join('')}
+      <div class="etq-autor">${sob}</div>
+      ${linguaStripe(o,'mm')}
+    </div>`;
+  });
+
+  const html=montarHtmlEtiquetas(itensEtq);
   const w=window.open('','_blank','width=900,height=700');
   if(!w){toast('Permita pop-ups para imprimir as etiquetas.','error');return;}
   w.document.write(html);
@@ -4515,6 +4601,7 @@ window._fbAuth.onAuthStateChanged(async user=>{
 
 // Inicialização
 popularSelectsAssuntos();
+carregarMargensEtq();
 load().then(()=>{
   carregarProjetos();
   updPrev();
@@ -4545,7 +4632,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.17-t</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.21-b</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
