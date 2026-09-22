@@ -1206,7 +1206,7 @@ window.dispatchEvent(new Event('fb-ready'));
       <!-- Ordem e margens de impressão -->
       <div style="display:flex;gap:14px 18px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;font-size:12px;color:var(--gray-600)">
         <label style="display:flex;flex-direction:column;gap:4px;font-weight:600">Ordem de impressão
-          <select id="etq-ordem" style="padding:7px 10px;font-size:13px;border:1.5px solid var(--gray-200);border-radius:var(--r);background:#fff">
+          <select id="etq-ordem" onchange="renderEtiquetas()" style="padding:7px 10px;font-size:13px;border:1.5px solid var(--gray-200);border-radius:var(--r);background:#fff">
             <option value="sobrenome">Sobrenome do autor (A–Z)</option>
             <option value="tombo">Número de tombo</option>
           </select>
@@ -3998,7 +3998,7 @@ let etqSomenteSel=false;
 function chaveEtq(o){return String(o.id||o.tombo||'');}
 
 function filtrarListaEtq(){
-  if(etqSomenteSel) return acervo.filter(o=>etqSelecionadas.has(chaveEtq(o))).sort((a,b)=>tomboNum(a.tombo)-tomboNum(b.tombo));
+  if(etqSomenteSel) return ordenarEtqImpressao(acervo.filter(o=>etqSelecionadas.has(chaveEtq(o))));
   const filtro=(document.getElementById('etq-filtro')?.value||'').toLowerCase();
   const area=document.getElementById('etq-area')?.value||'';
   const assuntos=document.getElementById('etq-assuntos')?.value||'';
@@ -4006,7 +4006,7 @@ function filtrarListaEtq(){
   const lingua=document.getElementById('etq-lingua')?.value||'';
   const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
   const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
-  return acervo.filter(o=>{
+  return ordenarEtqImpressao(acervo.filter(o=>{
     if(area&&(o.area||'').toLowerCase()!==area.toLowerCase())return false;
     if(assuntos&&assuntoCanonico(o.assuntos)!==assuntoCanonico(assuntos))return false;
     if(colecao&&(o.colecao||'gabinete')!==colecao)return false;
@@ -4016,7 +4016,7 @@ function filtrarListaEtq(){
     const n=tomboNum(o.tombo);
     if((ini||fim<999999)&&(n<ini||n>fim))return false;
     return true;
-  });
+  }));
 }
 
 function limparFiltrosEtq(){
@@ -4632,7 +4632,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.21-b</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.21-c</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
