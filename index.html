@@ -3975,7 +3975,12 @@ const LINGUA_INFO={
   'Francês':{cor:'#0055A4',sigla:'FR'},
   'Alemão':{cor:'#1a1a1a',sigla:'DE'}
 };
+function temFaixaLingua(o){
+  // Faixa colorida de língua estrangeira: só no perfil Escritório
+  return (o.colecao||'gabinete')==='escritorio' && !!LINGUA_INFO[linguaCanonica(o.lingua)];
+}
 function linguaStripe(o,tamanho){
+  if(!temFaixaLingua(o)) return '';
   const info=LINGUA_INFO[linguaCanonica(o.lingua)];
   if(!info) return '';
   const alturaImg=tamanho==='mm'?'3mm':'6px';
@@ -4087,7 +4092,7 @@ function semRepetir(linhas,jaImpresso){
 function etqLinhas(o){
   const linhas=[];
   // Assunto específico — aparece entre área e autor
-  if(o.assuntoEspecifico&&o.assuntoEspecifico.trim()) linhas.push({txt:o.assuntoEspecifico.trim(),tipo:'esp'});
+  if(o.assuntoEspecifico&&o.assuntoEspecifico.trim()) linhas.push({txt:o.assuntoEspecifico.trim().toUpperCase(),tipo:'esp'});
   // Volume e tomo — cada um na sua linha
   partesVolumeTomo(o.volume).forEach(t=>linhas.push({txt:t,tipo:'extra'}));
   // Edição — só a partir da 2ª, no formato "2.ed", sem "revista/atualizada/ampliada"
@@ -4142,14 +4147,14 @@ function renderEtiquetas(){
     // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
     const extras=semRepetir(isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o),areaLabel+' '+assunto);
     const selecionado=etqSelecionadas.has(chaveEtq(o));
-    const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
+    const temFaixa=temFaixaLingua(o);
     return `<div onclick="toggleEtq('${chaveEtq(o)}')" style="cursor:pointer;border:2px solid ${selecionado?'var(--gold)':'var(--gray-200)'};border-radius:8px;padding:8px;background:${selecionado?'var(--gold-pale)':'var(--white)'};transition:all .15s">
       <div style="position:relative;background:#fff;border:1.5px solid #1a2744;border-radius:5px;padding:8px 6px ${temFaixa?'14px':'8px'} 16px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;min-height:64px">
         <div style="position:absolute;left:3px;top:5px;bottom:5px;width:12px;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;font-weight:600;letter-spacing:.03em;color:#8a8a8a;white-space:nowrap">${o.tombo||''}</div>
         <div style="font-size:11px;font-weight:700;color:#1a2744;letter-spacing:.06em;line-height:1.25">${areaLabel}</div>
-        ${assunto?`<div style="font-size:10px;color:#1f1f1f;font-style:italic;letter-spacing:.01em">${assunto}</div>`:''}
+        ${assunto?`<div style="font-size:10px;color:#1f1f1f;letter-spacing:.01em">${assunto}</div>`:''}
         ${extras.map(l=>l.tipo==='esp'
-          ?`<div style="font-size:10px;color:#1f1f1f;font-style:italic;letter-spacing:.01em">${l.txt}</div>`
+          ?`<div style="font-size:10px;color:#1f1f1f;letter-spacing:.01em">${l.txt}</div>`
           :`<div style="font-size:10px;color:#3a3a3a;letter-spacing:.04em">${l.txt}</div>`).join('')}
         <div style="font-size:14px;font-weight:700;color:#1a2744;letter-spacing:.08em">${sob}</div>
         ${linguaStripe(o,'px')}
@@ -4319,7 +4324,6 @@ function montarHtmlEtiquetas(itens,titulo){
     font-size:8pt;font-weight:500;
     color:#1f1f1f;
     text-align:center;
-    font-style:italic;
     letter-spacing:.01em;
     line-height:1.2;
   }
@@ -4402,7 +4406,7 @@ function imprimirEtiquetas(modo){
     const extras=semRepetir(isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o),areaLabel+' '+assunto);
     const ci=corColecao(o.colecao);
     const dotStyle='background:'+ci.cor+';border:0.3mm solid '+ci.borda+';';
-    const temFaixa=!!LINGUA_INFO[linguaCanonica(o.lingua)];
+    const temFaixa=temFaixaLingua(o);
     const nLinhas=extras.length+(assunto?1:0)+(temFaixa?1:0);
     return `<div class="etq${nLinhas>=3?' compacta':''}" style="position:relative${temFaixa?';padding-bottom:6mm':''}">
       <div class="etq-tombo">${o.tombo||''}</div>
