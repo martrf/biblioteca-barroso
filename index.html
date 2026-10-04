@@ -4089,10 +4089,23 @@ function semRepetir(linhas,jaImpresso){
   return saida;
 }
 
+// Assunto da etiqueta: usa o "Assunto específico"; se estiver vazio, cai para
+// o campo "Assuntos" (Escritório) e, por último, para o primeiro termo de "Assunto".
+function assuntoEtq(o){
+  const esp=(o.assuntoEspecifico||'').trim();
+  if(esp) return esp.toUpperCase();
+  const dd=(o.assuntos||'').trim();
+  if(dd) return dd.toUpperCase();
+  const a=(o.assunto||'').trim();
+  if(!a) return '';
+  return a.split(';')[0].split('--')[0].trim().toUpperCase();
+}
+
 function etqLinhas(o){
   const linhas=[];
   // Assunto específico — aparece entre área e autor
-  if(o.assuntoEspecifico&&o.assuntoEspecifico.trim()) linhas.push({txt:o.assuntoEspecifico.trim().toUpperCase(),tipo:'esp'});
+  const assuntoEtq_=assuntoEtq(o);
+  if(assuntoEtq_) linhas.push({txt:assuntoEtq_,tipo:'esp'});
   // Volume e tomo — cada um na sua linha
   partesVolumeTomo(o.volume).forEach(t=>linhas.push({txt:t,tipo:'extra'}));
   // Edição — só a partir da 2ª, no formato "2.ed", sem "revista/atualizada/ampliada"
@@ -4142,7 +4155,7 @@ function renderEtiquetas(){
     const locRaw=(o.localizacao||'').trim();
     const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
-    const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
+    const assunto=isEsc?assuntoEtq(o):'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
     const extras=semRepetir(isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o),areaLabel+' '+assunto);
@@ -4400,7 +4413,7 @@ function imprimirEtiquetas(modo){
     const locRaw=(o.localizacao||'').trim();
     const cdd=isEsc?(locRaw.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||o.cdd||''):'';
     const areaLabel=isEsc?cdd:areaParaLabel(o);
-    const assunto=isEsc&&o.assuntoEspecifico?o.assuntoEspecifico.toUpperCase():'';
+    const assunto=isEsc?assuntoEtq(o):'';
     const sob=(o.sobrenomeClass||sobrenome(o.autor)).toUpperCase();
     // No Escritório o assunto específico já sai em linha própria; aqui entram só volume, tomo e edição
     const extras=semRepetir(isEsc?etqLinhas({volume:o.volume,edicao:o.edicao}):etqLinhas(o),areaLabel+' '+assunto);
