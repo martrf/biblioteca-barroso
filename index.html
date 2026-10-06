@@ -1191,10 +1191,11 @@ window.dispatchEvent(new Event('fb-ready'));
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <button class="btn btn-sm btn-p" onclick="selecionarTodas()"><i class="ti ti-checkbox"></i> Selecionar todas as filtradas</button>
-          <button class="btn btn-sm btn-o" onclick="removerFiltradosDaSelecao()"><i class="ti ti-minus"></i> Tirar estas da seleção</button>
           <button class="btn btn-sm btn-o" id="btn-ver-selecao" onclick="alternarVerSelecao()"><i class="ti ti-eye"></i> Ver só a seleção</button>
-          <button class="btn btn-sm btn-o" onclick="deselecionarTodas()"><i class="ti ti-square-off"></i> Zerar seleção</button>
           <button class="btn btn-sm" onclick="zerarTudoEtq()" style="background:#fff;border:1.5px solid #b84040;color:#b84040;font-weight:700" title="Limpa a seleção, todos os filtros e a lista colada — volta ao início"><i class="ti ti-refresh-alert"></i> Zerar tudo</button>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray-600);cursor:pointer" title="Desmarcado: cada seleção substitui a anterior. Marcado: vai somando.">
+            <input type="checkbox" id="etq-somar" style="width:15px;height:15px;cursor:pointer"> Somar à seleção atual
+          </label>
           <span style="font-size:12px;color:var(--gray-600);margin-left:auto;display:flex;align-items:center;gap:6px">
             Etiquetas por folha:
             <input type="number" id="etq-por-folha" value="27" min="1" max="99" oninput="renderEtiquetas()" style="width:58px;padding:5px 8px;font-size:12px">
@@ -4134,7 +4135,7 @@ function renderEtiquetas(){
   const res=document.getElementById('etq-resumo');
   if(res){
     if(!sel){
-      res.innerHTML='<strong>Seleção vazia.</strong> Filtre por tombo, assunto, língua ou perfil e clique em "Selecionar todas as filtradas". Pode repetir com filtros diferentes — a seleção vai se acumulando até fechar a folha.';
+      res.innerHTML='<strong>Seleção vazia.</strong> Cole uma lista de tombos, ou filtre e clique em "Selecionar todas as filtradas". Cada seleção substitui a anterior; para juntar vários filtros numa folha só, marque "Somar à seleção atual".';
     }else{
       const porFolha=etqPorFolha();
       const folhas=Math.ceil(sel/porFolha);
@@ -4183,12 +4184,22 @@ function toggleEtq(chave){
   renderEtiquetas();
 }
 
+// Marcada a caixinha "Somar à seleção atual", as seleções se acumulam.
+// Desmarcada (padrão), cada seleção substitui a anterior.
+function etqSomando(){return !!document.getElementById('etq-somar')?.checked;}
+
 function selecionarTodas(){
+  const lista=filtrarListaEtq();
+  if(!lista.length){toast('Nenhuma obra neste filtro.','error');return;}
+  const somar=etqSomando();
+  if(!somar) etqSelecionadas.clear();
   const antes=etqSelecionadas.size;
-  filtrarListaEtq().forEach(o=>etqSelecionadas.add(chaveEtq(o)));
+  lista.forEach(o=>etqSelecionadas.add(chaveEtq(o)));
   const add=etqSelecionadas.size-antes;
   renderEtiquetas();
-  toast(add?add+' etiqueta(s) somada(s) à seleção.':'Estas já estavam na seleção.','success');
+  toast(somar
+    ? (add?add+' etiqueta(s) somada(s). Seleção: '+etqSelecionadas.size+'.':'Estas já estavam na seleção.')
+    : 'Seleção trocada: '+etqSelecionadas.size+' etiqueta(s).','success');
 }
 function removerFiltradosDaSelecao(){
   const antes=etqSelecionadas.size;
@@ -4208,13 +4219,17 @@ function selecionarPorLista(){
   const pedidos=new Set(txt.split(/[^0-9A-Za-z\-]+/).map(chaveTombo).filter(Boolean));
   if(!pedidos.size){toast('Não encontrei nenhum número de tombo na lista.','error');return;}
   const achados=acervo.filter(o=>pedidos.has(chaveTombo(o.tombo)));
+  const somar=etqSomando();
+  if(!somar) etqSelecionadas.clear();
   let novos=0;
   achados.forEach(o=>{const k=chaveEtq(o);if(!etqSelecionadas.has(k))novos++;etqSelecionadas.add(k);});
   const encontrados=new Set(achados.map(o=>chaveTombo(o.tombo)));
   const faltando=[...pedidos].filter(x=>!encontrados.has(x));
   etqSomenteSel=true;
   renderEtiquetas();
-  let msg=novos+' de '+pedidos.size+' tombo(s) somado(s) à seleção.';
+  let msg=somar
+    ? novos+' de '+pedidos.size+' tombo(s) somado(s). Seleção: '+etqSelecionadas.size+'.'
+    : 'Seleção trocada: '+etqSelecionadas.size+' etiqueta(s), de '+pedidos.size+' tombo(s) da lista.';
   if(faltando.length) msg+=' Não localizados: '+faltando.slice(0,10).join(', ')+(faltando.length>10?' e mais '+(faltando.length-10):'')+'.';
   toast(msg,faltando.length?'':'success');
   if(faltando.length) console.warn('Tombos não localizados no acervo:',faltando);
