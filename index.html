@@ -856,6 +856,12 @@ window.dispatchEvent(new Event('fb-ready'));
             <input type="hidden" id="f-class">
           </div>
           <div class="fld"><label>Exemplares</label><input type="number" id="f-ex" value="1" min="1"></div>
+          <div class="fld"><label>Etiqueta</label>
+            <label for="f-etiquetado" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-800);letter-spacing:0;padding:9px 0">
+              <input type="checkbox" id="f-etiquetado" style="width:16px;height:16px;cursor:pointer;accent-color:var(--navy)">
+              <i class="ti ti-tag" style="color:var(--gold-dim);font-size:15px"></i> Livro já etiquetado
+            </label>
+          </div>
           <div class="fld full"><label>Notas</label><textarea id="f-notas" placeholder="Notas gerais sobre a obra..."></textarea></div>
           <div class="fld full"><label>Observações</label><textarea id="f-observacoes" placeholder="Observações adicionais..."></textarea></div>
 
@@ -1349,6 +1355,7 @@ window.dispatchEvent(new Event('fb-ready'));
           <span class="mtb" id="m-tombo">—</span>
           <span id="m-nav-info" style="font-size:11px;color:rgba(255,255,255,.4)"></span>
         </div>
+        <div id="m-etq-flag" title="Livro etiquetado" style="display:none;margin-top:6px"><i class="ti ti-tag" style="font-size:18px;color:var(--gold)" aria-label="Livro etiquetado"></i></div>
       </div>
       <button class="mc-btn" onclick="fmob()" aria-label="Fechar"><i class="ti ti-x"></i></button>
     </div>
@@ -1411,7 +1418,8 @@ async function sbCarregarAcervo(){
           estante:r.estante,colecao:r.colecao||'gabinete',cdd:r.cdd||'',
           estante:r.estante,colecao:r.colecao||'gabinete',
           classificacao:r.classificacao,exemplares:r.exemplares,
-          notas:r.notas,observacoes:r.observacoes,lingua:r.lingua,assuntos:r.assuntos,capaUrl:r.capa_url,dataCad:r.data_cad
+          notas:r.notas,observacoes:r.observacoes,lingua:r.lingua,assuntos:r.assuntos,capaUrl:r.capa_url,dataCad:r.data_cad,
+          etiquetado:!!r.etiquetado
         });
       });
       ultimo=snap.docs[snap.docs.length-1];
@@ -1441,7 +1449,8 @@ async function sbSalvarAcervo(){
           localizacao:o.localizacao||'',estante:o.estante||'',
           colecao:o.colecao||'gabinete',classificacao:o.classificacao||'',cdd:o.cdd||'',
           exemplares:o.exemplares||'1',notas:o.notas||'',observacoes:o.observacoes||'',lingua:o.lingua||'',assuntos:o.assuntos||'',
-          capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString()
+          capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString(),
+          etiquetado:!!o.etiquetado
         });
       });
       await batch.commit();
@@ -1463,7 +1472,8 @@ async function sbSalvarObra(o){
       localizacao:o.localizacao||'',estante:o.estante||'',
       colecao:o.colecao||'gabinete',classificacao:o.classificacao||'',
       exemplares:o.exemplares||'1',notas:o.notas||'',observacoes:o.observacoes||'',lingua:o.lingua||'',assuntos:o.assuntos||'',
-      capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString()
+      capa_url:o.capaUrl||(o.capaBase64||''),data_cad:o.dataCad||new Date().toISOString(),
+          etiquetado:!!o.etiquetado
     });
     return true;
   }catch(e){console.error('Firebase salvar obra:',e);return false;}
@@ -2710,11 +2720,14 @@ function salvar(e,opts){if(e&&e.preventDefault)e.preventDefault();
     paginas:gv('f-pag'),isbn:gv('f-isbn'),tipo:gv('f-tipo'),area:gv('f-area'),assunto:gv('f-assunto'),
     localizacao:gv('f-loc'),estante:gv('f-estante'),colecao:(document.getElementById('f-colecao')?.value||'gabinete'),classificacao:normClassificacao({classificacao:gv('f-class'),area:gv('f-area')}),cdd:(()=>{const c=gv('f-class').trim();return /^\d/.test(c)?c.match(/^[A-Za-zÀ-ÖØ-öø-ÿ\d.,;:()\[\]{}+*=/'’\"°ºª§%!&|\s-]+/)?.[0]||'':''})(),assuntoEspecifico:(document.getElementById('f-class-especifico')?.value.trim()||''),sobrenomeClass:(document.getElementById('f-class-sobrenome')?.value.trim()||''),exemplares:gv('f-ex')||'1',
     notas:gv('f-notas'),observacoes:gv('f-observacoes'),lingua:gv('f-lingua'),assuntos:gv('f-assuntos'),capaUrl:capaUrl,capaBase64:capaBase64Temp,
+    etiquetado:!!document.getElementById('f-etiquetado')?.checked,
     dataCad:curId?acervo.find(x=>x.id===curId).dataCad:new Date().toISOString()};
   if(curId){const i=acervo.findIndex(x=>x.id===curId);acervo[i]=o;toast('Obra atualizada!','success');}
   else{acervo.push(o);toast('Obra registrada! Tombo: '+o.tombo,'success');}
   save();updStats();renderCarousel();renderPI();
   sincronizarListas(o);
+  // Livro marcado como etiquetado sai da seleção de impressão
+  if(o.etiquetado){try{etqSelecionadas.delete(chaveEtq(o));}catch(e){}}
   if(document.getElementById('results-area')?.style.display!=='none') renderResGrid();
   try{ if(document.getElementById('etq-grid')) renderEtiquetas(); }catch(e){}
   // Sincroniza somente este registro com o Firebase
@@ -2791,6 +2804,8 @@ function ver(id,lista){
   }
   document.getElementById('m-titulo').textContent=o.titulo+(o.subtitulo?': '+o.subtitulo:'');
   document.getElementById('m-tombo').textContent=o.tombo;
+  const etqFlag=document.getElementById('m-etq-flag');
+  if(etqFlag) etqFlag.style.display=o.etiquetado?'block':'none';
   // Navegação info
   const nav=document.getElementById('m-nav-info');
   if(nav) nav.textContent=(modalIdx+1)+' de '+modalLista.length;
@@ -2934,6 +2949,7 @@ function preencherFormEdicao(id){
     const m={'f-titulo':'titulo','f-subtitulo':'subtitulo','f-autor':'autor','f-org':'organizador','f-editora':'editora','f-local':'local_pub','f-ano':'ano','f-volume':'volume','f-edicao':'edicao','f-pag':'paginas','f-isbn':'isbn','f-tipo':'tipo','f-area':'area','f-assunto':'assunto','f-loc':'localizacao','f-estante':'estante','f-colecao':'colecao','f-ex':'exemplares','f-notas':'notas','f-observacoes':'observacoes','f-lingua':'lingua','f-assuntos':'assuntos'};
     garantirOpcao(document.getElementById('f-assuntos'),o.assuntos||'');
     Object.entries(m).forEach(([fid,k])=>{const el=document.getElementById(fid);if(el)el.value=o[k]||'';});
+    const etqChk=document.getElementById('f-etiquetado');if(etqChk)etqChk.checked=!!o.etiquetado;
     const espEl=document.getElementById('f-class-especifico');if(espEl)espEl.value=o.assuntoEspecifico||'';
     const sobEl=document.getElementById('f-class-sobrenome');if(sobEl)sobEl.value=o.sobrenomeClass||sobrenome(o.autor||'');
     const manEl=document.getElementById('f-class-area-manual');
@@ -4004,7 +4020,7 @@ let etqSomenteSel=false;
 function chaveEtq(o){return String(o.id||o.tombo||'');}
 
 function filtrarListaEtq(){
-  if(etqSomenteSel) return ordenarEtqImpressao(acervo.filter(o=>etqSelecionadas.has(chaveEtq(o))));
+  if(etqSomenteSel) return ordenarEtqImpressao(acervo.filter(o=>!o.etiquetado&&etqSelecionadas.has(chaveEtq(o))));
   const filtro=(document.getElementById('etq-filtro')?.value||'').toLowerCase();
   const area=document.getElementById('etq-area')?.value||'';
   const assuntos=document.getElementById('etq-assuntos')?.value||'';
@@ -4013,6 +4029,7 @@ function filtrarListaEtq(){
   const ini=parseInt(document.getElementById('etq-tombo-ini')?.value)||0;
   const fim=parseInt(document.getElementById('etq-tombo-fim')?.value)||999999;
   return ordenarEtqImpressao(acervo.filter(o=>{
+    if(o.etiquetado)return false; // já etiquetado: fica fora da impressão
     if(area&&(o.area||'').toLowerCase()!==area.toLowerCase())return false;
     if(assuntos&&assuntoCanonico(o.assuntos)!==assuntoCanonico(assuntos))return false;
     if(colecao&&(o.colecao||'gabinete')!==colecao)return false;
@@ -4218,18 +4235,21 @@ function selecionarPorLista(){
   if(!txt){toast('Cole a lista de tombos no campo ao lado.','error');return;}
   const pedidos=new Set(txt.split(/[^0-9A-Za-z\-]+/).map(chaveTombo).filter(Boolean));
   if(!pedidos.size){toast('Não encontrei nenhum número de tombo na lista.','error');return;}
-  const achados=acervo.filter(o=>pedidos.has(chaveTombo(o.tombo)));
+  const todosAchados=acervo.filter(o=>pedidos.has(chaveTombo(o.tombo)));
+  const jaEtiquetados=todosAchados.filter(o=>o.etiquetado);
+  const achados=todosAchados.filter(o=>!o.etiquetado);
   const somar=etqSomando();
   if(!somar) etqSelecionadas.clear();
   let novos=0;
   achados.forEach(o=>{const k=chaveEtq(o);if(!etqSelecionadas.has(k))novos++;etqSelecionadas.add(k);});
-  const encontrados=new Set(achados.map(o=>chaveTombo(o.tombo)));
+  const encontrados=new Set(todosAchados.map(o=>chaveTombo(o.tombo)));
   const faltando=[...pedidos].filter(x=>!encontrados.has(x));
   etqSomenteSel=true;
   renderEtiquetas();
   let msg=somar
     ? novos+' de '+pedidos.size+' tombo(s) somado(s). Seleção: '+etqSelecionadas.size+'.'
     : 'Seleção trocada: '+etqSelecionadas.size+' etiqueta(s), de '+pedidos.size+' tombo(s) da lista.';
+  if(jaEtiquetados.length) msg+=' '+jaEtiquetados.length+' já etiquetado(s), deixado(s) de fora.';
   if(faltando.length) msg+=' Não localizados: '+faltando.slice(0,10).join(', ')+(faltando.length>10?' e mais '+(faltando.length-10):'')+'.';
   toast(msg,faltando.length?'':'success');
   if(faltando.length) console.warn('Tombos não localizados no acervo:',faltando);
@@ -4410,7 +4430,8 @@ function imprimirEtiquetas(modo){
     if(!obras.length){toast('Nenhuma obra encontrada nesse intervalo com os filtros atuais.','error');return;}
   } else {
     if(!etqSelecionadas.size){toast('Selecione ao menos uma etiqueta para imprimir.','error');return;}
-    obras=ordenarEtqImpressao(acervo.filter(o=>etqSelecionadas.has(chaveEtq(o))));
+    obras=ordenarEtqImpressao(acervo.filter(o=>!o.etiquetado&&etqSelecionadas.has(chaveEtq(o))));
+    if(!obras.length){toast('Todas as obras selecionadas já estão etiquetadas.','error');return;}
   }
 
   // Confere o que vai sair antes de abrir a janela de impressão
