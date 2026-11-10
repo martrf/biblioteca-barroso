@@ -1930,14 +1930,27 @@ function colDot(col,size){
   const i=corColecao(col);
   return '<span title="'+i.nome+'" style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+i.cor+';border:1px solid '+i.borda+';vertical-align:middle;flex-shrink:0"></span>';
 }
+// Produção intelectual: Luís Roberto Barroso como autor, coautor, organizador,
+// coordenador ou prefaciador. Vale para "Barroso, Luís Roberto" e "Luís Roberto Barroso",
+// com ou sem acento, e ignora outros Barroso (Domingos, Jorge, Aléssia...).
+function temNomeLRB(txt){
+  const a=normBusca(txt);
+  return /barroso,\s*l(uis|\.)\s*r(oberto|\.)/.test(a)||/l(uis|\.)\s*r(oberto|\.)?\s+barroso/.test(a);
+}
+function ehProducaoIntelectual(o){
+  // Autor e Organizador/Editor: basta o nome (cobre coordenação e organização)
+  if(temNomeLRB(o.autor)||temNomeLRB(o.organizador)) return true;
+  // Notas, Observações, Subtítulo: o nome precisa vir junto de prefácio/coordenação/organização/apresentação
+  const extra=[o.notas,o.observacoes,o.subtitulo].join(' ; ');
+  return temNomeLRB(extra)&&/pref[aá]c|coord|organiz|apresenta|introdu|posf[aá]c/i.test(normBusca(extra));
+}
+function obrasPI(){
+  // Mais recentes primeiro — o que foi catalogado hoje aparece no começo do carrossel
+  return acervo.filter(ehProducaoIntelectual)
+    .sort((a,b)=>new Date(b.dataCad||0)-new Date(a.dataCad||0));
+}
 function renderPI(){
-  const obras=acervo.filter(o=>{
-    const autor=(o.autor||'').toLowerCase();
-    return autor.includes('barroso') && (
-      autor.includes('luís') || autor.includes('luis') || 
-      autor.includes('roberto') || autor.includes('barroso, lu')
-    );
-  });
+  const obras=obrasPI();
   const pi=document.getElementById('pi-section');
   const car=document.getElementById('pi-carousel');
   if(!obras.length||!car){if(pi)pi.style.display='none';return;}
@@ -1961,9 +1974,8 @@ function piScroll(dir){
   if(car) car.scrollBy({left:dir*280,behavior:'smooth'});
 }
 function buscarPI(){
-  // Vai para pesquisa com filtro do Ministro
-  document.getElementById('s-main').value='Barroso';
-  buscar();
+  // Mostra exatamente as obras do carrossel de Produção intelectual
+  mostrarRes(obrasPI(),[{label:'Produção intelectual — Luís Roberto Barroso'}]);
 }
 
 function renderCarousel(){
@@ -4692,7 +4704,7 @@ load().then(()=>{
 </script>
 <!-- ADMIN FOOTER -->
 <div class="admin-footer">
-  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.09.21-c</span>
+  <span id="versao-sistema" style="font-size:10px;color:var(--gray-500);opacity:.7;margin-right:10px;letter-spacing:.04em">v2026.11.10-a</span>
   <button class="admin-btn" onclick="abrirLogin()" id="admin-footer-btn" title="Acesso administrativo">admin</button>
 </div>
 </body>
